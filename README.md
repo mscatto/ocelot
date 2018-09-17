@@ -5,6 +5,11 @@ It's aim is to create a player light on resources by utilizing near-stock Qt Wid
 
 _This project is currently in an early stage of development! As such, many planned features are still not present._
 
+~~~~
+ qmake-qt5 && make ** ./ocelot
+~~~~
+
+
 ### TODO
 
 > * Milkdrop visualization support
