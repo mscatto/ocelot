@@ -19,7 +19,7 @@
 #define COVERVIEW_HPP
 
 #include<QLabel>
-#include"mwindow.hpp"
+#include"src/mwindow.hpp"
 
 class coverview : public QLabel
 {

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "playlist.hpp"
-#include "mwindow.hpp"
+#include "src/mwindow.hpp"
 #include <qheaderview.h>
 #include <QMenu>
 playlist::playlist(mwindow *parent) : QTreeWidget(parent){

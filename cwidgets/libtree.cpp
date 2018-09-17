@@ -23,7 +23,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QSqlRecord>
-#include "mwindow.hpp"
+#include "src/mwindow.hpp"
 
 libtree::libtree(mwindow *win) : QFrame(win){
     QGridLayout *grid =  new QGridLayout(this);

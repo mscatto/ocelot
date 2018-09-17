@@ -5,8 +5,8 @@
 #include <QWidget>
 #include <QDialog>
 
-#include "vars.hpp"
-#include "libmgr.hpp"
+#include "src/vars.hpp"
+#include "src/libmgr.hpp"
 
 class settings : public QDialog
 {

@@ -11,10 +11,10 @@
 #include <QTreeWidget>
 #include <QFileDialog>
 
-#include "vars.hpp"
+#include "src/vars.hpp"
 #include "settings.hpp"
-#include "library.hpp"
-#include "mwindow.hpp"
+#include "src/library.hpp"
+#include "src/mwindow.hpp"
 
 settings::settings(QWidget *win, vars *jag) : QDialog(win){
     this->jag = jag;

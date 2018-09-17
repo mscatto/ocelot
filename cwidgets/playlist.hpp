@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QTreeWidget>
-#include "mwindow.hpp"
+#include "src/mwindow.hpp"
 
 class playlist : public QTreeWidget
 {

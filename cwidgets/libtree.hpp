@@ -23,9 +23,9 @@
 #include <QWidget>
 #include <QTreeWidget>
 #include <QPushButton>
-#include <library.hpp>
 
-#include "mwindow.hpp"
+#include "src/library.hpp"
+#include "src/mwindow.hpp"
 
 class libtree : public QFrame
 {

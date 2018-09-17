@@ -4,7 +4,7 @@
 #include <QStandardPaths>
 #include <QSqlDatabase>
 #include <QMap>
-#include <library.hpp>
+#include "library.hpp"
 
 class vars
 {

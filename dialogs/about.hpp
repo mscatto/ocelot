@@ -22,7 +22,7 @@
 #include <QWidget>
 #include <QDialog>
 
-#include "vars.hpp"
+#include "src/vars.hpp"
 
 class about : public QDialog
 {

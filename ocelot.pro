@@ -28,9 +28,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-		main.cpp \
-	library.cpp \
-	workbench.cpp \
+		src/main.cpp \
+	src/library.cpp \
+	src/workbench.cpp \
 	cwidgets/coverview.cpp \
 	cwidgets/libtree.cpp \
 	cwidgets/playlist.cpp \
@@ -41,12 +41,12 @@ SOURCES += \
 	dialogs/about.cpp \
 	cwidgets/toolbar.cpp \
 	dialogs/settings.cpp \
-	mwindow.cpp \
-	vars.cpp
+	src/mwindow.cpp \
+	src/vars.cpp
 
 HEADERS += \
-	library.hpp \
-	workbench.hpp \
+	src/library.hpp \
+	src/workbench.hpp \
 	cwidgets/coverview.hpp \
 	cwidgets/tagview.hpp \
 	cwidgets/splitter.hpp \
@@ -57,8 +57,8 @@ HEADERS += \
 	dialogs/about.hpp \
 	cwidgets/toolbar.hpp \
 	dialogs/settings.hpp \
-	mwindow.hpp \
-	vars.hpp
+	src/mwindow.hpp \
+	src/vars.hpp
 
 FORMS += \
 

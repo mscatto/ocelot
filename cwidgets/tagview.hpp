@@ -23,7 +23,7 @@
 #include <QTreeWidget>
 #include <taglib/fileref.h>
 
-#include "mwindow.hpp"
+#include "src/mwindow.hpp"
 
 class tagview : public QTreeWidget{
 private:
