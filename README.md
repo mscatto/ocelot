@@ -33,6 +33,6 @@ You can build with:
 > * Allow for on-the-fly add and remove libraries
 > * Refinements for the standard UI widgets (tagview, playlist editor, etc)
 ----
-For now, I'm building Ocelot for my own use, as I am very much a Foobar2k widower, but contributions are very much appreciated as development progresses.
+For now, I'm building Ocelot for my own use, as I am very much a Foobar2k widower, but contributions are much appreciated as development progresses.
 
 ![Imgur](https://i.imgur.com/lKeJrHR.png)
