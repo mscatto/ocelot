@@ -9,10 +9,10 @@ Aside from the Qt Framework, you'll need qtmultimedia and taglib development pac
 
 On Arch you'll need:
 ~~~~
-sudo pacman -Sy qt5-multimedia qt5-base taglib
+pacman -Sy qt5-multimedia qt5-base taglib
 ~~~~
 
-And to build:
+You can build with:
 ~~~~
  qmake-qt5 && make && ./ocelot
 ~~~~
@@ -31,7 +31,8 @@ And to build:
 
 ### TODO FOR 0.3
 > * Allow for on-the-fly add and remove libraries
-> * Refinements for the standard UI widges (tagview, playlist editor, etc)
-
+> * Refinements for the standard UI widgets (tagview, playlist editor, etc)
 ----
-For now, I'm building Ocelot for my own use, since I'm very much a Foobar2k widower, but contributions are very much appreciated.
+For now, I'm building Ocelot for my own use, as I am very much a Foobar2k widower, but contributions are very much appreciated as development progresses.
+
+[Imgur](https://i.imgur.com/lKeJrHR.png)
