@@ -1,7 +1,7 @@
-# Ocelot Media Manager v0.3a
+# Ocelot Media Manager v0.2c
 
 Ocelot is an audio player and library organizer, built using Qt and TagLib.
-It's aim is to create a player light on resources by utilizing near-stock Qt Widgets, while also retaining some of the native look-and-feel of each platform.
+The aim is to create a player light on resources by utilizing near-stock Qt Widgets, while also retaining some of the native look-and-feel of each platform.
 
 _This project is currently in an early stage of development! As such, many planned features are still not present._
 
@@ -18,9 +18,20 @@ And to build:
 ~~~~
 
 
-### TODO
-
+### PLANNED
 > * Milkdrop visualization support
 > * Mass tagger and batch renamer
 > * Batch transcode
 > * Themes and layout editor
+
+### WHAT WORKS
+> * Basic database management
+> * Single-layout UI with basic features
+> * Music playback and metadata extraction
+
+### TODO FOR 0.3
+> * Allow for on-the-fly add and remove libraries
+> * Refinements for the standard UI widges (tagview, playlist editor, etc)
+
+----
+For now, I'm building Ocelot for my own use, since I'm very much a Foobar2k widower, but contributions are very much appreciated.
