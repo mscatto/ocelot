@@ -1,5 +1,5 @@
 ﻿#include "toolbar.hpp"
-#include "mwindow.hpp"
+#include "src/mwindow.hpp"
 
 #include <QToolBar>
 #include <QToolButton>

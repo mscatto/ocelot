@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "volslider.hpp"
-#include "mwindow.hpp"
+#include "src/mwindow.hpp"
 #include "toolbar.hpp"
 #include <QPainter>
 #include <QToolTip>
