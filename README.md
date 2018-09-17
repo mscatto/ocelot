@@ -5,7 +5,7 @@ The goal is to build a player light on resources by utilizing near-stock Qt Widg
 
 _This project is currently in an early stage of development! As such, many planned features are still not present._
 
-Aside from the Qt Framework itself, you'll need qtmultimedia and taglib development packages to build Ocelot. Both are available on the standard repos of pretty much every distro around, although the exact name may vary.
+Aside from the Qt Framework itself, you'll need qtmultimedia and taglib development packages to build Ocelot. Both packages are available on the standard repos of pretty much every distro around, although the exact name may vary.
 
 On Arch you'll need:
 ~~~~
@@ -14,7 +14,7 @@ pacman -Sy qt5-multimedia qt5-base taglib
 
 You can build with:
 ~~~~
- qmake-qt5 && make && ./ocelot
+qmake-qt5 && make && ./ocelot
 ~~~~
 
 
