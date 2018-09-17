@@ -35,4 +35,4 @@ You can build with:
 ----
 For now, I'm building Ocelot for my own use, as I am very much a Foobar2k widower, but contributions are very much appreciated as development progresses.
 
-[Imgur](https://i.imgur.com/lKeJrHR.png)
+![Imgur](https://i.imgur.com/lKeJrHR.png)
