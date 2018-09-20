@@ -25,6 +25,7 @@
 #include <QStatusBar>
 #include <QMainWindow>
 #include <QtWidgets>
+
 #include "mwindow.hpp"
 #include "library.hpp"
 #include "vars.hpp"

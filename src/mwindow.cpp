@@ -44,28 +44,18 @@
 #include <taglib/flacfile.h>
 
 mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
+    /* initialize embedded widgets */
     this->jag = jag;
     this->bar = new toolbar(this);
     this->player = new QMediaPlayer();
     this->prog = new progslider(Qt::Horizontal, this->bar, this);
     this->configmenu = new QMenu(this);
     this->vol = new volslider(Qt::Horizontal, this->bar, this);
+    this->wb = new workbench(jag, this);
 
-    this->sdiag = new settings(this, jag);
-    this->adiag = new about(this, jag);
-
-    player->setVolume(100);
-    player->setNotifyInterval(200);
-    this->media_status(player->mediaStatus());
-    this->setWindowIcon(QIcon(":/internals/icon"));
-    this->setMinimumSize(896, 504);
-    this->layout()->setContentsMargins(0,0,0,0);
-    this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
-    this->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
-    this->sizePolicy().setVerticalPolicy(QSizePolicy::Expanding);
-    this->setStatusBar(new QStatusBar());
-    this->statusBar()->addWidget(&this->status);
-    this->statusBar()->addPermanentWidget(&this->proglabel);
+    this->bar->addWidget(this->vol);
+    this->bar->addSeparator();
+    this->bar->addWidget(this->prog);
 
     configmenu->addAction(new QAction("Open File..."));
     configmenu->addAction(new QAction("Play Disc..."));
@@ -79,6 +69,29 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     configmenu->addAction(new QAction("Exit"));
     configmenu->setParent(this);
 
+    /* and windows */
+    this->sdiag = new settings(this, jag);
+    this->adiag = new about(this, jag);
+
+    /* set the defaults */
+    player->setVolume(100);
+    player->setNotifyInterval(200);
+    this->setCentralWidget(wb);
+    this->addToolBar(this->bar);
+    this->media_status(player->mediaStatus());
+    this->setWindowIcon(QIcon(":/internals/icon"));
+    this->setMinimumSize(896, 504);
+    this->layout()->setContentsMargins(0,0,0,0);
+    this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
+    this->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
+    this->sizePolicy().setVerticalPolicy(QSizePolicy::Expanding);
+    this->setStatusBar(new QStatusBar());
+    this->statusBar()->addWidget(&this->status);
+    this->statusBar()->addPermanentWidget(&this->proglabel);
+    status.setText("<b>IDLE</b>");
+    proglabel.setText("<b>00:00</b>");
+
+    /* and then connect everything */
     connect(this->player, &QMediaPlayer::positionChanged, this, &mwindow::progslider_sync);
     connect(this->prog, &QSlider::sliderMoved, this, &mwindow::progslider_moved);
     connect(this->prog, &QSlider::sliderReleased, this, &mwindow::progslider_released);
@@ -87,30 +100,13 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     connect(this->vol, &QSlider::sliderMoved, this, &mwindow::volslider_moved);
     connect(this->player, &QMediaPlayer::mediaStatusChanged, this, &mwindow::media_status);
 
-    this->bar->addWidget(this->vol);
-    this->bar->addSeparator();
-    this->bar->addWidget(this->prog);
-
-    status.setText("<b>IDLE</b>");
-    proglabel.setText("<b>00:00</b>");
-
-    /*QStringList *data = new QStringList();
-    QSqlQuery d = this->lib->query("SELECT path FROM songs");
-    while(d.next())
-        data->append(d.record().value(0).toString());
-    this->lib->scan("/storage/music", data);
-    data->~QStringList();*/
-
-    this->wb = new workbench(jag, this);
-    this->setCentralWidget(wb);
-    this->addToolBar(this->bar);
-
 }
 
 mwindow::~mwindow(){
 
 }
 
+/* this will be triggered when the pause toolbar button is triggered */
 void mwindow::toolbar_pause(){
     this->player->pause();
 
@@ -120,6 +116,7 @@ void mwindow::toolbar_pause(){
     }
 }
 
+/* this will be triggered when the play toolbar button is triggered */
 void mwindow::toolbar_play(){
     this->player->play();
 
@@ -131,20 +128,24 @@ void mwindow::toolbar_play(){
     }
 }
 
+/* this will be triggered when the stop toolbar button is triggered */
 void mwindow::toolbar_stop(){
     this->player->stop();
     this->status.setText("<b>IDLE</b>");
     this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
 }
 
+/* this will be triggered when the next toolbar button is triggered */
 void mwindow::toolbar_next(){
 
 }
 
+/* this will be triggered when the prev toolbar button is triggered */
 void mwindow::toolbar_prev(){
 
 }
 
+/* this will be triggered when the menu toolbar button is triggered */
 void mwindow::toolbar_menu(){
     //this->menuact->;
 }
@@ -158,6 +159,7 @@ void mwindow::about_spawn()
     this->adiag->show();
 }
 
+/* will be called every time the player changes position, which will be x */
 void mwindow::progslider_sync(qint64 x){
     if (!this->prog->isSliderDown()){
         this->prog->setValue(x/1000);
@@ -165,6 +167,7 @@ void mwindow::progslider_sync(qint64 x){
     }
 }
 
+/* called when the progslider is dragged */
 void mwindow::progslider_moved(int x){
     QPoint *p = new QPoint(this->prog->mapToGlobal(this->prog->pos()));
     p->setX(QCursor::pos().rx());
@@ -174,6 +177,7 @@ void mwindow::progslider_moved(int x){
     p->~QPoint();
 }
 
+/* called when progslider is clicked */
 void mwindow::progslider_clicked(int x){
     //QPoint *p = new QPoint(this->prog->mapToGlobal(this->prog->pos()));
     //qDebug() << prog->sliderPosition();
@@ -181,6 +185,7 @@ void mwindow::progslider_clicked(int x){
     //this
 }
 
+/* called when the volslider is dragged */
 void mwindow::volslider_moved(int x){
     QPoint *p = new QPoint(this->vol->mapToGlobal(this->vol->pos()));
     p->setX(QCursor::pos().rx());
@@ -188,10 +193,12 @@ void mwindow::volslider_moved(int x){
     p->~QPoint();
 }
 
+/* called when the progslider is released */
 void mwindow::progslider_released(){
     this->player->setPosition(this->prog->value()*1000);
 }
 
+/* this will be called when the player changes the status flag */
 void mwindow::media_status(QMediaPlayer::MediaStatus status){
     switch(status){
     case QMediaPlayer::MediaStatus::LoadedMedia: /* when playback is stopped */
@@ -254,6 +261,7 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
     }
 }
 
+/* triggered when activated from a lib widget */
 void mwindow::play(QTreeWidgetItem *item){
     if(!item->data(1, Qt::EditRole).isValid()){ /* items from widgets will have path on column 0 */
         this->player->setMedia(QUrl::fromLocalFile(item->data(0, Qt::EditRole).toString()));
@@ -265,6 +273,7 @@ void mwindow::play(QTreeWidgetItem *item){
     this->player->play();
 }
 
+/* when a item is single clicked on a widget */
 void mwindow::select(QTreeWidgetItem *item){
     QString *front = new QString(item->data(1, Qt::EditRole).toStringList().first());
     this->selectionchanged(*front);

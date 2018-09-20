@@ -84,11 +84,10 @@ void vars::initlibs(){
 
     QSqlQuery *q = new QSqlQuery();
     *q = this->DB_REF->exec("SELECT path FROM libs");
-    if(!q->isNull(0)){
-        do{
-            this->libs->append(new library(q->value(0).toString(),this->DB_REF));
-        }while(q->next());
+    while(q->next()){
+       this->libs->append(new library(q->value(0).toString(),this->DB_REF));
     }
     q->~QSqlQuery();
+
     qInfo() << "[INFO] Done.";
 }

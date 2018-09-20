@@ -35,7 +35,7 @@ private:
                                  "audio/flac"
     };
     QSqlDatabase *db;
-    qint64 size = 0;
+    qint64 size;
     QStringList tracks;
     QString libpath;
 

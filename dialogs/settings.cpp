@@ -161,6 +161,12 @@ void settings::lib_dirpicker(){
 }
 
 void settings::lib_treerefresh(){
-    for(int i=jag->libs->length(); i>0; i--)
-        libstree->addTopLevelItem(new QTreeWidgetItem(libstree, jag->libs->at(i-1)->dumpinfo()->split(";")));
+    if(this->jag->libs->length()==0)
+        return;
+
+    for(int i=jag->libs->length(); i>0; i--){
+        QStringList s = jag->libs->at(i-1)->dumpinfo()->split(";");
+        s.last().append(" GB");
+        libstree->addTopLevelItem(new QTreeWidgetItem(libstree, s));
+    }
 }
