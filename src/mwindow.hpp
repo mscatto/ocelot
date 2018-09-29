@@ -31,6 +31,7 @@
 
 #include "dialogs/settings.hpp"
 #include "dialogs/about.hpp"
+#include "dialogs/transcoder.hpp"
 
 #include "cwidgets/volslider.hpp"
 #include "cwidgets/progslider.hpp"
@@ -56,6 +57,7 @@ private:
     QMenu *configmenu;
     toolbar *bar;
     settings *sdiag;
+    transcoder *transcdiag;
     about *adiag;
 public slots:
     void toolbar_pause();
@@ -66,6 +68,7 @@ public slots:
     void toolbar_menu();
     void config_spawn();
     void about_spawn();
+    void transcoder_spawn();
     void play(QTreeWidgetItem* item);
     void select(QTreeWidgetItem *item);
 private slots:
@@ -78,7 +81,9 @@ private slots:
 signals:
     void selectionchanged(QString item);
     void coverchanged(QPixmap *cover);
+    void libchanged(QSqlDatabase *db);
     void plappend(QStringList l);
+    void convhandler(QStringList files);
 };
 
 #endif // MWINDOW_HPP

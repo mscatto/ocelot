@@ -33,9 +33,11 @@ private:
     QTreeWidget *tree;
     void recurtree(QTreeWidgetItem *parent, QStringList levels, QString conditions, QSqlDatabase *db);
     QStringList *extract(QString vars);
+    void menu_items(const QPoint &pos);
+public slots:
+    void populate(QSqlDatabase *db);
 public:
     libtree(mwindow *win);
-    void populate(QSqlDatabase *db);
     ~libtree();
 };
 

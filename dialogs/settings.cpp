@@ -10,6 +10,8 @@
 #include <QTabWidget>
 #include <QTreeWidget>
 #include <QFileDialog>
+#include <QComboBox>
+#include <QFormLayout>
 
 #include "src/vars.hpp"
 #include "settings.hpp"
@@ -18,15 +20,16 @@
 
 settings::settings(QWidget *win, vars *jag) : QDialog(win){
     this->jag = jag;
+    this->win = win;
     QVBoxLayout *l = new QVBoxLayout(this);
-    QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel|QDialogButtonBox::Apply);
+    QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Close);
     QTabWidget *tab = new QTabWidget(this);
 
     l->addWidget(tab);
     l->addWidget(bb);
 
     tab->addTab(this->spawn_maintab(win),"General");
-    tab->addTab(this->spawn_libtab(win, jag->DB_REF),"Library");
+    tab->addTab(this->spawn_libtab(win),"Library");
     connect(bb, &QDialogButtonBox::accepted, this, &settings::accept);
     connect(bb, &QDialogButtonBox::rejected, this, &settings::reject);
 
@@ -42,12 +45,18 @@ settings::~settings(){
 
 QWidget* settings::spawn_maintab(QWidget *win){
     QWidget *w = new QWidget(win);
+    QFormLayout *main_layout = new QFormLayout;
 
+    QComboBox *main_selbehaviour = new QComboBox(w);
+    main_selbehaviour->insertItems(0, QStringList()<<"current selection"<<"current media playback");
+
+    main_layout->addRow(new QLabel("UI contents follow:", w), main_selbehaviour);
+    w->setLayout(main_layout);
 
     return w;
 }
 
-QWidget* settings::spawn_libtab(QWidget *win, QSqlDatabase *db){
+QWidget* settings::spawn_libtab(QWidget *win){
     QWidget *w = new QWidget(win);
     QGroupBox *fbox = new QGroupBox("Directories");
     fbox->setLayout(new QGridLayout);
@@ -82,6 +91,7 @@ QWidget* settings::spawn_libtab(QWidget *win, QSqlDatabase *db){
     QPushButton *rembtn = new QPushButton();
     rembtn->setText("Remove selected");
     rembtn->setMaximumWidth(120);
+    connect(rembtn, &QPushButton::clicked, this, &settings::lib_remdir);
 
     qobject_cast<QGridLayout*>(tframe->layout())->addWidget(tree,0,0,1,3);
     qobject_cast<QGridLayout*>(tframe->layout())->addWidget(fpicker,1,0,1,1);
@@ -154,13 +164,32 @@ void settings::lib_dirpicker(){
         return;
 
     this->jag->libs->append(new library(dir,this->jag->DB_REF));
-    QString st = this->jag->libs->last()->dumpinfo()->split(";").join("', '");
+    QString st = this->jag->libs->last()->dumpinfo()->split(";").first();
     this->jag->DB_REF->exec("INSERT INTO libs VALUES ('"+st+"')");
 
     lib_treerefresh();
 }
 
 void settings::lib_treerefresh(){
-    for(int i=jag->libs->length(); i>0; i--)
-        libstree->addTopLevelItem(new QTreeWidgetItem(libstree, jag->libs->at(i-1)->dumpinfo()->split(";")));
+    libstree->clear();
+
+    for(int i=jag->libs->length()-1; i>=0; i--){
+        QStringList s = jag->libs->at(i)->dumpinfo()->split(";");
+
+        s.last().append(" MiB");
+        libstree->addTopLevelItem(new QTreeWidgetItem(libstree, s));
+    }
+
+    qobject_cast<mwindow*>(this->win)->libchanged(this->jag->DB_REF);
+}
+
+void settings::lib_remdir(){
+    if(this->jag->libs->length()==0)
+        return;
+
+    foreach(QTreeWidgetItem *s, this->libstree->selectedItems()){
+        this->jag->remlibs(s->data(0, Qt::EditRole).toString());
+    }
+
+    lib_treerefresh();
 }

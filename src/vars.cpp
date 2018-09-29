@@ -21,6 +21,17 @@ vars::~vars(){
 
 }
 
+void vars::remlibs(QString path){
+    for(int i=this->libs->length()-1; i>=0; i--){
+        if(this->libs->at(i)->dumpinfo()->split(";").first() == path){
+            this->libs->removeAt(i);
+        }
+    }
+
+    this->DB_REF->exec("DELETE FROM songs WHERE lib='"+path+"'");
+    this->DB_REF->exec("DELETE FROM libs WHERE path='"+path+"'");
+}
+
 void vars::initdb(){
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     *this->DB_REF = QSqlDatabase::addDatabase("QSQLITE");
@@ -42,6 +53,9 @@ void vars::initdb(){
 
     if(x->isNull(0)){
         qInfo() << "[INFO] No database found! generating a new one...";
+        this->DB_REF->exec("CREATE TABLE libs(\
+            path TEXT NOT NULL, PRIMARY KEY('path')\
+        )");
         this->DB_REF->exec("CREATE TABLE songs (\
             root TEXT,\
             path TEXT,\
@@ -52,9 +66,10 @@ void vars::initdb(){
             track INTEGER,\
             year TEXT,\
             genre TEXT,\
-            discNumber INTEGER\
+            discNumber INTEGER,\
+            lib TEXT, FOREIGN KEY('lib') REFERENCES 'libs'('path')\
         )");
-        this->DB_REF->exec("CREATE TABLE properties(\
+        /*this->DB_REF->exec("CREATE TABLE properties(\
             song_id INTEGER,\
             format TEXT,\
             duration REAL,\
@@ -64,12 +79,8 @@ void vars::initdb(){
             channels INTEGER,\
             audio_sha256sum TEXT,\
             FOREIGN KEY(song_id) REFERENCES songs(_rowid_) ON DELETE CASCADE\
-        )");
-        this->DB_REF->exec("CREATE TABLE libs(\
-            path TEXT,\
-            trackcount INTEGER,\
-            filesize INTEGER\
-        )");
+        )");*/
+
         qInfo() << "  -> created at" << this->DATA_PATH+"/ocelot.database";
     }else{
         qInfo("%s",qPrintable("[INFO] Database found at "+this->DB_REF->databaseName()+"..."));

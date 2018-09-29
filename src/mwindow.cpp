@@ -153,11 +153,15 @@ void mwindow::config_spawn(){
     this->sdiag->show();
 }
 
-void mwindow::about_spawn()
-{
+void mwindow::about_spawn(){
     this->adiag->show();
 }
 
+void mwindow::transcoder_spawn(){
+    this->transcdiag->show();
+}
+
+/* will be called every time the player changes position, which will be x */
 void mwindow::progslider_sync(qint64 x){
     if (!this->prog->isSliderDown()){
         this->prog->setValue(x/1000);

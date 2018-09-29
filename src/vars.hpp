@@ -9,13 +9,13 @@
 class vars
 {
 public:
-    const char* VERSION = "0.2b";
+    const char* VERSION = "0.2c";
     QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/ocelot";
     QString DB_PATH = DATA_PATH+"/ocelot.database";
     QSqlDatabase *DB_REF = new QSqlDatabase();
-
-    //static QList<QTreeWidgetItem *> *dumplibs();
     QList<library*> *libs = new QList<library*>();
+
+    void remlibs(QString path);
 
     vars();
     ~vars();

@@ -63,17 +63,11 @@ void tagview::swap(QString item){
     QStringList *keylist = new QStringList();
     keylist->append(QString(x->file()->properties().toString().toCString(true)).split("\n"));
 
-    /*QString s;
-    foreach(s, order){
+    QString s;
+    foreach(s, *keylist){
         if(s.contains("=", Qt::CaseInsensitive))
-            if(this->val.contains(s.split("=").first())){
-                QStringList *z = new QStringList();
-                z->append(this->val.value((s.split("=").first())));
-                z->append(s.split("=").last());
-                this->addTopLevelItem(new QTreeWidgetItem(this, *z));
-                z->~QStringList();
-            }
-    }*/
+            this->addTopLevelItem(new QTreeWidgetItem(this, s.split("=")));
+    }
 
     keylist->~QStringList();
     x->~FileRef();

@@ -26,14 +26,14 @@
 class playlist : public QTreeWidget
 {
 private:
-    QMenu *hctx;
-    QMenu *bctx;
+    QDialog *config;
+    void spawn_config();
 public:
     playlist(mwindow *parent);
     ~playlist();
 public slots:
     void append(QStringList f);
-    void headerctx(QPoint p);
+    void context(QPoint p);
 };
 
 #endif // PLAYLIST_HPP

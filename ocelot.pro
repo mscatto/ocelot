@@ -13,6 +13,7 @@ TEMPLATE = app
 OUTPUT += console
 QT_CONFIG -= no-pkg-config
 CONFIG += link_pkgconfig debug
+CONFIG += static
 PKGCONFIG += taglib
 
 # The following define makes your compiler emit warnings if you use
@@ -42,7 +43,8 @@ SOURCES += \
 	cwidgets/toolbar.cpp \
 	dialogs/settings.cpp \
 	src/mwindow.cpp \
-	src/vars.cpp
+	src/vars.cpp \
+    dialogs/transcoder.cpp
 
 HEADERS += \
 	src/library.hpp \
@@ -58,7 +60,8 @@ HEADERS += \
 	cwidgets/toolbar.hpp \
 	dialogs/settings.hpp \
 	src/mwindow.hpp \
-	src/vars.hpp
+	src/vars.hpp \
+    dialogs/transcoder.hpp
 
 FORMS += \
 

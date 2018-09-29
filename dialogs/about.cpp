@@ -5,7 +5,7 @@
 #include <QSplitter>
 
 about::about(QWidget *parent, vars *jag) : QDialog(parent){
-        QGridLayout *l = new QGridLayout(this);
+    QGridLayout *l = new QGridLayout(this);
     QSplitter *s = new QSplitter(this);
     l->addWidget(s);
 

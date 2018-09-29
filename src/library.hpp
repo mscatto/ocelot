@@ -39,7 +39,7 @@ private:
     QStringList tracks;
     QString libpath;
 
-    void insert(QString *fpath);
+    void insert(QString fpath);
     void scan(QString *dir);
 public:
     library(QString path, QSqlDatabase *db);

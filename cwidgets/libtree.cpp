@@ -23,6 +23,8 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QSqlRecord>
+#include <QMenu>
+
 #include "src/mwindow.hpp"
 
 libtree::libtree(mwindow *win) : QFrame(win){
@@ -32,6 +34,7 @@ libtree::libtree(mwindow *win) : QFrame(win){
     QPushButton *config = new QPushButton(QIcon(":/internals/wrench"), "", this);
     QLabel *label = new QLabel("Filter", this);
     tree = new QTreeWidget(this);
+    tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
     this->setFrameShape(QFrame::StyledPanel);
     this->setFrameShadow(QFrame::Sunken);
@@ -52,8 +55,10 @@ libtree::libtree(mwindow *win) : QFrame(win){
 
     this->setLayout(grid);
     //parent->window()->
+    connect(tree, &QTreeWidget::customContextMenuRequested, this, &libtree::menu_items);
     connect(tree, &QTreeWidget::itemDoubleClicked, win, &mwindow::play);
     connect(tree, &QTreeWidget::itemClicked, win, &mwindow::select);
+    connect(win, &mwindow::libchanged, this, &libtree::populate);
 }
 
 /* take one and pass it ahead */
@@ -103,7 +108,32 @@ QStringList* libtree::extract(QString vars){
     return out;
 }
 
+void libtree::menu_items(const QPoint &pos){
+    QMenu menu(this);
+
+    const QIcon c = QIcon::fromTheme("gtk-convert");
+    const QIcon t = QIcon::fromTheme("tag-symbolic");
+
+    QAction *tagger = new QAction(t, "Mass Tag");
+    QAction *conv = new QAction(c, "Transcode");
+    QAction *prop = new QAction("Properties");
+
+
+    //conv->
+    //QAction *newAct = new QAction(
+    //QAction *newAct = new QAction(
+    menu.addAction(conv);
+    menu.addAction(tagger);
+    menu.addSeparator();
+    menu.addAction(prop);
+
+    QPoint pt(pos);
+    menu.exec(tree->mapToGlobal(pos));
+}
+
 void libtree::populate(QSqlDatabase *db){
+    this->tree->clear();
+
     QStringList order = QString("#artist#/[#year#] #album#/#track#. #title#").split("/");
     QString root = order.first();
 

@@ -18,21 +18,72 @@
 #include "playlist.hpp"
 #include "src/mwindow.hpp"
 #include <qheaderview.h>
+#include <QGridLayout>
+#include <QListWidget>
+#include <QPushButton>
 #include <QMenu>
+#include <QIcon>
+#include <taglib/tag.h>
+#include <taglib/tpropertymap.h>
+
 playlist::playlist(mwindow *parent) : QTreeWidget(parent){
     this->setAlternatingRowColors(true);
     this->header()->setContextMenuPolicy(Qt::CustomContextMenu);
-    this->hctx = new QMenu("Column Editor");
-    this->hctx->addSeparator();
-    this->hctx->addAction(new QAction("Niggers"));
-    this->hctx->addAction(new QAction("Wiggaz"));
+    this->config = new QDialog(this);
+
+    config->setModal(false);
+    config->setFixedSize(QSize(480, 320));
+    config->setMaximumSize(QSize(480,320));
+    config->setWindowTitle("Column Editor");
+    config->setSizeGripEnabled(false);
+    //config->setSizePolicy(0);
+
+    QGridLayout *l = new QGridLayout;
+    l->setSizeConstraint(QLayout::SetFixedSize);
+    l->setSpacing(8);
+    l->setMargin(8);
+    config->setLayout(l);
+
+    QTreeWidget *avail = new QTreeWidget(this);
+    QTreeWidget *picked = new QTreeWidget(this);
+
+    avail->setHeaderLabel("Available columns");
+    avail->setSelectionBehavior(QAbstractItemView::SelectRows);
+    avail->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    avail->setDragDropMode(QAbstractItemView::DragOnly);
+
+    picked->setHeaderLabel("Columns shown");
+    picked->setDragDropMode(QAbstractItemView::DragOnly);
+    picked->setSelectionBehavior(QAbstractItemView::SelectRows);
+    picked->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    QPushButton *bleft = new QPushButton(QIcon::fromTheme("arrow-left"), "");
+    QPushButton *bright = new QPushButton(QIcon::fromTheme("arrow-right"), "");
+
+    //bleft->setFixedHeight(260);
+    bleft->setToolTip("Remove from shown columns");
+    //bright->setFixedHeight(260);
+    bright->setToolTip("Move to shown columns");
+
+    l->setSizeConstraint(QLayout::SizeConstraint::SetMaximumSize);
+    l->setAlignment(bleft, Qt::AlignBottom);
+
+    l->addWidget(avail, 0,0,4,1);
+    l->addWidget(bleft, 1,1,1,1);
+    l->addWidget(bright,2,1,1,1);
+    l->addWidget(picked,0,2,4,1);
+
     connect(parent, &mwindow::plappend, this, &playlist::append);
-    connect(this->header(), &QHeaderView::customContextMenuRequested, this, &playlist::headerctx);
+    connect(this->header(), &QHeaderView::customContextMenuRequested, this, &playlist::context);
     connect(this, &QTreeWidget::itemDoubleClicked, parent, &mwindow::play);
 }
 
 playlist::~playlist(){
 
+}
+
+void playlist::spawn_config(){
+    this->config->show();
 }
 
 void playlist::append(QStringList f){
@@ -42,10 +93,16 @@ void playlist::append(QStringList f){
     }
 }
 
-void playlist::headerctx(QPoint p){
-    qDebug() << p;
+void playlist::context(QPoint p){
+    QMenu *ctx = new QMenu("Column Editor");
+    QAction *config = new QAction("Configure columns...");
+    ctx->addAction(config);
+    connect(config, &QAction::triggered, this, &playlist::spawn_config);
+
+    QPoint pt(p);
+    ctx->exec(this->mapToGlobal(p));
     //QModelIndex index = this->indexAt(p);
     //if (index.isValid() && index.row() % 2 == 0) {
-        hctx->popup(this->viewport()->mapToGlobal(p));
+        //hctx->popup(this->viewport()->mapToGlobal(p));
     //}
 }
