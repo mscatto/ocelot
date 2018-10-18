@@ -3,6 +3,19 @@
 Ocelot is an audio player and library organizer, built with Qt and TagLib.
 It's aim is to create a player light on resources by utilizing near-stock Qt Widgets, while also retaining some of the native look-and-feel of each platform.
 
+---
+
+### BUILDING
+Ocelot requires Qt5 at least 5.10, Qt Multimedia and TagLib development files.
+
+On Arch, you'll need the following packages:
+`qt5-multimedia qt5-base taglib make gcc`
+
+You can build it and run with:
+`qmake . && make && ./ocelot`
+
+---
+
 _This project is currently in an early stage of development! As such, many planned features are still not present._
 
 ### TODO
