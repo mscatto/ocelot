@@ -34,7 +34,6 @@ SOURCES += \
 	src/workbench.cpp \
 	cwidgets/coverview.cpp \
 	cwidgets/libtree.cpp \
-	cwidgets/playlist.cpp \
 	cwidgets/progslider.cpp \
 	cwidgets/splitter.cpp \
 	cwidgets/tagview.cpp \
@@ -44,7 +43,10 @@ SOURCES += \
 	dialogs/settings.cpp \
 	src/mwindow.cpp \
 	src/vars.cpp \
-    dialogs/transcoder.cpp
+    dialogs/transcoder.cpp \
+    cwidgets/playlistview.cpp \
+    cwidgets/playlist.cpp \
+    cwidgets/renamepbtn.cpp
 
 HEADERS += \
 	src/library.hpp \
@@ -53,7 +55,6 @@ HEADERS += \
 	cwidgets/tagview.hpp \
 	cwidgets/splitter.hpp \
 	cwidgets/progslider.hpp \
-	cwidgets/playlist.hpp \
 	cwidgets/libtree.hpp \
 	cwidgets/volslider.hpp \
 	dialogs/about.hpp \
@@ -61,7 +62,10 @@ HEADERS += \
 	dialogs/settings.hpp \
 	src/mwindow.hpp \
 	src/vars.hpp \
-    dialogs/transcoder.hpp
+    dialogs/transcoder.hpp \
+    cwidgets/playlistview.hpp \
+    cwidgets/playlist.hpp \
+    cwidgets/renamepbtn.hpp
 
 FORMS += \
 

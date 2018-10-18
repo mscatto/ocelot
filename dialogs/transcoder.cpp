@@ -20,8 +20,6 @@ transcoder::transcoder(vars *jag, QWidget *win) : QDialog(win){
     connect(qobject_cast<mwindow*>(win), &mwindow::convhandler, this, &transcoder::handle);
 }
 
-
-
 transcoder::~transcoder(){
 
 }

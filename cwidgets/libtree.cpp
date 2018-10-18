@@ -1,5 +1,5 @@
 /*
- * Ocelot Music Manager: music player and library manager built using Qt
+ * Ocelot Music Manager: A music player and library manager built using Qt
  * Copyright (C) 2018 Matheus Scattolin Anselmo
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QSqlRecord>
+#include <QSqlError>
 #include <QMenu>
 
 #include "src/mwindow.hpp"
@@ -62,19 +63,19 @@ libtree::libtree(mwindow *win) : QFrame(win){
 }
 
 /* take one and pass it ahead */
-/* i'm so uglyyyyyyy */
+/* i'm so uglyyyyyyy */// 999663822
 void libtree::recurtree(QTreeWidgetItem *parent, QStringList levels, QString conditions, QSqlDatabase *db){
     QString root = levels.first();
     levels.removeFirst();
     QStringList* sroot = libtree::extract(root);
     QString vars = sroot->join(", ");
 
-    QSqlQuery rq = db->exec("SELECT DISTINCT "+vars+" FROM songs WHERE "+conditions+" ORDER BY "+sroot->first());
-
+    QSqlQuery rq;
+    rq.prepare("SELECT DISTINCT "+vars+" FROM songs WHERE "+conditions+" ORDER BY "+sroot->first());
+    rq.exec();
     while(rq.next()){
         QString name = root;
         sroot = libtree::extract(root);
-
         for(int i=sroot->length()-1; i>=0; i--){
             name.replace(sroot->at(i), rq.record().value(i).toString());
             sroot->replace(i, sroot->at(i)+"='"+rq.record().value(i).toString()+"'");
@@ -84,12 +85,14 @@ void libtree::recurtree(QTreeWidgetItem *parent, QStringList levels, QString con
 
         parent->addChild(new QTreeWidgetItem(parent,QStringList(name)));
 
-        QSqlQuery qpath = db->exec("SELECT DISTINCT path FROM songs WHERE "+sroot->join(" AND "));
+        QSqlQuery qpath;
+        qpath.prepare("SELECT DISTINCT path FROM songs WHERE "+sroot->join(" AND "));
+        qpath.exec();
         QStringList act;
         while(qpath.next()){
             act.append(qpath.record().value(0).toString());
         }
-        parent->child(parent->childCount()-1)->setData(1, Qt::EditRole, act);
+        parent->child(parent->childCount()-1)->setData(0, Qt::UserRole, act);
 
         if(levels.length()>=1){
             libtree::recurtree(parent->child(parent->childCount()-1), levels, conditions+" AND "+sroot->join(" AND "), db);
@@ -137,32 +140,39 @@ void libtree::populate(QSqlDatabase *db){
     QStringList order = QString("#artist#/[#year#] #album#/#track#. #title#").split("/");
     QString root = order.first();
 
-    QString q = "SELECT DISTINCT "
-                +libtree::extract(order.first())->join(", ")
-                +" FROM songs ORDER BY "
-                +libtree::extract(order.first())->join(", ");
+    QSqlQuery *query = new QSqlQuery();
+    query->prepare("SELECT DISTINCT "+libtree::extract(order.first())->join(", ")+" FROM songs ORDER BY "+libtree::extract(order.first())->join(", "));
+    query->exec();
+    //query->next();
 
     order.removeFirst();
-    QSqlQuery query = db->exec(q);
     QList<QTreeWidgetItem*> items;
 
-    while(query.next()){
+    while(query->next()){
+
         QStringList *caseq = libtree::extract(root);
         QString name = root;
         for(int i=0; i<caseq->length(); i++){
-            name.replace(caseq->at(i), query.record().value(i).toString());
-            caseq->replace(i, caseq->at(i) + "='"+query.record().value(i).toString()+"'");
+            name.replace(caseq->at(i), query->record().value(i).toString());
+            caseq->replace(i, caseq->at(i) + "='"+query->record().value(i).toString()+"'");
         }
         name.remove("#");
-        q = "SELECT DISTINCT path FROM songs WHERE "+caseq->join(" AND ");
+
         items.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(name)));
-        QSqlQuery sidequery = db->exec(q);
+        QSqlQuery sidequery;
+        sidequery.prepare("SELECT DISTINCT path FROM songs WHERE "+caseq->join(" AND "));
+        sidequery.exec();
+        sidequery.next();
         QStringList act;
-        while(sidequery.next()){
-            act.append(sidequery.record().value(0).toString());
+        int z=0;
+        while(sidequery.record().value(z).isValid()){//////////////////////////
+            act.append(sidequery.record().value(z).toString());
+            z++;
+            sidequery.next();
         }
 
-        items.last()->setData(1, Qt::EditRole, act);
+        qDebug() << act.last();
+        items.last()->setData(0, Qt::UserRole, act.last());
         libtree::recurtree(items.last(), order, caseq->join(" AND "), db);
         caseq->~QStringList();
         items.last()->setText(0, items.last()->text(0)+" ("+QString::number(items.last()->childCount())+")");

@@ -12,13 +12,29 @@
 vars::vars(){
     qInfo("[INFO] Starting Ocelot Media Manager v%s", this->VERSION);
 
+    initpmap();
     initdb();
     initlibs();
-
 }
 
 vars::~vars(){
 
+}
+
+QString vars::translate_key(QString key){
+    return this->pmap.value(key);
+}
+
+QString vars::translate_val(QString val){
+    return this->pmap.key(val);
+}
+
+QStringList vars::dumpvars(){
+    return this->pmap.values();
+}
+
+QStringList vars::dumpkeys(){
+    return this->pmap.keys();
 }
 
 void vars::remlibs(QString path){
@@ -52,9 +68,12 @@ void vars::initdb(){
     x->last();
 
     if(x->isNull(0)){
-        qInfo() << "[INFO] No database found! generating a new one...";
+        qInfo() << "[INFO] Database empty or not found! generating defaults...";
         this->DB_REF->exec("CREATE TABLE libs(\
             path TEXT NOT NULL, PRIMARY KEY('path')\
+        )");
+        this->DB_REF->exec("CREATE TABLE data(\
+            key TEXT NOT NULL, val TEXT NOT NULL\
         )");
         this->DB_REF->exec("CREATE TABLE songs (\
             root TEXT,\
@@ -81,6 +100,9 @@ void vars::initdb(){
             FOREIGN KEY(song_id) REFERENCES songs(_rowid_) ON DELETE CASCADE\
         )");*/
 
+        /* initialize default values */
+        initdata();
+
         qInfo() << "  -> created at" << this->DATA_PATH+"/ocelot.database";
     }else{
         qInfo("%s",qPrintable("[INFO] Database found at "+this->DB_REF->databaseName()+"..."));
@@ -95,6 +117,7 @@ void vars::initlibs(){
 
     QSqlQuery *q = new QSqlQuery();
     *q = this->DB_REF->exec("SELECT path FROM libs");
+    q->next();
     if(!q->isNull(0)){
         do{
             this->libs->append(new library(q->value(0).toString(),this->DB_REF));
@@ -102,4 +125,25 @@ void vars::initlibs(){
     }
     q->~QSqlQuery();
     qInfo() << "[INFO] Done.";
+}
+
+void vars::initdata(){
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'playlist_column_order',\
+        '#PLAY#;#INDEX#;TRACKNUMBER;TITLE;ARTIST;ALBUM;YEAR\
+    ')");
+}
+
+void vars::initpmap(){
+    this->pmap.insert("TITLE", "Title");
+    this->pmap.insert("ALBUM","Album");
+    this->pmap.insert("ARTIST","Artist");
+    this->pmap.insert("ALBUMARTIST","Album Artist");
+    this->pmap.insert("SUBTITLE","Subtitle");
+    this->pmap.insert("TRACKNUMBER","Track Number");
+    this->pmap.insert("DISCNUMBER", "Disc Number");
+    this->pmap.insert("DATE","Year");
+    this->pmap.insert("ORIGINALDATE","Original Year");
+    this->pmap.insert("GENRE","Genre");
+    this->pmap.insert("COMMENT","Comment");
 }

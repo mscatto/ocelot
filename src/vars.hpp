@@ -14,13 +14,19 @@ public:
     QString DB_PATH = DATA_PATH+"/ocelot.database";
     QSqlDatabase *DB_REF = new QSqlDatabase();
     QList<library*> *libs = new QList<library*>();
-
+    QString translate_key(QString key);
+    QString translate_val(QString val);
+    QStringList dumpvars();
+    QStringList dumpkeys();
     void remlibs(QString path);
 
     vars();
     ~vars();
 private:
+    QMap<QString,QString> pmap;
+    void initpmap();
     void initdb();
     void initlibs();
+    void initdata();
 };
 #endif // VARS_HPP

@@ -1,5 +1,5 @@
 /*
- * Ocelot Music Manager: music player and library manager built using Qt
+ * Ocelot Music Manager: A music player and library manager built using Qt
  * Copyright (C) 2018 Matheus Scattolin Anselmo
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,93 +16,134 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "playlist.hpp"
-#include "src/mwindow.hpp"
-#include <qheaderview.h>
-#include <QGridLayout>
-#include <QListWidget>
-#include <QPushButton>
+
+#include <QHeaderView>
 #include <QMenu>
-#include <QIcon>
-#include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
 
-playlist::playlist(mwindow *parent) : QTreeWidget(parent){
+playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win) : QTreeWidget (){
+    this->order = order;
+    this->headerctx = headerctx;
+    this->bodyctx = new QMenu();
+    this->jag = jag;
+
+    QList<QAction*> *al = new QList<QAction*>();
+    al->append(new QAction(QString("Clear playlist")));
+    connect(al->back(), &QAction::triggered, this, &playlist::clear);
+    al->append(new QAction(QString("Remove selected")));
+
+    al->append(new QAction(QString("Export playlist")));
+
+    this->bodyctx->addActions(*al);
+    al->~QList();
+
     this->setAlternatingRowColors(true);
+    this->setSortingEnabled(true);
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->header()->setContextMenuPolicy(Qt::CustomContextMenu);
-    this->config = new QDialog(this);
+    this->header()->setFirstSectionMovable(false);
 
-    config->setModal(false);
-    config->setFixedSize(QSize(480, 320));
-    config->setMaximumSize(QSize(480,320));
-    config->setWindowTitle("Column Editor");
-    config->setSizeGripEnabled(false);
-    //config->setSizePolicy(0);
+    this->rebuild_columns();
 
-    QGridLayout *l = new QGridLayout;
-    l->setSizeConstraint(QLayout::SetFixedSize);
-    l->setSpacing(8);
-    l->setMargin(8);
-    config->setLayout(l);
+    this->header()->resizeSection(0, 40);
+    this->header()->resizeSection(1, 40);
 
-    QTreeWidget *avail = new QTreeWidget(this);
-    QTreeWidget *picked = new QTreeWidget(this);
+    connect(this,
+            &playlist::customContextMenuRequested,
+            this,
+            &playlist::show_bodyctx);
 
-    avail->setHeaderLabel("Available columns");
-    avail->setSelectionBehavior(QAbstractItemView::SelectRows);
-    avail->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    avail->setDragDropMode(QAbstractItemView::DragOnly);
+    connect(this->header(),
+            &QHeaderView::customContextMenuRequested,
+            this,
+            &playlist::show_headerctx);
 
-    picked->setHeaderLabel("Columns shown");
-    picked->setDragDropMode(QAbstractItemView::DragOnly);
-    picked->setSelectionBehavior(QAbstractItemView::SelectRows);
-    picked->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-    QPushButton *bleft = new QPushButton(QIcon::fromTheme("arrow-left"), "");
-    QPushButton *bright = new QPushButton(QIcon::fromTheme("arrow-right"), "");
-
-    //bleft->setFixedHeight(260);
-    bleft->setToolTip("Remove from shown columns");
-    //bright->setFixedHeight(260);
-    bright->setToolTip("Move to shown columns");
-
-    l->setSizeConstraint(QLayout::SizeConstraint::SetMaximumSize);
-    l->setAlignment(bleft, Qt::AlignBottom);
-
-    l->addWidget(avail, 0,0,4,1);
-    l->addWidget(bleft, 1,1,1,1);
-    l->addWidget(bright,2,1,1,1);
-    l->addWidget(picked,0,2,4,1);
-
-    connect(parent, &mwindow::plappend, this, &playlist::append);
-    connect(this->header(), &QHeaderView::customContextMenuRequested, this, &playlist::context);
-    connect(this, &QTreeWidget::itemDoubleClicked, parent, &mwindow::play);
+    connect(this,
+            &QTreeWidget::itemDoubleClicked,
+            win,
+            &mwindow::play);
 }
 
-playlist::~playlist(){
+playlist::~playlist(){}
+
+void playlist::show_headerctx(const QPoint & pos){
+    /*QMenu *ctx = new QMenu("Columns");
+    ctx->addActions(this->headerctx->actions()values());
+    //qDebug() << this->menuctx.values();*************************************************/
+
+    this->headerctx->exec(this->mapToGlobal(pos));
+}
+
+void playlist::show_bodyctx(const QPoint & pos){
+    this->bodyctx->exec(this->mapToGlobal(pos));
+}
+
+void playlist::clear(){
 
 }
 
-void playlist::spawn_config(){
-    this->config->show();
+void playlist::rebuild_columns(){
+    QStringList *c = new QStringList;
+    c->append(this->order->split(";"));
+    this->setColumnCount(c->length());
+
+    c->replace(0, QString(this->playchar));
+
+    for(int i=1; i<c->length(); i++){
+        if(c->at(i) == "#INDEX#") /* only index atm */
+            c->replace(i, QString("#"));
+        else
+            c->replace(i, this->jag->translate_key(c->at(i)));}
+    this->setHeaderLabels(*c);
+    c->~QStringList();
+}
+
+bool playlist::contains(QString path){
+    foreach(QString s, this->pl){
+        if(s==path)
+            return true;
+    }
+
+    return false;
 }
 
 void playlist::append(QStringList f){
-    while(f.length()>0){
-        this->addTopLevelItem(new QTreeWidgetItem(this, QStringList(f.first())));
+    while(f.length()>0 && !playlist::contains(f.first())){
+
+        TagLib::FileRef *fr;
+        fr = new TagLib::FileRef(qPrintable(f.first()));
+
+        QStringList tagbank;
+        QMap<QString, QString> pr;
+        QStringList lst;
+        tagbank.append(QString(fr->tag()->properties().toString().toCString(true)).split("\n", QString::SkipEmptyParts));
+
+        foreach(QString s, tagbank){
+            lst << s.split("=", QString::SkipEmptyParts);
+            pr.insert(lst.first(), lst.last());
+            lst.clear();
+        }
+
+        QTreeWidgetItem *ni = new QTreeWidgetItem(this, QStringList(f.first()));
+        QStringList data;
+        int z = 0;
+        foreach(QString s, this->order->split(";", QString::SkipEmptyParts)){
+            if(s=="#INDEX#")
+                ni->setData(z, Qt::EditRole,QString::number(this->pl.length())); /* me toooooooooooooooooooo */
+            else
+                ni->setData(z, Qt::EditRole,pr.value(s));
+            z++;
+        }
+
+
+        ni->setData(0, Qt::UserRole, f.first());
+        this->insertTopLevelItem(this->children().count(), ni);
+        //this->addTopLevelItem(ni);
+        this->pl.append(f); /* look at meeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee */
+        fr->~FileRef();
         f.pop_front();
+
+        //this->
     }
 }
 
-void playlist::context(QPoint p){
-    QMenu *ctx = new QMenu("Column Editor");
-    QAction *config = new QAction("Configure columns...");
-    ctx->addAction(config);
-    connect(config, &QAction::triggered, this, &playlist::spawn_config);
-
-    QPoint pt(p);
-    ctx->exec(this->mapToGlobal(p));
-    //QModelIndex index = this->indexAt(p);
-    //if (index.isValid() && index.row() % 2 == 0) {
-        //hctx->popup(this->viewport()->mapToGlobal(p));
-    //}
-}

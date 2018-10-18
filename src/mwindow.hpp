@@ -74,7 +74,7 @@ public slots:
 private slots:
     void progslider_sync(qint64 x);
     void progslider_moved(int x);
-    void progslider_clicked(int x);
+    void progslider_clicked(int action);
     void progslider_released();
     void volslider_moved(int x);
     void media_status(QMediaPlayer::MediaStatus status);

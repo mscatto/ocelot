@@ -33,7 +33,7 @@
 #include "cwidgets/coverview.hpp"
 #include "cwidgets/libtree.hpp"
 #include "cwidgets/tagview.hpp"
-#include "cwidgets/playlist.hpp"
+#include "cwidgets/playlistview.hpp"
 #include "cwidgets/splitter.hpp"
 
 workbench::workbench(vars *jag, QWidget *win) : QFrame(win){
@@ -52,7 +52,7 @@ workbench::workbench(vars *jag, QWidget *win) : QFrame(win){
     x->addWidget(j);
     x->addWidget(y);
 
-    y->addWidget(new playlist(qobject_cast<mwindow*>(win)));
+    y->addWidget(new playlistview(jag, qobject_cast<mwindow*>(win)));
     y->addWidget(z);
 
     z->addWidget(new coverview(qobject_cast<mwindow*>(win)));

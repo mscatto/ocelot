@@ -90,6 +90,7 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->bar->addWidget(this->vol);
     this->bar->addSeparator();
     this->bar->addWidget(this->prog);
+    ///this->bar->set
 
     status.setText("<b>IDLE</b>");
     proglabel.setText("<b>00:00</b>");
@@ -170,18 +171,16 @@ void mwindow::progslider_sync(qint64 x){
 }
 
 void mwindow::progslider_moved(int x){
-    QPoint *p = new QPoint(this->prog->mapToGlobal(this->prog->pos()));
+    QPoint *p = new QPoint(this->vol->mapToGlobal(this->vol->pos()));
     p->setX(QCursor::pos().rx());
-
     QToolTip::showText(*p, QDateTime::fromTime_t(x).toString("mm : ss"), this->prog);
-
     p->~QPoint();
 }
 
-void mwindow::progslider_clicked(int x){
+void mwindow::progslider_clicked(int action){
     //QPoint *p = new QPoint(this->prog->mapToGlobal(this->prog->pos()));
-    //qDebug() << prog->sliderPosition();
-    this->player->setPosition(this->prog->value()*1000);
+    qDebug() << action;
+    this->player->setPosition(this->prog->value()+this->prog->value()/10);
     //this
 }
 
@@ -198,8 +197,10 @@ void mwindow::progslider_released(){
 
 void mwindow::media_status(QMediaPlayer::MediaStatus status){
     switch(status){
-    case QMediaPlayer::MediaStatus::LoadedMedia: /* when playback is stopped */
-    case QMediaPlayer::MediaStatus::EndOfMedia: /* -- or reached the end */
+    case QMediaPlayer::MediaStatus::LoadedMedia:
+        /* to start playing right away */
+    case QMediaPlayer::MediaStatus::EndOfMedia:
+
     case QMediaPlayer::MediaStatus::NoMedia:
         this->coverchanged(new QPixmap());
         this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
@@ -259,18 +260,19 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
 }
 
 void mwindow::play(QTreeWidgetItem *item){
-    if(!item->data(1, Qt::EditRole).isValid()){ /* items from widgets will have path on column 0 */
-        this->player->setMedia(QUrl::fromLocalFile(item->data(0, Qt::EditRole).toString()));
+    qDebug() << item->data(0, Qt::UserRole);
+    if(!item->data(0, Qt::UserRole).isValid()){ /* items from widgets will have path on column 0 */
+        this->player->setMedia(QUrl::fromLocalFile(item->data(0, Qt::UserRole).toString()));
         this->player->play();
         return;
     }
-    this->player->setMedia(QUrl::fromLocalFile(item->data(1, Qt::EditRole).toStringList().first()));
-    this->plappend(item->data(1, Qt::EditRole).toStringList());
+    this->player->setMedia(QUrl::fromLocalFile(item->data(0, Qt::UserRole).toStringList().first()));
+    this->plappend(item->data(0, Qt::UserRole).toStringList());
     this->player->play();
 }
 
 void mwindow::select(QTreeWidgetItem *item){
-    QString *front = new QString(item->data(1, Qt::EditRole).toStringList().first());
+    QString *front = new QString(item->data(0, Qt::UserRole).toStringList().first());
     this->selectionchanged(*front);
     front->~QString();
 }

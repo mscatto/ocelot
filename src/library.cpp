@@ -37,7 +37,6 @@ library::library(QString path, QSqlDatabase *db){
     this->libpath = path;
     this->size = 0;
     this->scan(&this->libpath);
-
     qInfo() << qPrintable("  -> "+QString::number(this->tracks.length()).toUtf8()+" tracks found at "+path);
 
 }
