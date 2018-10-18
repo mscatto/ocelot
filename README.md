@@ -21,7 +21,6 @@ _This project is currently in an early stage of development! As such, many plann
 ### TODO FOR 0.3
 > * UI features and polish
 
-# Screenshot
-
-
+## Screenshot
+![alt text](https://raw.githubusercontent.com/mscatto/ocelot/master/ss.png)
 
