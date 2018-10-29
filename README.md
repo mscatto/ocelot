@@ -1,11 +1,11 @@
-# Ocelot Media Manager v0.3ac
+# Ocelot Media Manager v0.3a
 
 Ocelot is an audio player and library organizer, built with Qt and TagLib.
 It's aim is to create a player light on resources by utilizing near-stock Qt Widgets, while also retaining some of the native look-and-feel of each platform.
 
 ---
-### BINARIES
-A precompiled binary for linux x86_64 v0.3a is also available [here](https://raw.githubusercontent.com/mscatto/ocelot/master/ocelot-bin)
+### PRECOMPILED BINARY
+A precompiled binary for linux x86_64 v0.3a is also available [here](https://raw.githubusercontent.com/mscatto/ocelot/master/ocelot-bin).
 ### BUILDING
 Ocelot requires Qt5 at least 5.10, Qt Multimedia and TagLib development files.
 
