@@ -23,15 +23,16 @@
 #include <QTreeWidget>
 #include <taglib/fileref.h>
 
+#include "src/vars.hpp"
 #include "src/mwindow.hpp"
 
 class tagview : public QTreeWidget{
 private:
+    vars *jag;
     const QStringList order = (QStringList()<<"TITLE"<<"ALBUM"<<"ARTIST"<<"YEAR"<<"GENRE"<<"TRACKNUMBER"<<"DISCNUMBER");
-    QMap<QString, QString> *table;
 public:
     enum format {FLAC=0, MPEG=1, OGG=2, MP4=3, WAV=4};
-    tagview(mwindow *parent);
+    tagview(vars *jag, mwindow *parent);
     ~tagview();
 public slots:
     void swap(QString item);

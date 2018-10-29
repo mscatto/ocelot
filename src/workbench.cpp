@@ -56,7 +56,7 @@ workbench::workbench(vars *jag, QWidget *win) : QFrame(win){
     y->addWidget(z);
 
     z->addWidget(new coverview(qobject_cast<mwindow*>(win)));
-    z->addWidget(new tagview(qobject_cast<mwindow*>(win)));
+    z->addWidget(new tagview(jag, qobject_cast<mwindow*>(win)));
 
     grid->addWidget(x);
     /* expand further...*/

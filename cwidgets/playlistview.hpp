@@ -27,9 +27,11 @@
 
 class playlistview : public QTabWidget
 {
+    Q_OBJECT
 private:
     QMap<QString, playlist*> pl;
-    playlist *current;
+    playlist *plactive; /* the one on display */
+    playlist *plplaying; /* from currently playing track */
     QString order;
     QMenu *headermenu;
     vars *jag;
@@ -37,6 +39,7 @@ private:
     QDialog *renamer;
     QLineEdit *namebox;
     QString tmpkey;
+    QTreeWidgetItem *currentitem;
 
     QToolButton *addbtn;
 
@@ -51,6 +54,10 @@ public slots:
     void context(QPoint p);
     void playing(QString f);
     void refreshpl();
+    void next();
+    void prev();
+    void medistatus(QMediaPlayer::MediaStatus status);
+    void swapitem(QTreeWidgetItem* item);
 private slots:
     void toggler(bool checked);
     void tab_close(int index);

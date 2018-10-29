@@ -46,7 +46,7 @@ progslider::~progslider(){
 
 }
 
-void progslider::mousePressEvent(QMouseEvent *event){
-    this->setValue(event->pos().rx()-8); /* half width of handle */
-    QSlider::mousePressEvent(event);
-}
+//void progslider::mousePressEvent(QMouseEvent *event){
+//    this->setValue(event->pos().rx()-8); /* half width of handle */
+//    QSlider::mousePressEvent(event);
+//}

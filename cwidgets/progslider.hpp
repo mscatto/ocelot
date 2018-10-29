@@ -19,12 +19,29 @@
 #define PROGSLIDER_HPP
 
 #include <QSlider>
+#include <QDateTime>
+#include <QToolTip>
+#include <QMouseEvent>
 #include "toolbar.hpp"
 
 class progslider : public QSlider
 {
 protected:
-    void mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event){
+        if (event->button() == Qt::LeftButton){
+            if (orientation() == Qt::Vertical)
+                setValue(minimum() + ((maximum()-minimum()) * (height()-event->y())) / height()) ;
+            else
+                setValue(minimum() + ((maximum()-minimum()) * event->x()) / width()) ;
+
+            QPoint *p = new QPoint(this->mapToGlobal(this->pos()));
+            p->setX(QCursor::pos().rx());
+            QToolTip::showText(*p, QDateTime::fromTime_t(unsigned(this->value())).toString("mm : ss"), this);
+            p->~QPoint();
+            event->accept();
+        }
+        QSlider::mousePressEvent(event);
+    }
 public slots:
     void rotate(Qt::Orientation o);
 public:

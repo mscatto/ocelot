@@ -46,7 +46,8 @@ SOURCES += \
     dialogs/transcoder.cpp \
     cwidgets/playlistview.cpp \
     cwidgets/playlist.cpp \
-    cwidgets/renamepbtn.cpp
+    cwidgets/renamepbtn.cpp \
+    dialogs/tageditor.cpp
 
 HEADERS += \
 	src/library.hpp \
@@ -65,7 +66,8 @@ HEADERS += \
     dialogs/transcoder.hpp \
     cwidgets/playlistview.hpp \
     cwidgets/playlist.hpp \
-    cwidgets/renamepbtn.hpp
+    cwidgets/renamepbtn.hpp \
+    dialogs/tageditor.hpp
 
 FORMS += \
 

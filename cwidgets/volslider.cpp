@@ -53,11 +53,11 @@ void volslider::rotate(Qt::Orientation o){
     this->setOrientation(o);
 }
 
-void volslider::mousePressEvent(QMouseEvent *event){
+//void volslider::mousePressEvent(QMouseEvent *event){
     //this->setValue(event->localPos().toPoint().rx()-8-1); /* half width of handle */
-    QToolTip::showText(QCursor::pos(), QString::number(this->value()), this);
-    QSlider::mousePressEvent(event);
-}
+    //QToolTip::showText(QCursor::pos(), QString::number(this->value()), this);
+    //QSlider::mousePressEvent(event);
+//}
 
 //void volslider::paintEvent(QPaintEvent *event){
     //QWidget::paintEvent(event);

@@ -25,7 +25,7 @@ transcoder::~transcoder(){
 }
 
 void transcoder::handle(QStringList files){
-    qDebug() << files;
+    //qDebug() << files;
 }
 
 

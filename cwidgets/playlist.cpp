@@ -17,15 +17,22 @@
  */
 #include "playlist.hpp"
 
+#include <QObject>
 #include <QHeaderView>
 #include <QMenu>
+#include <QCollator>
 #include <taglib/tpropertymap.h>
+#include <cwidgets/playlistview.hpp>
 
-playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win) : QTreeWidget (){
+playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QWidget *parent) : QTreeWidget (){
     this->order = order;
     this->headerctx = headerctx;
     this->bodyctx = new QMenu();
+    this->playing = new QTreeWidgetItem();
     this->jag = jag;
+
+    playlistview *p = qobject_cast<playlistview*>(parent);
+    connect(this, &playlist::play, p, &playlistview::swapitem);
 
     QList<QAction*> *al = new QList<QAction*>();
     al->append(new QAction(QString("Clear playlist")));
@@ -40,6 +47,9 @@ playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win) : 
     this->setAlternatingRowColors(true);
     this->setSortingEnabled(true);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
+    this->setRootIsDecorated(false);
+    this->setSelectionMode(QAbstractItemView::SelectionMode::MultiSelection);
+
     this->header()->setContextMenuPolicy(Qt::CustomContextMenu);
     this->header()->setFirstSectionMovable(false);
 
@@ -60,8 +70,16 @@ playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win) : 
 
     connect(this,
             &QTreeWidget::itemDoubleClicked,
+            this,
+            &playlist::doubleclick);
+    connect(this,
+            &playlist::play,
             win,
             &mwindow::play);
+    connect(this,
+            &playlist::EOP,
+            win,
+            &mwindow::toolbar_stop);
 }
 
 playlist::~playlist(){}
@@ -95,6 +113,7 @@ void playlist::rebuild_columns(){
         else
             c->replace(i, this->jag->translate_key(c->at(i)));}
     this->setHeaderLabels(*c);
+    this->header()->setSortIndicator(1,Qt::SortOrder::AscendingOrder);
     c->~QStringList();
 }
 
@@ -108,42 +127,104 @@ bool playlist::contains(QString path){
 }
 
 void playlist::append(QStringList f){
-    while(f.length()>0 && !playlist::contains(f.first())){
+    TagLib::FileRef *fr;
+    QTreeWidgetItem *nitem;
 
-        TagLib::FileRef *fr;
-        fr = new TagLib::FileRef(qPrintable(f.first()));
+    QCollator collator;
+    collator.setNumericMode(true);
+    std::sort(f.begin(), f.end(),collator);
+    //f.sort(collator);
+    /* this will enforce that the first item will be playing */
+    bool fuse = true;
+    //f.sort(Qt::CaseInsensitive);
+    foreach(QString track, f){
+        if(!this->pl.contains(track)){
+            this->pl.append(track); /* look at meeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee */
+            fr = new TagLib::FileRef(qPrintable(track));
 
-        QStringList tagbank;
-        QMap<QString, QString> pr;
-        QStringList lst;
-        tagbank.append(QString(fr->tag()->properties().toString().toCString(true)).split("\n", QString::SkipEmptyParts));
+            QStringList tagbank;
+            QMap<QString, QString> pr;
+            QStringList lst;
+            tagbank.append(QString(fr->tag()->properties().toString().toCString(true)).split("\n", QString::SkipEmptyParts));
 
-        foreach(QString s, tagbank){
-            lst << s.split("=", QString::SkipEmptyParts);
-            pr.insert(lst.first(), lst.last());
-            lst.clear();
+            foreach(QString s, tagbank){
+                lst << s.split("=", QString::SkipEmptyParts);
+                pr.insert(lst.first(), lst.last());
+                lst.clear();
+            }
+
+            nitem = new QTreeWidgetItem(this, QStringList(track));
+            QStringList data;
+            int z = 0;
+            foreach(QString s, this->order->split(";", QString::SkipEmptyParts)){
+                if(s=="#INDEX#")
+                    nitem->setData(z, Qt::EditRole,this->pl.length()); /* me toooooooooooooooooooo *///----------
+                else
+                    nitem->setData(z, Qt::EditRole,pr.value(s));
+                z++;
+            }
+
+            /* full path to file */
+            nitem->setData(0, Qt::UserRole, track);
+            //this->topl
+            this->insertTopLevelItem(this->topLevelItemCount(), nitem);
+            //this->addTopLevelItem(ni);
+
+            if(fuse){
+                fuse = false;
+
+                /* TODO option to not append playing */
+                this->clearSelection();
+                this->setItemSelected(nitem,true);
+                this->playing->setData(0, Qt::EditRole,".");
+                this->playing = nitem;
+                this->playing->setData(0, Qt::EditRole,this->playchar);
+                this->playing_index++;
+            }
+            fr->~FileRef();
+        }else{
+            this->clearSelection();
+            this->setItemSelected(this->playing, true);
         }
-
-        QTreeWidgetItem *ni = new QTreeWidgetItem(this, QStringList(f.first()));
-        QStringList data;
-        int z = 0;
-        foreach(QString s, this->order->split(";", QString::SkipEmptyParts)){
-            if(s=="#INDEX#")
-                ni->setData(z, Qt::EditRole,QString::number(this->pl.length())); /* me toooooooooooooooooooo */
-            else
-                ni->setData(z, Qt::EditRole,pr.value(s));
-            z++;
-        }
-
-
-        ni->setData(0, Qt::UserRole, f.first());
-        this->insertTopLevelItem(this->children().count(), ni);
-        //this->addTopLevelItem(ni);
-        this->pl.append(f); /* look at meeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee */
-        fr->~FileRef();
-        f.pop_front();
-
-        //this->
     }
+}
+
+void playlist::next(){
+    if(this->playing_index-1 >= this->pl.length()-1){ /* case the end of playlist */
+        this->EOP();
+        return;
+    }
+
+    this->playing->setData(0, Qt::EditRole,"·");
+    this->playing = this->itemBelow(this->topLevelItem(this->playing_index-1));
+    this->playing->setData(0, Qt::EditRole,this->playchar);
+    this->play(this->playing);
+    this->playing_index++;
+
+    this->clearSelection();
+    this->setItemSelected(this->playing,true);
+}
+
+void playlist::prev(){
+    if(this->playing_index-1 <= 0) /* case the first of playlist */
+        return;
+
+    this->playing->setData(0, Qt::EditRole,"·");
+    this->playing = this->itemAbove(this->topLevelItem(this->playing_index-1));
+    this->playing->setData(0, Qt::EditRole,this->playchar);
+    this->play(this->playing);
+    this->playing_index--;
+
+    this->clearSelection();
+    this->setItemSelected(this->playing,true);
+}
+
+void playlist::doubleclick(QTreeWidgetItem *item){
+    this->playing->setData(0, Qt::EditRole,"·");
+    this->playing = item;
+    this->playing->setData(0, Qt::EditRole,this->playchar);
+    this->play(this->playing);
+
+    //this->playing_index = this->indexOfTopLevelItem(this->playing);
 }
 

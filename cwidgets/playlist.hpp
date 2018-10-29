@@ -6,12 +6,13 @@
 
 class playlist : public QTreeWidget
 {
+    Q_OBJECT
 private:
     QString *order;
     vars *jag;
     QMenu *headerctx;
     QMenu *bodyctx;
-    ushort playing_index;
+    ushort playing_index=0;
     QTreeWidgetItem *playing;
     QTreeWidgetItem *selected;
     QStringList pl;
@@ -19,7 +20,7 @@ private:
     const char* playchar = "►";
     bool contains(QString path);
 public:
-    playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win);
+    playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QWidget *parent);
     ~playlist();
 private slots:
     void show_headerctx(const QPoint & pos);
@@ -28,6 +29,12 @@ private slots:
 public slots:
     void rebuild_columns();
     void append(QStringList f);
+    void next();
+    void prev();
+    void doubleclick(QTreeWidgetItem*item);
+signals:
+    void play(QTreeWidgetItem*);
+    void EOP();
 };
 
 #endif // PLAYLIST_HPP

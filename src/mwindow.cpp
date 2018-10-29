@@ -25,6 +25,7 @@
 
 #include "dialogs/settings.hpp"
 #include "dialogs/about.hpp"
+#include "dialogs/tageditor.hpp"
 
 #include <QToolBar>
 #include <QStatusBar>
@@ -45,14 +46,14 @@
 
 mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->jag = jag;
-    this->bar = new toolbar(this);
+    this->bar = new toolbar(this, this->configmenu);
     this->player = new QMediaPlayer();
     this->prog = new progslider(Qt::Horizontal, this->bar, this);
-    this->configmenu = new QMenu(this);
     this->vol = new volslider(Qt::Horizontal, this->bar, this);
 
     this->sdiag = new settings(this, jag);
     this->adiag = new about(this, jag);
+    this->tagdiag = new tageditor(this, jag);
 
     player->setVolume(100);
     player->setNotifyInterval(200);
@@ -67,17 +68,6 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->statusBar()->addWidget(&this->status);
     this->statusBar()->addPermanentWidget(&this->proglabel);
 
-    configmenu->addAction(new QAction("Open File..."));
-    configmenu->addAction(new QAction("Play Disc..."));
-    configmenu->addAction(new QAction("Play from network..."));
-    configmenu->addSeparator();
-    configmenu->addAction(new QAction("Settings"));
-    configmenu->addSeparator();
-    configmenu->addAction(new QAction("Unlock Widget Manager"));
-    configmenu->addSeparator();
-    configmenu->addAction(new QAction("About"));
-    configmenu->addAction(new QAction("Exit"));
-    configmenu->setParent(this);
 
     connect(this->player, &QMediaPlayer::positionChanged, this, &mwindow::progslider_sync);
     connect(this->prog, &QSlider::sliderMoved, this, &mwindow::progslider_moved);
@@ -86,6 +76,8 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     connect(this->vol, &QSlider::valueChanged, this->player, &QMediaPlayer::setVolume);
     connect(this->vol, &QSlider::sliderMoved, this, &mwindow::volslider_moved);
     connect(this->player, &QMediaPlayer::mediaStatusChanged, this, &mwindow::media_status);
+    connect(this->player, &QMediaPlayer::mediaStatusChanged, this, &mwindow::mediastatus);
+
 
     this->bar->addWidget(this->vol);
     this->bar->addSeparator();
@@ -93,7 +85,7 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     ///this->bar->set
 
     status.setText("<b>IDLE</b>");
-    proglabel.setText("<b>00:00</b>");
+    proglabel.setText(QDateTime::fromTime_t(0).toString("mm:ss")+" / "+QDateTime::fromTime_t(0).toString("mm:ss"));
 
     /*QStringList *data = new QStringList();
     QSqlQuery d = this->lib->query("SELECT path FROM songs");
@@ -106,6 +98,7 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->setCentralWidget(wb);
     this->addToolBar(this->bar);
 
+    qInfo() << "[INFO] Ocelot initialized successfully!\n\n";
 }
 
 mwindow::~mwindow(){
@@ -134,20 +127,23 @@ void mwindow::toolbar_play(){
 
 void mwindow::toolbar_stop(){
     this->player->stop();
+    this->prog->setValue(0);
+    this->prog->setRange(0,0);
     this->status.setText("<b>IDLE</b>");
     this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
+    this->proglabel.setText(QDateTime::fromTime_t(0).toString("mm:ss")+" / "+QDateTime::fromTime_t(0).toString("mm:ss"));
 }
 
 void mwindow::toolbar_next(){
-
+    this->plnext();
 }
 
 void mwindow::toolbar_prev(){
-
+    this->plprev();
 }
 
 void mwindow::toolbar_menu(){
-    //this->menuact->;
+    //this->configmenu->show();
 }
 
 void mwindow::config_spawn(){
@@ -162,25 +158,29 @@ void mwindow::transcoder_spawn(){
     this->transcdiag->show();
 }
 
+void mwindow::tageditor_spawn(){
+    this->tagdiag->show();
+}
+
 /* will be called every time the player changes position, which will be x */
 void mwindow::progslider_sync(qint64 x){
     if (!this->prog->isSliderDown()){
-        this->prog->setValue(x/1000);
-        this->proglabel.setText(QDateTime::fromTime_t(x/1000).toString("mm:ss")+" / "+QDateTime::fromTime_t(player->duration()/1000).toString("mm:ss"));
+        this->prog->setValue((int)x/1000);
+        this->proglabel.setText(QDateTime::fromTime_t(unsigned(x)/1000).toString("mm:ss")+" / "+QDateTime::fromTime_t(player->duration()/1000).toString("mm:ss"));
     }
 }
 
 void mwindow::progslider_moved(int x){
     QPoint *p = new QPoint(this->vol->mapToGlobal(this->vol->pos()));
     p->setX(QCursor::pos().rx());
-    QToolTip::showText(*p, QDateTime::fromTime_t(x).toString("mm : ss"), this->prog);
+    QToolTip::showText(*p, QDateTime::fromTime_t(unsigned(x)).toString("mm : ss"), this->prog);
     p->~QPoint();
 }
 
 void mwindow::progslider_clicked(int action){
     //QPoint *p = new QPoint(this->prog->mapToGlobal(this->prog->pos()));
-    qDebug() << action;
-    this->player->setPosition(this->prog->value()+this->prog->value()/10);
+    //this->player->setPosition(this->prog->value()+1);
+    //this->progslider_moved(this->prog->value());
     //this
 }
 
@@ -200,7 +200,8 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
     case QMediaPlayer::MediaStatus::LoadedMedia:
         /* to start playing right away */
     case QMediaPlayer::MediaStatus::EndOfMedia:
-
+        this->plnext();
+        break;
     case QMediaPlayer::MediaStatus::NoMedia:
         this->coverchanged(new QPixmap());
         this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
@@ -260,18 +261,18 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
 }
 
 void mwindow::play(QTreeWidgetItem *item){
-    qDebug() << item->data(0, Qt::UserRole);
-    if(!item->data(0, Qt::UserRole).isValid()){ /* items from widgets will have path on column 0 */
-        this->player->setMedia(QUrl::fromLocalFile(item->data(0, Qt::UserRole).toString()));
-        this->player->play();
+    if(!item->data(0, Qt::UserRole).isValid()) /* case path is empty */
         return;
-    }
+
     this->player->setMedia(QUrl::fromLocalFile(item->data(0, Qt::UserRole).toStringList().first()));
     this->plappend(item->data(0, Qt::UserRole).toStringList());
     this->player->play();
 }
 
 void mwindow::select(QTreeWidgetItem *item){
+    if(!item->data(0, Qt::UserRole).isValid()) /* case path is empty */
+        return;
+
     QString *front = new QString(item->data(0, Qt::UserRole).toStringList().first());
     this->selectionchanged(*front);
     front->~QString();

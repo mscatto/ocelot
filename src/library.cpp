@@ -105,26 +105,31 @@ void library::scan(QString *dir){
 /* appends and extracts metadata from track fpath to the database */
 void library::insert(QString fpath){
     QSqlQuery q;
-    TagLib::FileRef file(qPrintable(fpath));
+
+    TagLib::FileRef *file = new TagLib::FileRef(qPrintable(fpath));
     QString root = fpath.chopped(fpath.length()-fpath.lastIndexOf("/"));
     QString fname = fpath.remove(0, fpath.lastIndexOf("/")+1);
 
     q.prepare("INSERT INTO songs (root, path, filename, title, artist, album, track, year, genre, discNumber, lib)"
               "VALUES(:root, :path, :filename, :title, :artist, :album, :track, :year, :genre, :discNumber, :lib)");
 
+
     q.bindValue(":root", root);
     q.bindValue(":path", root+"/"+fname);
     q.bindValue(":filename", fname);
-    q.bindValue(":title", file.tag()->title().toCString(true));
-    q.bindValue(":artist", file.tag()->artist().toCString(true));
-    q.bindValue(":album", file.tag()->album().toCString(true));
-    q.bindValue(":track", std::to_string(file.tag()->track()).c_str());
-    q.bindValue(":year", std::to_string(file.tag()->year()).c_str());
-    q.bindValue(":genre", file.tag()->genre().toCString(true));
-    q.bindValue(":discNumber", file.tag()->properties().operator []("DISCNUMBER").toString().toCString());
+    /* SEGFAULT HAPPENED HERE --SHITTY TAG */
+    q.bindValue(":title", file->tag()->title().toCString(true));
+    q.bindValue(":artist", file->tag()->artist().toCString(true));
+    q.bindValue(":album", file->tag()->album().toCString(true));
+    q.bindValue(":track", std::to_string(file->tag()->track()).c_str());
+    q.bindValue(":year", std::to_string(file->tag()->year()).c_str());
+    q.bindValue(":genre", file->tag()->genre().toCString(true));
+    q.bindValue(":discNumber", file->tag()->properties().operator []("DISCNUMBER").toString().toCString());
     q.bindValue(":lib", this->libpath);
 
     q.exec();
+
+    file->~FileRef();
 }
 
 

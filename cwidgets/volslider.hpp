@@ -21,7 +21,9 @@
 #include <QObject>
 #include <QWidget>
 #include <QSlider>
-//#include "mwindow.hpp"
+#include <QToolTip>
+#include <QDateTime>
+#include <QMouseEvent>
 #include "toolbar.hpp"
 
 class volslider : public QSlider
@@ -32,7 +34,21 @@ public:
 public slots:
     void rotate(Qt::Orientation o);
 protected:
-    void mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event){
+        if (event->button() == Qt::LeftButton){
+            if (orientation() == Qt::Vertical)
+                setValue(minimum() + ((maximum()-minimum()) * (height()-event->y())) / height()) ;
+            else
+                setValue(minimum() + (maximum() - minimum()) * (static_cast<float>(event->x()) / static_cast<float>(width()))+1);
+
+            QPoint *p = new QPoint(this->mapToGlobal(this->pos()));
+            p->setX(QCursor::pos().rx());
+            QToolTip::showText(*p, QString::number(this->value()), this);
+            p->~QPoint();
+            event->accept();
+        }
+        QSlider::mousePressEvent(event);
+    }
 };
 
 #endif // volslider_HPP

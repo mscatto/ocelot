@@ -9,7 +9,7 @@
 class vars
 {
 public:
-    const char* VERSION = "0.2c";
+    const char* VERSION = "0.3a";
     QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/ocelot";
     QString DB_PATH = DATA_PATH+"/ocelot.database";
     QSqlDatabase *DB_REF = new QSqlDatabase();
@@ -18,12 +18,15 @@ public:
     QString translate_val(QString val);
     QStringList dumpvars();
     QStringList dumpkeys();
+    QString fetchdata(QString *var);
+    void setdata(QString *var, QString *data);
     void remlibs(QString path);
 
     vars();
     ~vars();
 private:
     QMap<QString,QString> pmap;
+    QMap<QString,bool> ptmap;
     void initpmap();
     void initdb();
     void initlibs();

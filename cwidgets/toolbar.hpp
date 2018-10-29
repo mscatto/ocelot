@@ -8,7 +8,7 @@ private:
     QMenu *conf;
     QList<QWidget*> docked;
 public:
-    toolbar(QWidget *win);
+    toolbar(QWidget *win, QMenu *conf);
     ~toolbar();
     void pop();
     void addWidget(QWidget *widget);

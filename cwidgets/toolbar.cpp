@@ -5,7 +5,9 @@
 #include <QToolButton>
 #include <QMenu>
 
-toolbar::toolbar(QWidget *win) : QToolBar(win){
+toolbar::toolbar(QWidget *win, QMenu *conf) : QToolBar(win){
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+
     conf = new QMenu(qobject_cast<mwindow*>(win));
     conf->addAction(new QAction("Open File..."));
     conf->addAction(new QAction("Play Disc..."));
@@ -25,6 +27,7 @@ toolbar::toolbar(QWidget *win) : QToolBar(win){
     this->addAction(new QAction(QIcon(":/internals/next"), "Next on playlist"));
     QAction *a = new QAction(QIcon(":/internals/gear"), "Tweak settings");
     a->setMenu(conf);
+
     this->addAction(a);
 
     QList<QAction*> act = this->actions();

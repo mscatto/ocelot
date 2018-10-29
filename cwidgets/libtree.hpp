@@ -30,6 +30,7 @@
 class libtree : public QFrame
 {
 private:
+    QMenu *ctx;
     QTreeWidget *tree;
     void recurtree(QTreeWidgetItem *parent, QStringList levels, QString conditions, QSqlDatabase *db);
     QStringList *extract(QString vars);

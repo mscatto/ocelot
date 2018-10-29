@@ -56,7 +56,7 @@ playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
 
     /* fetches order from database */
     QSqlQuery *q = new QSqlQuery();
-    q->exec("SELECT val FROM data WHERE key='playlist_column_order'");
+    q->exec("SELECT val FROM data WHERE var='playlist_columnorder'");
     q->next();
     this->order.clear();
     this->order.append(q->record().value(0).toString());
@@ -100,6 +100,9 @@ playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
     connect(this, &QTabWidget::customContextMenuRequested, this, &playlistview::ctxmenu);
     connect(this, &QTabWidget::currentChanged, this, &playlistview::tab_switch);
     connect(parent, &mwindow::plappend, this, &playlistview::viewappend);
+    connect(parent, &mwindow::plnext, this, &playlistview::next);
+    connect(parent, &mwindow::plprev, this, &playlistview::prev);
+    connect(parent, &mwindow::mediastatus, this, &playlistview::medistatus);
 }
 
 void playlistview::ctxmenu(const QPoint &pos){
@@ -123,8 +126,8 @@ void playlistview::newplaylist(){
 
     connect(ren, &renamepbtn::idclicked, this, &playlistview::tab_rename);
 
-    pl.insert(name, new playlist(&this->order,headermenu,jag,win));
-    this->current = pl.value(name);
+    pl.insert(name, new playlist(&this->order, headermenu, jag, win, this));
+    this->plactive = pl.value(name);
     this->insertTab(this->count(), pl.value(name), name);
     this->setCurrentIndex(this->count()-1);
     this->tabBar()->setTabButton(this->currentIndex(), QTabBar::ButtonPosition::LeftSide, ren);
@@ -156,6 +159,26 @@ void playlistview::refreshpl(){
     }
 }
 
+void playlistview::next(){
+    this->plactive->next();
+}
+
+void playlistview::prev(){
+    this->plactive->prev();
+}
+
+void playlistview::medistatus(QMediaPlayer::MediaStatus status){
+    //qDebug() << status;
+}
+
+void playlistview::swapitem(QTreeWidgetItem *item){
+    /* undo stuff */
+    //qDebug() << "lel";
+    this->currentitem = item;
+    /* redo stuff */
+
+}
+
 void playlistview::toggler(bool checked){
     this->order.clear();
     //this->order.append(this->playchar+QString(";"));
@@ -178,14 +201,11 @@ void playlistview::tab_close(int index){
         this->tab_switch(index-1);
 
     this->pl.remove(this->tabText(index).remove("&"));
-    this->tabBar()->removeTab(index);
-
+    this->removeTab(index);
 }
 
 void playlistview::tab_switch(int index){
-
-    this->current = this->pl.value(this->tabText(index).remove("&"));
-
+    this->plactive = this->pl.value(this->tabText(index).remove("&"));
 }
 
 void playlistview::tab_rename(QString key){
@@ -216,7 +236,7 @@ void playlistview::renamer_cancel(){
 }
 
 void playlistview::viewappend(QStringList f){
-    this->current->append(f);
+    this->plactive->append(f);
 }
 
 playlistview::~playlistview(){

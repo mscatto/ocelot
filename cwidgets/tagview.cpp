@@ -27,24 +27,13 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/tmap.h>
 
-tagview::tagview(mwindow *parent) : QTreeWidget(parent){
+tagview::tagview(vars *jag, mwindow *parent) : QTreeWidget(parent){
+    this->jag = jag;
     this->setColumnCount(2);
     this->setColumnWidth(0, 200);
     this->setHeaderHidden(false);
 
-    /* todo non static customization */
-    /* TagLib's property map and corresponding readable text for printing */
-    this->table = new QMap<QString, QString>();
-    this->table->insert("TITLE", "Title");
-    this->table->insert("ALBUM", "Album");
-    this->table->insert("ARTIST", "Artist");
-    this->table->insert("YEAR", "Year");
-    this->table->insert("GENRE", "Genre");
-    this->table->insert("TRACKNUMBER", "Track");
-    this->table->insert("DISCNUMBER", "Disc");
-    /* */
-
-    this->setHeaderLabels(QStringList() << "Field" << "Value");
+    this->setHeaderLabels(QStringList() << "Tag" << "Data");
     this->setRootIsDecorated(false);
     this->setAlternatingRowColors(true);
 
@@ -65,8 +54,13 @@ void tagview::swap(QString item){
 
     QString s;
     foreach(s, *keylist){
-        if(s.contains("=", Qt::CaseInsensitive))
-            this->addTopLevelItem(new QTreeWidgetItem(this, s.split("=")));
+        if(s.contains("=", Qt::CaseInsensitive)){
+            QStringList *qsl = new QStringList(s.split("="));
+            if(this->jag->translate_key(qsl->first())!="")/* case there's a translation on record */
+                qsl->replace(0,this->jag->translate_key(qsl->first()));
+            this->addTopLevelItem(new QTreeWidgetItem(this, *qsl));/* or else just show the taglib name for it */
+            qsl->~QStringList();
+        }
     }
 
     keylist->~QStringList();

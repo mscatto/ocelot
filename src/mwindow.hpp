@@ -32,6 +32,7 @@
 #include "dialogs/settings.hpp"
 #include "dialogs/about.hpp"
 #include "dialogs/transcoder.hpp"
+#include "dialogs/tageditor.hpp"
 
 #include "cwidgets/volslider.hpp"
 #include "cwidgets/progslider.hpp"
@@ -58,6 +59,7 @@ private:
     toolbar *bar;
     settings *sdiag;
     transcoder *transcdiag;
+    tageditor *tagdiag;
     about *adiag;
 public slots:
     void toolbar_pause();
@@ -69,6 +71,7 @@ public slots:
     void config_spawn();
     void about_spawn();
     void transcoder_spawn();
+    void tageditor_spawn();
     void play(QTreeWidgetItem* item);
     void select(QTreeWidgetItem *item);
 private slots:
@@ -84,6 +87,9 @@ signals:
     void libchanged(QSqlDatabase *db);
     void plappend(QStringList l);
     void convhandler(QStringList files);
+    void plnext();
+    void plprev();
+    void mediastatus(QMediaPlayer::MediaStatus status);
 };
 
 #endif // MWINDOW_HPP

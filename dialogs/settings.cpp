@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSizePolicy>
+#include <QTableWidget>
 #include <QTabWidget>
 #include <QTreeWidget>
 #include <QFileDialog>
@@ -45,15 +46,98 @@ settings::~settings(){
 
 QWidget* settings::spawn_maintab(QWidget *win){
     QWidget *w = new QWidget(win);
-    QFormLayout *main_layout = new QFormLayout;
+    QGridLayout *grid = new QGridLayout();
+
+    /* mouse behaviour groupbox */
+    QGroupBox *mgbox = new QGroupBox("Mouse Behaviour");
+    QFormLayout *mform = new QFormLayout();
+    mform->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    QComboBox *dclick = new QComboBox();
+    dclick->insertItems(0,QStringList()<<"Append to current playlist"
+        <<"Replace current playlist"<<"Do nothing");
+    mform->addRow(new QLabel("Double Click:", dclick), dclick);
+
+    QComboBox *mclick = new QComboBox();
+    mclick->insertItems(0,QStringList()<<"Append to current playlist"
+        <<"Replace current playlist"<<"Do nothing");
+    mform->addRow(new QLabel("Middle Click:", mclick), mclick);
+
+    QComboBox *append = new QComboBox();
+    append->insertItems(0, QStringList()<<"Start playing right away"
+        <<"Play if there's nothing playing"<<"Just append");
+    mform->addRow(new QLabel("When appending:"), append);
+
+    /* set selection from db */
+    dclick->setCurrentIndex(this->jag->fetchdata(new QString("general_doubleclick")).toInt());
+    mclick->setCurrentIndex(this->jag->fetchdata(new QString("general_middleclick")).toInt());
+    append->setCurrentIndex(this->jag->fetchdata(new QString("general_appendbehaviour")).toInt());
+
+    connect(dclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mdclick);
+    connect(mclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mmclick);
+    connect(append, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mappend);
+    mgbox->setLayout(mform);
+
+    /* other 1 */
+    QGroupBox *lelbox = new QGroupBox("the other one");
+
+    /* and another */
+
+    QGroupBox *kekbox = new QGroupBox("the last one");
+
+    /* and the last */
+    QGroupBox *kbbox = new QGroupBox("Keyboard Shortcuts");
+    kbbox->setLayout(new QGridLayout);
+    QTableWidget *sc = new QTableWidget(15,2);
+    sc->setHorizontalHeaderLabels(QStringList()<<"Action"<<"Shortcut");
+    sc->setColumnWidth(0,130);
+    sc->setColumnWidth(1,218);
+    sc->setSelectionMode(QAbstractItemView::NoSelection);
+    sc->setFixedWidth(400);
+    kbbox->layout()->addWidget(sc);
+    kbbox->setMaximumWidth(420);
+
+    /* entangle everything */
+    grid->addWidget(mgbox,0,0,1,1);
+    grid->addWidget(lelbox,0,1,2,1);
+    grid->addWidget(kekbox,0,2,2,1);
+    grid->addWidget(kbbox,1,0,1,1);
+    w->setLayout(grid);
+
+    return w;
+    /*QFormLayout *main_layout = new QFormLayout;
+
+    QGroupBox *pl = new QGroupBox("Mouse Behaviour");
+    QFormLayout *form = new QFormLayout;
+
+    QGroupBox *plbox = new QGroupBox("on playlist");
+    plbox->setAutoFillBackground(true);
+    QFormLayout *plform = new QFormLayout;
+    //plform->set
+
+    QComboBox *dclick = new QComboBox();
+    dclick->insertItems(0,QStringList()<<"Append to current playlist"
+        <<"Append to new playlist"<<"Replace current playlist");
+    plform->addRow(new QLabel("Double Click", dclick), dclick);
+
+    QComboBox *mclick = new QComboBox();
+    mclick->insertItems(0,QStringList()<<"Append to current playlist"
+                       <<"Append to new playlist"<<"Replace current playlist");
+    plform->addRow(new QLabel("Middle Click", mclick), mclick);
+
+    QCheckBox *ck = new QCheckBox("Play on append");
+    plform->addRow(ck);
+
+    pl->setLayout(form);
+    plbox->setLayout(plform);
+    form->addWidget(plbox);
+    main_layout->addWidget(pl);
 
     QComboBox *main_selbehaviour = new QComboBox(w);
     main_selbehaviour->insertItems(0, QStringList()<<"current selection"<<"current media playback");
-
     main_layout->addRow(new QLabel("UI contents follow:", w), main_selbehaviour);
     w->setLayout(main_layout);
 
-    return w;
+    return w;*/
 }
 
 QWidget* settings::spawn_libtab(QWidget *win){
@@ -163,9 +247,11 @@ void settings::lib_dirpicker(){
     if(dir.isEmpty())
         return;
 
+    qInfo() << "[INFO] Adding new library through settings dialog...";
     this->jag->libs->append(new library(dir,this->jag->DB_REF));
     QString st = this->jag->libs->last()->dumpinfo()->split(";").first();
     this->jag->DB_REF->exec("INSERT INTO libs VALUES ('"+st+"')");
+    qInfo() << "[INFO] Done.";
 
     lib_treerefresh();
 }
@@ -192,4 +278,37 @@ void settings::lib_remdir(){
     }
 
     lib_treerefresh();
+}
+
+/* combobox about double click behaviour */
+void settings::gen_mdclick(int index){
+    if(static_cast<uint>(index)==this->APPEND){
+
+    }else if(static_cast<uint>(index)==this->REPLACE){
+
+    }else{ /* do nothing */
+
+    }
+}
+
+/* combobox about middle click behaviour */
+void settings::gen_mmclick(int index){
+    if(static_cast<uint>(index)==this->APPEND){
+
+    }else if(static_cast<uint>(index)==this->REPLACE){
+
+    }else{ /* do nothing */
+
+    }
+}
+
+/* combobox about append behaviour */
+void settings::gen_mappend(int index){
+    if(static_cast<uint>(index)==this->PLAY){
+
+    }else if(static_cast<uint>(index)==this->IFIDLE){
+
+    }else{ /* don't play */
+
+    }
 }

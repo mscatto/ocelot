@@ -37,6 +37,21 @@ libtree::libtree(mwindow *win) : QFrame(win){
     tree = new QTreeWidget(this);
     tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    /* init context menu */
+    this->ctx = new QMenu();
+    const QIcon c = QIcon::fromTheme("gtk-convert");
+    const QIcon t = QIcon::fromTheme("tag-symbolic");
+    QAction *tagger = new QAction("Mass Tagger");
+    QAction *conv = new QAction(c, "Transcode");
+    QAction *prop = new QAction(t, "Edit Tag");
+
+    connect(prop, &QAction::triggered, win, &mwindow::tageditor_spawn);/////////////////////////
+
+    ctx->addAction(conv);
+    ctx->addAction(tagger);
+    ctx->addSeparator();
+    ctx->addAction(prop);
+
     this->setFrameShape(QFrame::StyledPanel);
     this->setFrameShadow(QFrame::Sunken);
     this->layout()->setContentsMargins(1,1,1,1);
@@ -63,7 +78,7 @@ libtree::libtree(mwindow *win) : QFrame(win){
 }
 
 /* take one and pass it ahead */
-/* i'm so uglyyyyyyy */// 999663822
+/* this fills each node with the corresponding path and name */
 void libtree::recurtree(QTreeWidgetItem *parent, QStringList levels, QString conditions, QSqlDatabase *db){
     QString root = levels.first();
     levels.removeFirst();
@@ -73,32 +88,35 @@ void libtree::recurtree(QTreeWidgetItem *parent, QStringList levels, QString con
     QSqlQuery rq;
     rq.prepare("SELECT DISTINCT "+vars+" FROM songs WHERE "+conditions+" ORDER BY "+sroot->first());
     rq.exec();
-    while(rq.next()){
+    while(rq.next()){ /* query again to fetch paths */
+        /* starting by generating condition string */
         QString name = root;
         sroot = libtree::extract(root);
         for(int i=sroot->length()-1; i>=0; i--){
             name.replace(sroot->at(i), rq.record().value(i).toString());
-            sroot->replace(i, sroot->at(i)+"='"+rq.record().value(i).toString()+"'");
+            sroot->replace(i, sroot->at(i)+"=\""+rq.record().value(i).toString()+"\"");
         }
-
         name.remove("#");
 
-        parent->addChild(new QTreeWidgetItem(parent,QStringList(name)));
-
-        QSqlQuery qpath;
-        qpath.prepare("SELECT DISTINCT path FROM songs WHERE "+sroot->join(" AND "));
-        qpath.exec();
+        /* then running the query itself */
         QStringList act;
-        while(qpath.next()){
+        QTreeWidgetItem *child = new QTreeWidgetItem(parent,QStringList(name));
+        QSqlQuery qpath;
+        qpath.prepare( "SELECT DISTINCT path FROM songs WHERE "+sroot->join(" AND ")+" ORDER BY track");
+        qpath.exec();
+
+        /* filling in the data */
+        while(qpath.next())
             act.append(qpath.record().value(0).toString());
-        }
-        parent->child(parent->childCount()-1)->setData(0, Qt::UserRole, act);
+        child->setData(0, Qt::UserRole, act);
 
+        /* and recurring down if so needed */
         if(levels.length()>=1){
-            libtree::recurtree(parent->child(parent->childCount()-1), levels, conditions+" AND "+sroot->join(" AND "), db);
-            parent->child(parent->childCount()-1)->setText(0, parent->child(parent->childCount()-1)->text(0)+" ("+QString::number(parent->child(parent->childCount()-1)->childCount())+")");
-
+            libtree::recurtree(child, levels, conditions+" AND "+sroot->join(" AND "), db);
+            child->setText(0, child->text(0)+" ("+QString::number(child->childCount())+")");
         }
+
+        parent->addChild(child);
     }
 }
 
@@ -112,26 +130,7 @@ QStringList* libtree::extract(QString vars){
 }
 
 void libtree::menu_items(const QPoint &pos){
-    QMenu menu(this);
-
-    const QIcon c = QIcon::fromTheme("gtk-convert");
-    const QIcon t = QIcon::fromTheme("tag-symbolic");
-
-    QAction *tagger = new QAction(t, "Mass Tag");
-    QAction *conv = new QAction(c, "Transcode");
-    QAction *prop = new QAction("Properties");
-
-
-    //conv->
-    //QAction *newAct = new QAction(
-    //QAction *newAct = new QAction(
-    menu.addAction(conv);
-    menu.addAction(tagger);
-    menu.addSeparator();
-    menu.addAction(prop);
-
-    QPoint pt(pos);
-    menu.exec(tree->mapToGlobal(pos));
+    this->ctx->exec(tree->mapToGlobal(pos));
 }
 
 void libtree::populate(QSqlDatabase *db){
@@ -154,30 +153,33 @@ void libtree::populate(QSqlDatabase *db){
         QString name = root;
         for(int i=0; i<caseq->length(); i++){
             name.replace(caseq->at(i), query->record().value(i).toString());
-            caseq->replace(i, caseq->at(i) + "='"+query->record().value(i).toString()+"'");
+            caseq->replace(i, caseq->at(i) + "=\""+query->record().value(i).toString()+"\"");
         }
         name.remove("#");
 
         items.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(name)));
         QSqlQuery sidequery;
-        sidequery.prepare("SELECT DISTINCT path FROM songs WHERE "+caseq->join(" AND "));
+        sidequery.prepare("SELECT DISTINCT path FROM songs WHERE "+caseq->join(" AND ")+" ORDER BY track");
         sidequery.exec();
-        sidequery.next();
+        //sidequery.next();
+
         QStringList act;
-        int z=0;
-        while(sidequery.record().value(z).isValid()){//////////////////////////
+        while(sidequery.next())
+            act.append(sidequery.value(0).toString());
+
+        /*(sidequery.record().value(z).isValid()){//////////////////////////
+            qDebug() << sidequery.record().value(z).toString();
             act.append(sidequery.record().value(z).toString());
             z++;
             sidequery.next();
-        }
+        }*/
 
-        qDebug() << act.last();
-        items.last()->setData(0, Qt::UserRole, act.last());
+        items.last()->setData(0, Qt::UserRole, act);
         libtree::recurtree(items.last(), order, caseq->join(" AND "), db);
         caseq->~QStringList();
         items.last()->setText(0, items.last()->text(0)+" ("+QString::number(items.last()->childCount())+")");
-    }
 
+    }
     this->tree->insertTopLevelItem(0, new QTreeWidgetItem((QTreeWidget*)0, QStringList("")));
     this->tree->topLevelItem(0)->addChildren(items);
     this->tree->topLevelItem(0)->setText(0, "All Media ("+QString::number(this->tree->topLevelItem(0)->childCount())+")");
