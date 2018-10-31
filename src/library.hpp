@@ -25,9 +25,10 @@
 #include <QSqlQueryModel>
 #include <QSqlDatabase>
 
-class library
+class library : public QObject
 {
 private:
+    Q_OBJECT
     const QStringList formats = {"audio/mpeg",
                                  "audio/mp4",
                                  "audio/ogg",
@@ -45,6 +46,8 @@ public:
     library(QString path, QSqlDatabase *db);
     QString* dumpinfo();
     ~library();
+private slots:
+    void error_thread(QString err);
 };
 
 #endif // LIBRARY_HPP

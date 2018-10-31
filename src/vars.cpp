@@ -161,14 +161,17 @@ void vars::initpmap(){
     this->pmap.insert("TITLE", "Title");
     this->pmap.insert("ALBUM","Album");
     this->pmap.insert("ARTIST","Artist");
-    this->pmap.insert("ALBUM ARTIST","Album Artist");
+    this->pmap.insert("ALBUMARTIST","Album Artist");
     this->pmap.insert("SUBTITLE","Subtitle");
-    this->pmap.insert("TRACKNUMBER","Track Number");
+    this->pmap.insert("TRACKNUMBER","Track #");
     this->pmap.insert("TRACKTOTAL","Track Count");
-    this->pmap.insert("DISCNUMBER", "Disc Number");
+    this->pmap.insert("DISCNUMBER", "Disc #");
+    this->pmap.insert("DISCTOTAL", "Disc Count");
     this->pmap.insert("DATE","Year");
     this->pmap.insert("ORIGINALDATE","Original Year");
     this->pmap.insert("GENRE","Genre");
     this->pmap.insert("COMMENT","Comment");
+    this->pmap.insert("COMPOSER","Composer");
+    this->pmap.insert("LYRICS","Lyrics");
 }
 

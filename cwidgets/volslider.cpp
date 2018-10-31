@@ -24,7 +24,7 @@
 
 volslider::volslider(Qt::Orientation o, toolbar *bar, QWidget *parent) : QSlider(o, parent){
     this->setTracking(true);
-    this->setMaximumWidth(100);
+    this->setMaximumWidth(140);
     this->setRange(0, 100);
     this->setValue(100);
     this->setToolTip("Playback volume");

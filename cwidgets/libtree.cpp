@@ -45,7 +45,8 @@ libtree::libtree(mwindow *win) : QFrame(win){
     QAction *conv = new QAction(c, "Transcode");
     QAction *prop = new QAction(t, "Edit Tag");
 
-    connect(prop, &QAction::triggered, win, &mwindow::tageditor_spawn);/////////////////////////
+    connect(prop, &QAction::triggered, this, &libtree::gatherselected);
+    connect(this, &libtree::dispatch, win, &mwindow::tageditor_spawn);
 
     ctx->addAction(conv);
     ctx->addAction(tagger);
@@ -184,6 +185,11 @@ void libtree::populate(QSqlDatabase *db){
     this->tree->topLevelItem(0)->addChildren(items);
     this->tree->topLevelItem(0)->setText(0, "All Media ("+QString::number(this->tree->topLevelItem(0)->childCount())+")");
     this->tree->expandItem(this->tree->topLevelItem(0));
+}
+
+void libtree::gatherselected()
+{
+
 }
 
 libtree::~libtree(){

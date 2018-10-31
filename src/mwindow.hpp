@@ -71,7 +71,7 @@ public slots:
     void config_spawn();
     void about_spawn();
     void transcoder_spawn();
-    void tageditor_spawn();
+    void tageditor_spawn(QStringList *l);
     void play(QTreeWidgetItem* item);
     void select(QTreeWidgetItem *item);
 private slots:

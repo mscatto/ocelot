@@ -17,7 +17,9 @@
  */
 #include "library.hpp"
 #include "database.hpp"
-//#include "vars.hpp"
+#include "worker.hpp"
+
+#include <QObject>
 #include <QStringList>
 #include <QString>
 #include <QMimeDatabase>
@@ -31,11 +33,23 @@
 #include <tpropertymap.h>
 #include <qstandardpaths.h>
 #include <QtConcurrent/QtConcurrent>
+#include <QThread>
 
-library::library(QString path, QSqlDatabase *db){
+library::library(QString path, QSqlDatabase *db):QObject(){
     this->db = db;
     this->libpath = path;
     this->size = 0;
+
+    QThread* thread = new QThread;
+    worker* w = new worker();
+    w->moveToThread(thread);
+    QObject::connect(w, &worker::error, this, &library::error_thread);
+    QObject::connect(thread, &QThread::started, w, &worker::process);
+    QObject::connect(w, &worker::finished, thread, &QThread::quit);
+    QObject::connect(w, &worker::finished, w, &worker::deleteLater);
+    QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    thread->start();
+
     this->scan(&this->libpath);
     qInfo() << qPrintable("  -> "+QString::number(this->tracks.length()).toUtf8()+" tracks found at "+path);
 
@@ -51,6 +65,15 @@ QString *library::dumpinfo(){
     else
         s->append(QString::number(0));
     return s;
+}
+
+library::~library(){
+
+}
+
+void library::error_thread(QString err){
+    qDebug() << err;
+
 }
 
 /* recursively scans for valid files */

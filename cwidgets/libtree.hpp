@@ -29,6 +29,7 @@
 
 class libtree : public QFrame
 {
+    Q_OBJECT
 private:
     QMenu *ctx;
     QTreeWidget *tree;
@@ -37,6 +38,9 @@ private:
     void menu_items(const QPoint &pos);
 public slots:
     void populate(QSqlDatabase *db);
+    void gatherselected();
+signals:
+    void dispatch(QStringList *l);
 public:
     libtree(mwindow *win);
     ~libtree();

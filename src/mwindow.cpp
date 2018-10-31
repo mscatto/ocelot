@@ -85,7 +85,7 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     ///this->bar->set
 
     status.setText("<b>IDLE</b>");
-    proglabel.setText(QDateTime::fromTime_t(0).toString("mm:ss")+" / "+QDateTime::fromTime_t(0).toString("mm:ss"));
+    proglabel.setText("<b>"+QDateTime::fromTime_t(0).toString("mm:ss")+" / "+QDateTime::fromTime_t(0).toString("mm:ss")+"</b>");
 
     /*QStringList *data = new QStringList();
     QSqlQuery d = this->lib->query("SELECT path FROM songs");
@@ -131,7 +131,7 @@ void mwindow::toolbar_stop(){
     this->prog->setRange(0,0);
     this->status.setText("<b>IDLE</b>");
     this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
-    this->proglabel.setText(QDateTime::fromTime_t(0).toString("mm:ss")+" / "+QDateTime::fromTime_t(0).toString("mm:ss"));
+    this->proglabel.setText("<b>"+QDateTime::fromTime_t(0).toString("mm:ss")+" / "+QDateTime::fromTime_t(0).toString("mm:ss")+"</b>");
 }
 
 void mwindow::toolbar_next(){
@@ -158,7 +158,9 @@ void mwindow::transcoder_spawn(){
     this->transcdiag->show();
 }
 
-void mwindow::tageditor_spawn(){
+void mwindow::tageditor_spawn(QStringList *l){
+    //qDebug() << l;
+    //this->tagdiag->init(l);
     this->tagdiag->show();
 }
 
@@ -166,7 +168,7 @@ void mwindow::tageditor_spawn(){
 void mwindow::progslider_sync(qint64 x){
     if (!this->prog->isSliderDown()){
         this->prog->setValue((int)x/1000);
-        this->proglabel.setText(QDateTime::fromTime_t(unsigned(x)/1000).toString("mm:ss")+" / "+QDateTime::fromTime_t(player->duration()/1000).toString("mm:ss"));
+        this->proglabel.setText("<b>"+QDateTime::fromTime_t(unsigned(x)/1000).toString("mm:ss")+" / "+QDateTime::fromTime_t(player->duration()/1000).toString("mm:ss")+"</b>");
     }
 }
 
