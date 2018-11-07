@@ -26,8 +26,10 @@
 
 playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QWidget *parent) : QTreeWidget (){
     this->order = order;
+    this->view = qobject_cast<QTabWidget*>(parent);
     this->headerctx = headerctx;
     this->bodyctx = new QMenu();
+    this->emptyctx = new QMenu();
     this->playing = new QTreeWidgetItem();
     this->jag = jag;
 
@@ -37,18 +39,19 @@ playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QW
     QList<QAction*> *al = new QList<QAction*>();
     al->append(new QAction(QString("Clear playlist")));
     connect(al->back(), &QAction::triggered, this, &playlist::clear);
-    al->append(new QAction(QString("Remove selected")));
-
+    al->append(new QAction(QString("Clear Selection")));
+    connect(al->back(), &QAction::triggered, this, &QTreeWidget::clearSelection);
     al->append(new QAction(QString("Export playlist")));
+    connect(al->back(), &QAction::triggered, this, &playlist::exportpl);
 
-    this->bodyctx->addActions(*al);
+    this->emptyctx->addActions(*al);
     al->~QList();
 
     this->setAlternatingRowColors(true);
     this->setSortingEnabled(true);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->setRootIsDecorated(false);
-    this->setSelectionMode(QAbstractItemView::SelectionMode::MultiSelection);
+    this->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 
     this->header()->setContextMenuPolicy(Qt::CustomContextMenu);
     this->header()->setFirstSectionMovable(false);
@@ -80,24 +83,40 @@ playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QW
             &playlist::EOP,
             win,
             &mwindow::toolbar_stop);
+    connect(this,
+            &QTreeWidget::itemClicked,
+            win,
+            &mwindow::select);
 }
 
 playlist::~playlist(){}
 
+/* shows the context menu for the wiget's header bar */
 void playlist::show_headerctx(const QPoint & pos){
-    /*QMenu *ctx = new QMenu("Columns");
-    ctx->addActions(this->headerctx->actions()values());
-    //qDebug() << this->menuctx.values();*************************************************/
-
-    this->headerctx->exec(this->mapToGlobal(pos));
+    QPoint *p = new QPoint(pos.x(),this->pos().y()+this->header()->height());
+    this->headerctx->exec(this->mapToGlobal(*p));
+    p->~QPoint();
 }
 
+/* this displays the context menu when right clicked inside the widget's body */
 void playlist::show_bodyctx(const QPoint & pos){
-    this->bodyctx->exec(this->mapToGlobal(pos));
+    QPoint *p = new QPoint(pos.x(), pos.y()+this->header()->height());
+
+    if(this->itemAt(pos)==nullptr){
+        this->emptyctx->exec(this->mapToGlobal(*p));
+    }else{
+        this->bodyctx->exec(this->mapToGlobal(*p));
+    }
+
+
+    p->~QPoint();
 }
 
-void playlist::clear(){
-
+void playlist::clearchildren(){
+    this->playing = new QTreeWidgetItem();
+    this->pl.clear();
+    this->selected->~QTreeWidgetItem();
+    this->clear();
 }
 
 void playlist::rebuild_columns(){
@@ -176,6 +195,7 @@ void playlist::append(QStringList f){
                 /* TODO option to not append playing */
                 this->clearSelection();
                 this->setItemSelected(nitem,true);
+                //if(this->playing!=nullptr)
                 this->playing->setData(0, Qt::EditRole,".");
                 this->playing = nitem;
                 this->playing->setData(0, Qt::EditRole,this->playchar);
@@ -226,5 +246,43 @@ void playlist::doubleclick(QTreeWidgetItem *item){
     this->play(this->playing);
 
     //this->playing_index = this->indexOfTopLevelItem(this->playing);
+}
+
+void playlist::exportpl(){
+    /* get path from file picker */
+    QString path = QFileDialog::getSaveFileName(
+        this,
+        "Exporting playlist '"+this->view->tabText(this->view->currentIndex()).remove("&")+"'",
+        QDir::homePath(), QString("Playlists (*.m3u *.pls)")
+    );
+
+    if(path.isEmpty() || this->topLevelItemCount()==0)
+        return;
+
+    qInfo() << "[INFO] Exporting playlist...";
+    QFile npl(path);
+    npl.open(QIODevice::WriteOnly);
+
+    /* check it opened ok */
+    if(!npl.isOpen()){
+        qFatal("%s", qPrintable(QString("[ERROR] Unable to open '"+path)+"' for output"));
+    }
+
+    /* point a QTextStream object at the file */
+    QTextStream outStream(&npl);
+
+    /* dump data to chosen file */
+    outStream << "#EXTM3U\n\n";
+    TagLib::FileRef *f;
+    for(int i=0;i<this->topLevelItemCount();i++){
+        f = new TagLib::FileRef(qPrintable(this->topLevelItem(i)->data(0, Qt::UserRole).toString()));
+        outStream << "#EXTINF:"+QString::number(f->audioProperties()->lengthInSeconds())+", "+f->tag()->artist().toCString(true)+" - "+f->tag()->title().toCString(true);
+        outStream << "\n"+this->topLevelItem(i)->data(0, Qt::UserRole).toString();
+        outStream << "\n\n";
+        f->~FileRef();
+    }
+    npl.close();
+
+    qInfo() << qPrintable("  -> playlist exported to: "+path);
 }
 

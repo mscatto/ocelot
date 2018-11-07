@@ -32,13 +32,18 @@ coverview::coverview(mwindow *win) : QLabel(win){
     this->setFrameShape(QFrame::StyledPanel);
     this->setFrameShadow(QFrame::Sunken);
 
-    this->setText("<b>Nothing to show</b>");
+    this->setText("<b>[No Media]</b>");
 
     connect(win, &mwindow::coverchanged, this, &coverview::coverchanged);
+    connect(win, &mwindow::clearcover, this, &coverview::clear);
 }
 
 void coverview::coverchanged(QPixmap *nc){
     this->setPixmap(*nc);
+}
+
+void coverview::clear(){
+    this->setText("<b>[No Media]</b>");
 }
 
 coverview::~coverview(){

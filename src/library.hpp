@@ -21,33 +21,36 @@
 #include <QList>
 
 #include "database.hpp"
-//#include "vars.hpp"
 #include <QSqlQueryModel>
 #include <QSqlDatabase>
+#include <QtWidgets>
 
 class library : public QObject
 {
-private:
     Q_OBJECT
+private:
     const QStringList formats = {"audio/mpeg",
                                  "audio/mp4",
                                  "audio/ogg",
                                  "audio/wav",
                                  "audio/flac"
     };
-    QSqlDatabase *db;
-    qint64 size = 0;
-    QStringList tracks;
-    QString libpath;
+    QString path;
+    QStringList pathlist;
+    QSqlDatabase db;
+
+    qint64 count=0;
 
     void insert(QString fpath);
-    void scan(QString *dir);
+    void scan(QString dir);
 public:
-    library(QString path, QSqlDatabase *db);
-    QString* dumpinfo();
+    explicit library(QString *path, QSqlDatabase *db, QStringList *pathlist);
     ~library();
-private slots:
-    void error_thread(QString err);
+public slots:
+    void process();
+signals:
+    void finished();
+    void added(QString lib);
 };
 
 #endif // LIBRARY_HPP

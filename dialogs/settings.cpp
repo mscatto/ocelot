@@ -14,8 +14,10 @@
 #include <QComboBox>
 #include <QFormLayout>
 
-#include "src/vars.hpp"
+
 #include "settings.hpp"
+
+#include "src/vars.hpp"
 #include "src/library.hpp"
 #include "src/mwindow.hpp"
 
@@ -248,22 +250,27 @@ void settings::lib_dirpicker(){
         return;
 
     qInfo() << "[INFO] Adding new library through settings dialog...";
-    this->jag->libs->append(new library(dir,this->jag->DB_REF));
-    QString st = this->jag->libs->last()->dumpinfo()->split(";").first();
-    this->jag->DB_REF->exec("INSERT INTO libs VALUES ('"+st+"')");
-    qInfo() << "[INFO] Done.";
-
-    lib_treerefresh();
+    QThread *t = new QThread();
+    library *l = new library(&dir,this->jag->DB_REF,this->jag->dumppaths());
+    l->moveToThread(t);
+    //connect(l, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+    connect(t, SIGNAL(started()), l, SLOT(process()));
+    connect(l, SIGNAL(finished()), t, SLOT(quit()));
+    connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
+    connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
+    connect(t, &QThread::finished, this, &settings::thread_libscan);
+    connect(l, &library::added, this, &settings::thread_newlib);
+    t->start();
 }
 
 void settings::lib_treerefresh(){
     libstree->clear();
+    QStringList libs = *this->jag->dumplibinfo();
 
-    for(int i=jag->libs->length()-1; i>=0; i--){
-        QStringList s = jag->libs->at(i)->dumpinfo()->split(";");
-
-        s.last().append(" MiB");
-        libstree->addTopLevelItem(new QTreeWidgetItem(libstree, s));
+    foreach(QString s, libs){
+        QStringList l = s.split(";");
+        l.last().append(" MiB");
+        libstree->addTopLevelItem(new QTreeWidgetItem(libstree, l));
     }
 
     qobject_cast<mwindow*>(this->win)->libchanged(this->jag->DB_REF);
@@ -311,4 +318,13 @@ void settings::gen_mappend(int index){
     }else{ /* don't play */
 
     }
+}
+
+void settings::thread_libscan(){
+    this->lib_treerefresh();
+}
+
+void settings::thread_newlib(QString lib){
+    this->jag->libs->append(lib);
+    //this->lib_treerefresh();
 }

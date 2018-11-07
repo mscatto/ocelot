@@ -82,6 +82,7 @@ private slots:
     void volslider_moved(int x);
     void media_status(QMediaPlayer::MediaStatus status);
 signals:
+    void clearcover();
     void selectionchanged(QString item);
     void coverchanged(QPixmap *cover);
     void libchanged(QSqlDatabase *db);

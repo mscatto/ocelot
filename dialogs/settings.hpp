@@ -1,4 +1,4 @@
-#ifndef SETTINGS_HPP
+﻿#ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
 #include <QObject>
@@ -34,6 +34,9 @@ private slots:
     void gen_mdclick(int index);
     void gen_mmclick(int index);
     void gen_mappend(int index);
+
+    void thread_libscan();
+    void thread_newlib(QString lib);
 public:
     settings(QWidget *parent, vars *jag);
     ~settings();

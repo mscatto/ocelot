@@ -127,6 +127,7 @@ void mwindow::toolbar_play(){
 
 void mwindow::toolbar_stop(){
     this->player->stop();
+    this->player->setMedia(QMediaContent());
     this->prog->setValue(0);
     this->prog->setRange(0,0);
     this->status.setText("<b>IDLE</b>");
@@ -198,6 +199,7 @@ void mwindow::progslider_released(){
 }
 
 void mwindow::media_status(QMediaPlayer::MediaStatus status){
+    //qDebug() << status;
     switch(status){
     case QMediaPlayer::MediaStatus::LoadedMedia:
         /* to start playing right away */
@@ -208,10 +210,10 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
         this->coverchanged(new QPixmap());
         this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
         this->status.setText("<b>IDLE</b>");
-        //ui->coverview->clear();
-        //ui->coverview->setText("<b>Nothing to show</b>");
+        this->clearcover();
         this->prog->setValue(0);
         this->prog->setEnabled(false);
+
         break;
     case QMediaPlayer::MediaStatus::InvalidMedia:
         this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
@@ -272,6 +274,7 @@ void mwindow::play(QTreeWidgetItem *item){
 }
 
 void mwindow::select(QTreeWidgetItem *item){
+    //qDebug() << "lel";
     if(!item->data(0, Qt::UserRole).isValid()) /* case path is empty */
         return;
 

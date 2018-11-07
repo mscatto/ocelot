@@ -4,16 +4,16 @@
 #include <QStandardPaths>
 #include <QSqlDatabase>
 #include <QMap>
+#include <QThread>
 #include "library.hpp"
 
-class vars
+class vars : QObject
 {
 public:
     const char* VERSION = "0.3a";
     QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/ocelot";
     QString DB_PATH = DATA_PATH+"/ocelot.database";
     QSqlDatabase *DB_REF = new QSqlDatabase();
-    QList<library*> *libs = new QList<library*>();
     QString translate_key(QString key);
     QString translate_val(QString val);
     QStringList dumpvars();
@@ -21,6 +21,9 @@ public:
     QString fetchdata(QString *var);
     void setdata(QString *var, QString *data);
     void remlibs(QString path);
+    QStringList *dumppaths();
+    QStringList *dumplibinfo();
+    QStringList *libs;
 
     vars();
     ~vars();
@@ -31,5 +34,7 @@ private:
     void initdb();
     void initlibs();
     void initdata();
+public slots:
+    void libfinished(uint *num);
 };
 #endif // VARS_HPP

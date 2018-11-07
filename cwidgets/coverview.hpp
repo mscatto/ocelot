@@ -23,6 +23,7 @@
 
 class coverview : public QLabel
 {
+    Q_OBJECT
 private:
     QPixmap *cover;
 public:
@@ -31,6 +32,7 @@ public:
     //virtual void paintEvent(QPaintEvent *p);
 public slots:
     void coverchanged(QPixmap *nc);
+    void clear();
 };
 
 #endif // COVERVIEW_HPP

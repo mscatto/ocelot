@@ -34,7 +34,7 @@
 #include <QString>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
-#include <tlist.h>
+#include <taglib/tlist.h>
 #include <QFocusEvent>
 
 playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){

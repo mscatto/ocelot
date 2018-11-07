@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTreeWidget>
+#include <QtConcurrent/QtConcurrent>
 #include <QSqlDriver>
 #include <QSqlRecord>
 #include <QSqlResult>
@@ -47,14 +48,49 @@ QString vars::fetchdata(QString *var){
 }
 
 void vars::remlibs(QString path){
-    for(int i=this->libs->length()-1; i>=0; i--){
+    this->libs->removeAll(path);
+    /*for(int i=this->libs->length()-1; i>=0; i--){
         if(this->libs->at(i)->dumpinfo()->split(";").first() == path){
             this->libs->removeAt(i);
         }
-    }
+    }*/
 
     this->DB_REF->exec("DELETE FROM songs WHERE lib='"+path+"'");
     this->DB_REF->exec("DELETE FROM libs WHERE path='"+path+"'");
+}
+
+QStringList *vars::dumppaths(){
+    QSqlQuery *x = new QSqlQuery(this->DB_REF->exec("SELECT path FROM songs"));
+    QStringList *out = new QStringList();
+
+    while(x->next())
+        out->append(x->value(0).toString());
+
+    return out;
+}
+
+QStringList *vars::dumplibinfo(){
+    QStringList *out = new QStringList();
+    foreach(QString s, *this->libs){
+        QFileInfo i;
+        uint count=0;
+        qint64 size=0;
+        QSqlQuery x = this->DB_REF->exec("SELECT path FROM songs WHERE lib='"+s+"'");
+        while(x.next()){
+            count++;
+            i.setFile(x.value(0).toString());
+            size+=i.size();
+        }
+
+        s.append(";"+QString::number(count)+";");
+
+        if(size>0)
+            s.append(QString::number(size/1024/1024));
+        else
+            s.append(QString::number(0));
+        out->append(s);
+    }
+    return out;
 }
 
 void vars::initdb(){
@@ -116,12 +152,27 @@ void vars::initdb(){
     }else{
         qInfo("%s",qPrintable("[INFO] Database found at "+this->DB_REF->databaseName()+"..."));
 
-        x->exec("SELECT _rowid_ FROM songs");
+        x->exec("SELECT path FROM songs");
         x->last();
+
         if(x->isNull(0))
             qInfo("%s",qPrintable("  -> 0 tracks on record"));
         else
-            qInfo("%s",qPrintable("  -> "+QString::number(x->value(0).toInt())+" tracks on record"));
+            qInfo("%s",qPrintable("  -> "+QString::number(x->at()+1)+" tracks on record"));
+
+        qInfo() << "[INFO] Running sanity check...";
+
+        x->seek(0);
+        QFile dummy;
+        uint inv=0;
+        while(x->next()){
+            dummy.setFileName(x->value(0).toString());
+            if(!dummy.exists()){
+                inv++;
+                this->DB_REF->exec("DELETE FROM songs WHERE path='"+x->value(0).toString()+"'");
+            }
+        }
+        qInfo("%s", qPrintable("  -> "+QString::number(inv)+" entries were removed."));
     }
     x->~QSqlQuery();
     qInfo() << "[INFO] Database initialized successfully.";
@@ -129,16 +180,22 @@ void vars::initdb(){
 
 void vars::initlibs(){
     qInfo() << "[INFO] Initializing saved libraries...";
+    this->libs = new QStringList();
 
-    QSqlQuery *q = new QSqlQuery();
-    *q = this->DB_REF->exec("SELECT path FROM libs");
-    q->next();
-    if(!q->isNull(0)){
+    QSqlQuery q = this->DB_REF->exec("SELECT path FROM libs");
+    q.next();
+    if(!q.isNull(0)){
         do{
-            this->libs->append(new library(q->value(0).toString(),this->DB_REF));
-        }while(q->next());
+            this->libs->append(q.value(0).toString());
+
+            library *l = new library(new QString(q.value(0).toString()),this->DB_REF,this->dumppaths());
+            l->moveToThread(new QThread());
+            connect(l->thread(), SIGNAL(started()), l, SLOT(process()));
+            connect(l, SIGNAL(finished()), l->thread(), SLOT(quit()));
+            connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
+            connect(l->thread(), SIGNAL(finished()), l->thread(), SLOT(deleteLater()));
+        }while(q.next());
     }
-    q->~QSqlQuery();
     qInfo() << "[INFO] Done.";
 }
 
@@ -154,7 +211,7 @@ void vars::initdata(){
         '0')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_appendbehaviour',\
-        '0')");
+                       '0')");
 }
 
 void vars::initpmap(){
@@ -164,7 +221,7 @@ void vars::initpmap(){
     this->pmap.insert("ALBUMARTIST","Album Artist");
     this->pmap.insert("SUBTITLE","Subtitle");
     this->pmap.insert("TRACKNUMBER","Track #");
-    this->pmap.insert("TRACKTOTAL","Track Count");
+    this->pmap.insert("TRACKTOTAL","Tracks Total");
     this->pmap.insert("DISCNUMBER", "Disc #");
     this->pmap.insert("DISCTOTAL", "Disc Count");
     this->pmap.insert("DATE","Year");

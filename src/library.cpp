@@ -17,10 +17,12 @@
  */
 #include "library.hpp"
 #include "database.hpp"
-#include "worker.hpp"
+#include "vars.hpp"
 
 #include <QObject>
 #include <QStringList>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QString>
 #include <QMimeDatabase>
 #include <QSqlRecord>
@@ -28,89 +30,57 @@
 #include <QSqlError>
 #include <QRegularExpression>
 #include <QSqlQueryModel>
-#include <taglib.h>
+#include <taglib/taglib.h>
 #include <taglib/fileref.h>
-#include <tpropertymap.h>
+#include <taglib/tpropertymap.h>
 #include <qstandardpaths.h>
 #include <QtConcurrent/QtConcurrent>
-#include <QThread>
 
-library::library(QString path, QSqlDatabase *db):QObject(){
-    this->db = db;
-    this->libpath = path;
-    this->size = 0;
-
-    QThread* thread = new QThread;
-    worker* w = new worker();
-    w->moveToThread(thread);
-    QObject::connect(w, &worker::error, this, &library::error_thread);
-    QObject::connect(thread, &QThread::started, w, &worker::process);
-    QObject::connect(w, &worker::finished, thread, &QThread::quit);
-    QObject::connect(w, &worker::finished, w, &worker::deleteLater);
-    QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-    thread->start();
-
-    this->scan(&this->libpath);
-    qInfo() << qPrintable("  -> "+QString::number(this->tracks.length()).toUtf8()+" tracks found at "+path);
-
-}
-
-QString *library::dumpinfo(){
-    QString *s = new QString();
-    s->append(this->libpath+";");
-    s->append(QString::number(this->tracks.length())+";");
-
-    if(this->size>0)
-        s->append(QString::number(this->size/1024/1024));
-    else
-        s->append(QString::number(0));
-    return s;
+library::library(QString *path, QSqlDatabase *db, QStringList *pathlist):QObject(){
+    this->db = *db;
+    this->path = *path;
+    this->pathlist = *pathlist;
 }
 
 library::~library(){
 
 }
 
-void library::error_thread(QString err){
-    qDebug() << err;
+void library::process(){
+    this->db.open();
+    this->scan(this->path);
+    qInfo() << qPrintable("  -> "+QString::number(this->count).toUtf8()+" new tracks found at "+path);
 
+    if(this->count>0){
+        QSqlQuery *q = new QSqlQuery(this->db);
+        q->prepare("INSERT INTO libs(path) VALUES(:path)");
+        q->bindValue(":path", this->path);
+        q->exec();
+
+        emit added(this->path);
+    }
+    qInfo() << qPrintable("[INFO] Directory scan complete.");
+
+    emit finished();
 }
 
 /* recursively scans for valid files */
-void library::scan(QString *dir){
-    dir->replace("//","/");
+void library::scan(QString dir){
+    dir.replace("//","/");
 
-    QDir *iter = new QDir(*dir);
+    QDir *iter = new QDir(dir);
     iter->setFilter(QDir::NoSymLinks | QDir::Readable | QDir::Files);
     QStringList l = iter->entryList();
-    QFileInfo info;
-    //iter->~QDir();
 
     if(l.size()>0){
         QMimeDatabase mimedb;
-
         QString fname;
-        QSqlQuery *nq;
-
         for(int i=0; i<l.size(); i++){
-            fname = *dir+"/"+l.at(i);
+            fname = dir+"/"+l.at(i);
             if(formats.contains(mimedb.mimeTypeForFile(fname).name())){ /* case file has a valid mimetype from enum */
-                nq = new QSqlQuery();
-                nq->prepare("SELECT path FROM songs WHERE path=:fname");
-                nq->bindValue(":fname", fname);
-                nq->exec();
-                nq->next();
-
-                if(nq->record().value(0).isNull())/* not found inside the database */
-                    this->insert(fname);
-
-                info.setFile(fname);
-                this->size += info.size();
-                this->tracks.append(fname);
-
-                nq->~QSqlQuery();
+                if(!this->pathlist.contains(fname))
+                    library::insert(fname);
             }
-
         }
     }
 
@@ -118,41 +88,42 @@ void library::scan(QString *dir){
     l = iter->entryList();
     if(l.size()>0){
         for(int i=0; i<l.size(); i++){ // recur each directory
-            library::scan(new QString(*dir + "/" + l.at(i)));
+            library::scan(QString(dir + "/" + l.at(i)));
         }
     }
 
     iter->~QDir();
+
 }
 
 /* appends and extracts metadata from track fpath to the database */
 void library::insert(QString fpath){
-    QSqlQuery q;
+    this->count++;
+    QSqlQuery *q = new QSqlQuery(this->db);
 
     TagLib::FileRef *file = new TagLib::FileRef(qPrintable(fpath));
     QString root = fpath.chopped(fpath.length()-fpath.lastIndexOf("/"));
     QString fname = fpath.remove(0, fpath.lastIndexOf("/")+1);
 
-    q.prepare("INSERT INTO songs (root, path, filename, title, artist, album, track, year, genre, discNumber, lib)"
+    q->prepare("INSERT INTO songs (root, path, filename, title, artist, album, track, year, genre, discNumber, lib)"
               "VALUES(:root, :path, :filename, :title, :artist, :album, :track, :year, :genre, :discNumber, :lib)");
 
 
-    q.bindValue(":root", root);
-    q.bindValue(":path", root+"/"+fname);
-    q.bindValue(":filename", fname);
+    q->bindValue(":root", root);
+    q->bindValue(":path", root+"/"+fname);
+    q->bindValue(":filename", fname);
     /* SEGFAULT HAPPENED HERE --SHITTY TAG */
-    q.bindValue(":title", file->tag()->title().toCString(true));
-    q.bindValue(":artist", file->tag()->artist().toCString(true));
-    q.bindValue(":album", file->tag()->album().toCString(true));
-    q.bindValue(":track", std::to_string(file->tag()->track()).c_str());
-    q.bindValue(":year", std::to_string(file->tag()->year()).c_str());
-    q.bindValue(":genre", file->tag()->genre().toCString(true));
-    q.bindValue(":discNumber", file->tag()->properties().operator []("DISCNUMBER").toString().toCString());
-    q.bindValue(":lib", this->libpath);
+    q->bindValue(":title", file->tag()->title().toCString(true));
+    q->bindValue(":artist", file->tag()->artist().toCString(true));
+    q->bindValue(":album", file->tag()->album().toCString(true));
+    q->bindValue(":track", std::to_string(file->tag()->track()).c_str());
+    q->bindValue(":year", std::to_string(file->tag()->year()).c_str());
+    q->bindValue(":genre", file->tag()->genre().toCString(true));
+    q->bindValue(":discNumber", file->tag()->properties().operator []("DISCNUMBER").toString().toCString());
+    q->bindValue(":lib", this->path);
 
-    q.exec();
+    q->exec();
 
+    q->~QSqlQuery();
     file->~FileRef();
 }
-
-
