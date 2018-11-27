@@ -28,7 +28,6 @@ public:
 private slots:
     void show_headerctx(const QPoint & pos);
     void show_bodyctx(const QPoint &pos);
-    void clearchildren();
 public slots:
     void rebuild_columns();
     void append(QStringList f);
@@ -36,6 +35,7 @@ public slots:
     void prev();
     void doubleclick(QTreeWidgetItem*item);
     void exportpl();
+    void clearchildren();
 signals:
     void changesel(TagLib::FileRef *f);
     void play(QTreeWidgetItem*);

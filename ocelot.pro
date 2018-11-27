@@ -47,7 +47,8 @@ SOURCES += \
     cwidgets/playlistview.cpp \
     cwidgets/playlist.cpp \
     cwidgets/renamepbtn.cpp \
-    dialogs/tageditor.cpp
+    dialogs/tageditor.cpp \
+    src/player.cpp
 
 HEADERS += \
 	src/library.hpp \
@@ -67,9 +68,10 @@ HEADERS += \
     cwidgets/playlistview.hpp \
     cwidgets/playlist.hpp \
     cwidgets/renamepbtn.hpp \
-    dialogs/tageditor.hpp
+    dialogs/tageditor.hpp \
+    src/player.hpp
 
-FORMS += \
+FORMS +=
 
 RESOURCES += \
 	pak.qrc

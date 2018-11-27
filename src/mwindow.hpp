@@ -47,9 +47,9 @@ public:
 
     //vars *jaguatirica();
 private:
+    TagLib::FileRef *fr;
     vars *jag;
     libmgr *lib;
-    QMediaPlayer *player;
     QLabel status;
     QLabel proglabel;
     volslider *vol;
@@ -61,8 +61,9 @@ private:
     transcoder *transcdiag;
     tageditor *tagdiag;
     about *adiag;
+    QMediaPlayer::MediaStatus prev = QMediaPlayer::MediaStatus::UnknownMediaStatus;
 public slots:
-    void toolbar_pause();
+    void toolbar_pause(bool res=false);
     void toolbar_play();
     void toolbar_stop();
     void toolbar_next();
@@ -75,13 +76,14 @@ public slots:
     void play(QTreeWidgetItem* item);
     void select(QTreeWidgetItem *item);
 private slots:
-    void progslider_sync(qint64 x);
+    void progslider_sync(qint64 pos);
     void progslider_moved(int x);
     void progslider_clicked(int action);
-    void progslider_released();
+    void progslider_changed(int x);
     void volslider_moved(int x);
-    void media_status(QMediaPlayer::MediaStatus status);
+    void player_respond(QMediaPlayer::MediaStatus status);
 signals:
+    void player_play(QString *file);
     void clearcover();
     void selectionchanged(QString item);
     void coverchanged(QPixmap *cover);
@@ -91,6 +93,8 @@ signals:
     void plnext();
     void plprev();
     void mediastatus(QMediaPlayer::MediaStatus status);
+    void volumechanged(int vol);
+    void progsliderchanged(int pos);
 };
 
 #endif // MWINDOW_HPP

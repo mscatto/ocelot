@@ -1,4 +1,6 @@
 #include "vars.hpp"
+#include "player.hpp"
+
 #include <QDir>
 #include <QDebug>
 #include <QStringList>
@@ -16,10 +18,15 @@ vars::vars(){
     initpmap();
     initdb();
     initlibs();
+    initplayer();
 }
 
 vars::~vars(){
 
+}
+
+void vars::initplayer(){
+    this->mp = new player();
 }
 
 QString vars::translate_key(QString key){
@@ -156,7 +163,7 @@ void vars::initdb(){
         x->last();
 
         if(x->isNull(0))
-            qInfo("%s",qPrintable("  -> 0 tracks on record"));
+            qInfo("%s",qPrintable("  -> 0 tracks on record."));
         else
             qInfo("%s",qPrintable("  -> "+QString::number(x->at()+1)+" tracks on record"));
 
@@ -175,25 +182,28 @@ void vars::initdb(){
         qInfo("%s", qPrintable("  -> "+QString::number(inv)+" entries were removed."));
     }
     x->~QSqlQuery();
-    qInfo() << "[INFO] Database initialized successfully.";
+    //qInfo() << "[INFO] Database initialized successfully.";
 }
 
 void vars::initlibs(){
-    qInfo() << "[INFO] Initializing saved libraries...";
+    qInfo() << "[INFO] Scanning libraries...";
     this->libs = new QStringList();
 
     QSqlQuery q = this->DB_REF->exec("SELECT path FROM libs");
-    q.next();
+    QThread *t;
+    //q.next();
     if(!q.isNull(0)){
         do{
             this->libs->append(q.value(0).toString());
-
+            t = new QThread();
             library *l = new library(new QString(q.value(0).toString()),this->DB_REF,this->dumppaths());
-            l->moveToThread(new QThread());
-            connect(l->thread(), SIGNAL(started()), l, SLOT(process()));
-            connect(l, SIGNAL(finished()), l->thread(), SLOT(quit()));
+            l->moveToThread(t);
+            connect(t, SIGNAL(started()), l, SLOT(process()));
+            connect(l, SIGNAL(finished()), t, SLOT(quit()));
             connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
-            connect(l->thread(), SIGNAL(finished()), l->thread(), SLOT(deleteLater()));
+            connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
+            //connect(t, &QThread::finished, this, );
+            t->start();
         }while(q.next());
     }
     qInfo() << "[INFO] Done.";

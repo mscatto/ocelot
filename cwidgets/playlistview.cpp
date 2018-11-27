@@ -62,6 +62,18 @@ playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
     this->order.append(q->record().value(0).toString());
     q->~QSqlQuery();
 
+    /* the tab context */
+    this->ctx = new QMenu();
+
+    ctx->addAction("Rename playlist...");
+    ctx->addSeparator();
+    ctx->addAction(new QAction(QString("Clear playlist")));
+    connect(ctx->actions().last(), &QAction::triggered, this, &playlistview::clearpl);
+    ctx->addAction(new QAction(QString("Clear Selection")));
+    connect(ctx->actions().last(), &QAction::triggered, this, &playlistview::clearsel);
+    ctx->addAction(new QAction(QString("Export playlist")));
+    connect(ctx->actions().last(), &QAction::triggered, this, &playlistview::exportpl);
+
     /* then sets up header' context menu */
     QList<QAction*> *ctx = new QList<QAction*>();
 
@@ -83,6 +95,7 @@ playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
     headermenu->addActions(*ctx);
     ctx->~QList();
 
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
     /* insert default playlist*/
     this->newplaylist();
 
@@ -106,9 +119,10 @@ playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
 }
 
 void playlistview::ctxmenu(const QPoint &pos){
-    QMenu *ctx = new QMenu();
-    ctx->addAction("Rename playlist...");
+    if(this->tabBar()->tabAt(pos)==-1) /* case there isnt a tab there */
+        return;
 
+    //connect(ctx->actions().first(), &QAction::triggered, this)///wronggggg
     ctx->exec(this->mapToGlobal(pos));
 }
 
@@ -126,7 +140,10 @@ void playlistview::newplaylist(){
 
     connect(ren, &renamepbtn::idclicked, this, &playlistview::tab_rename);
 
-    pl.insert(name, new playlist(&this->order, headermenu, jag, win, this));
+    pl.insert(name, new playlist(&this->order, this->headermenu, jag, win, this));
+    connect(this, &playlistview::exportpl, pl.value(name), &playlist::exportpl);
+    connect(this, &playlistview::clearsel, pl.value(name), &playlist::clearSelection);
+    connect(this, &playlistview::clearpl, pl.value(name), &playlist::clearchildren);
     this->plactive = pl.value(name);
     this->insertTab(this->count(), pl.value(name), name);
     this->setCurrentIndex(this->count()-1);

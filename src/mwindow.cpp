@@ -47,17 +47,20 @@
 mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->jag = jag;
     this->bar = new toolbar(this, this->configmenu);
-    this->player = new QMediaPlayer();
     this->prog = new progslider(Qt::Horizontal, this->bar, this);
     this->vol = new volslider(Qt::Horizontal, this->bar, this);
+    this->fr = new TagLib::FileRef();
+    this->jag->mp->init(this);
+    QThread *pt = new QThread(this);
+    this->jag->mp->moveToThread(pt);
+    pt->start();
 
     this->sdiag = new settings(this, jag);
     this->adiag = new about(this, jag);
     this->tagdiag = new tageditor(this, jag);
 
-    player->setVolume(100);
-    player->setNotifyInterval(200);
-    this->media_status(player->mediaStatus());
+    //connect(jag->mp, &player::mediaStatusChanged, this, &mwindow::player_respond);
+    //this->media_status(player->mediaStatus());
     this->setWindowIcon(QIcon(":/internals/icon"));
     this->setMinimumSize(896, 504);
     this->layout()->setContentsMargins(0,0,0,0);
@@ -69,14 +72,14 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->statusBar()->addPermanentWidget(&this->proglabel);
 
 
-    connect(this->player, &QMediaPlayer::positionChanged, this, &mwindow::progslider_sync);
+    connect(this->jag->mp, &player::positionChanged, this, &mwindow::progslider_sync);
     connect(this->prog, &QSlider::sliderMoved, this, &mwindow::progslider_moved);
-    connect(this->prog, &QSlider::sliderReleased, this, &mwindow::progslider_released);
-    connect(this->prog, &QSlider::actionTriggered, this, &mwindow::progslider_clicked);
-    connect(this->vol, &QSlider::valueChanged, this->player, &QMediaPlayer::setVolume);
+    connect(this->prog, &QSlider::valueChanged, this, &mwindow::progslider_changed);
+    //connect(this->prog, &QSlider::actionTriggered, this, &mwindow::progslider_clicked);
+    connect(this->vol, &QSlider::valueChanged, this->jag->mp, &player::setVolume);
     connect(this->vol, &QSlider::sliderMoved, this, &mwindow::volslider_moved);
-    connect(this->player, &QMediaPlayer::mediaStatusChanged, this, &mwindow::media_status);
-    connect(this->player, &QMediaPlayer::mediaStatusChanged, this, &mwindow::mediastatus);
+    //connect(this->jag->mp, &player::mediaStatusChanged, this, &mwindow::media_status);
+    connect(this->jag->mp, &player::mediaStatusChanged, this, &mwindow::player_respond);
 
 
     this->bar->addWidget(this->vol);
@@ -105,29 +108,24 @@ mwindow::~mwindow(){
 
 }
 
-void mwindow::toolbar_pause(){
-    this->player->pause();
-
-    if(this->player->mediaStatus() == QMediaPlayer::BufferedMedia){
+void mwindow::toolbar_pause(bool res){
+    if(res){/* isn't this ugly? */
         this->status.setText(this->status.text().replace("NOW PLAYING", "PAUSED"));
         this->setWindowTitle("PAUSED :: "+this->windowTitle());
+        return;
     }
+
+    //this->jag->mp->pause(); /* if the player actually changes to a pause pause state */
+    /* this function will be called again, but packing a true */
 }
 
 void mwindow::toolbar_play(){
-    this->player->play();
-
-    if(this->player->mediaStatus()==QMediaPlayer::LoadedMedia)
-        this->media_status(this->player->mediaStatus());
-    else{
-        this->status.setText(this->status.text().replace("PAUSED", "NOW PLAYING"));
-        this->setWindowTitle(this->windowTitle().replace("PAUSED :: ", ""));
-    }
+    //this->jag->mp->play();
 }
 
 void mwindow::toolbar_stop(){
-    this->player->stop();
-    this->player->setMedia(QMediaContent());
+    //this->jag->mp->stop();
+    //this->player->setMedia(QMediaContent());
     this->prog->setValue(0);
     this->prog->setRange(0,0);
     this->status.setText("<b>IDLE</b>");
@@ -166,10 +164,10 @@ void mwindow::tageditor_spawn(QStringList *l){
 }
 
 /* will be called every time the player changes position, which will be x */
-void mwindow::progslider_sync(qint64 x){
+void mwindow::progslider_sync(qint64 pos){
     if (!this->prog->isSliderDown()){
-        this->prog->setValue((int)x/1000);
-        this->proglabel.setText("<b>"+QDateTime::fromTime_t(unsigned(x)/1000).toString("mm:ss")+" / "+QDateTime::fromTime_t(player->duration()/1000).toString("mm:ss")+"</b>");
+        this->prog->setValue((int)pos/1000);
+        this->proglabel.setText("<b>"+QDateTime::fromTime_t(unsigned(pos)/1000).toString("mm:ss")+" / "+QDateTime::fromTime_t(fr->audioProperties()->lengthInSeconds()).toString("mm:ss")+"</b>");
     }
 }
 
@@ -178,13 +176,20 @@ void mwindow::progslider_moved(int x){
     p->setX(QCursor::pos().rx());
     QToolTip::showText(*p, QDateTime::fromTime_t(unsigned(x)).toString("mm : ss"), this->prog);
     p->~QPoint();
+    this->progsliderchanged(x);
 }
 
 void mwindow::progslider_clicked(int action){
     //QPoint *p = new QPoint(this->prog->mapToGlobal(this->prog->pos()));
+    qDebug() << action;
+    this->progsliderchanged(this->prog->value()+1);
     //this->player->setPosition(this->prog->value()+1);
     //this->progslider_moved(this->prog->value());
     //this
+}
+
+void mwindow::progslider_changed(int x){
+    qDebug() << x;
 }
 
 void mwindow::volslider_moved(int x){
@@ -194,15 +199,79 @@ void mwindow::volslider_moved(int x){
     p->~QPoint();
 }
 
-void mwindow::progslider_released(){
-    this->player->setPosition(this->prog->value()*1000);
+void mwindow::player_respond(QMediaPlayer::MediaStatus status){
+    switch(status){
+    case QMediaPlayer::MediaStatus::NoMedia: /* case stopped */
+        this->coverchanged(new QPixmap());
+        this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
+        this->status.setText("<b>IDLE</b>");
+        this->clearcover();
+        this->prog->setValue(0);
+        this->prog->setEnabled(false);
+        break;
+    case QMediaPlayer::MediaStatus::LoadingMedia: /* when a new song is being loaded */
+        break; /* BufferedMedia is sent when it finishes */
+    case QMediaPlayer::MediaStatus::LoadedMedia:
+        this->status.setText(this->status.text().replace("PAUSED", "NOW PLAYING"));
+        this->setWindowTitle(this->windowTitle().replace("PAUSED :: ", ""));
+        break;
+    case QMediaPlayer::MediaStatus::EndOfMedia:
+        this->plnext();
+        break;
+    case QMediaPlayer::MediaStatus::InvalidMedia:
+        this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
+        this->status.setText("<b>INVALID MEDIA!</b>");
+        break;
+    case QMediaPlayer::MediaStatus::UnknownMediaStatus:
+        this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
+        this->status.setText("<b>NO MEDIA</b>");
+        break;
+    case QMediaPlayer::MediaStatus::StalledMedia:
+    case QMediaPlayer::MediaStatus::BufferingMedia:
+        break;
+    case QMediaPlayer::MediaStatus::BufferedMedia: /* this usually means it started playing */
+        //TagLib::FileRef *ref = new TagLib::FileRef();
+        QMimeDatabase *db = new QMimeDatabase;
+        QString *fmt = new QString(db->mimeTypeForFile(fr->file()->name()).name().remove(0,6).toUpper());
+
+        this->prog->setRange(0, this->fr->audioProperties()->lengthInSeconds());
+        this->prog->setEnabled(true);
+
+        this->setWindowTitle(QString(this->fr->tag()->artist().toCString(true))+" - "+QString(this->fr->tag()->title().toCString(true))+" :: OCELOT v"+jag->VERSION);
+        this->status.setText("<b>NOW PLAYING:</b> "+QString(this->fr->tag()->title().toCString(true))+" :: "+*fmt+" "+QString::number(this->fr->audioProperties()->bitrate())+"kb/s @"+QString::number(this->fr->audioProperties()->sampleRate())+"Hz");
+
+        if(db->mimeTypeForFile(this->fr->file()->name()).name().remove(0,6) == "flac"){ /* chops the 'audio/' from mime name */
+            TagLib::FLAC::File *x = new TagLib::FLAC::File(qPrintable(this->fr->file()->name()));
+            if(x->pictureList().front() != nullptr){
+                QPixmap *np = new QPixmap();
+                np->loadFromData((const uchar*)x->pictureList().front()->data().data(), x->pictureList().front()->data().size());
+                np->scaled(200, 200, Qt::KeepAspectRatio);
+                this->coverchanged(np);
+                np->~QPixmap();
+            }else{
+                //this->gcover->
+                //ui->coverview->setText("<b>Cover not set!</b>");
+            }
+
+            x->~File();
+        }else if(db->mimeTypeForFile(this->fr->file()->name()).name().remove(0,6) == "mpeg"){
+
+        }else{
+            //return;
+        }
+        db->~QMimeDatabase();
+        fmt->~QString();
+        break;
+    }
+
 }
 
-void mwindow::media_status(QMediaPlayer::MediaStatus status){
+
+/*void mwindow::media_status(QMediaPlayer::MediaStatus status){
     //qDebug() << status;
     switch(status){
     case QMediaPlayer::MediaStatus::LoadedMedia:
-        /* to start playing right away */
+        // to start playing right away
     case QMediaPlayer::MediaStatus::EndOfMedia:
         this->plnext();
         break;
@@ -226,9 +295,9 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
     case QMediaPlayer::MediaStatus::StalledMedia:
     case QMediaPlayer::MediaStatus::BufferingMedia:
         break;
-    case QMediaPlayer::MediaStatus::LoadingMedia: /* when new song is loaded */
-        break; /* BufferedMedia is triggered when it finishes, so it is of no use */
-    case QMediaPlayer::MediaStatus::BufferedMedia: /* this usually means it started playing */
+    case QMediaPlayer::MediaStatus::LoadingMedia: // when new song is loaded
+        break; // BufferedMedia is triggered when it finishes, so it is of no use
+    case QMediaPlayer::MediaStatus::BufferedMedia: // this usually means it started playing
         TagLib::FileRef *ref = new TagLib::FileRef(qPrintable(player->media().canonicalResource().url().path()));
         this->prog->setRange(0, ref->audioProperties()->lengthInSeconds());
         this->prog->setEnabled(true);
@@ -238,7 +307,7 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
         this->setWindowTitle(QString(ref->tag()->artist().toCString(true))+" - "+QString(ref->tag()->title().toCString(true))+" :: OCELOT v"+jag->VERSION);
         this->status.setText("<b>NOW PLAYING:</b> "+QString(ref->tag()->title().toCString(true))+" :: "+*fmt+" "+QString::number(ref->audioProperties()->bitrate())+"kb/s @"+QString::number(ref->audioProperties()->sampleRate())+"Hz");
 
-        if(mdb->mimeTypeForFile(player->media().canonicalResource().url().path()).name().remove(0,6) == "flac"){ /* chops the 'audio/' from mime name */
+        if(mdb->mimeTypeForFile(player->media().canonicalResource().url().path()).name().remove(0,6) == "flac"){ //chops the 'audio/' from mime name
             TagLib::FLAC::File *x = new TagLib::FLAC::File(qPrintable(player->media().canonicalResource().url().path()));
             if(x->pictureList().front() != nullptr){
                 QPixmap *np = new QPixmap();
@@ -262,15 +331,14 @@ void mwindow::media_status(QMediaPlayer::MediaStatus status){
         fmt->~QString();
         break;
     }
-}
+}*/
 
 void mwindow::play(QTreeWidgetItem *item){
-    if(!item->data(0, Qt::UserRole).isValid()) /* case path is empty */
-        return;
-
-    this->player->setMedia(QUrl::fromLocalFile(item->data(0, Qt::UserRole).toStringList().first()));
     this->plappend(item->data(0, Qt::UserRole).toStringList());
-    this->player->play();
+    this->player_play(new QString(item->data(0, Qt::UserRole).toStringList().first()));
+
+    this->fr->~FileRef();
+    this->fr = new TagLib::FileRef(qPrintable(item->data(0, Qt::UserRole).toStringList().first()));
 }
 
 void mwindow::select(QTreeWidgetItem *item){

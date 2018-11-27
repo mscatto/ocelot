@@ -30,7 +30,7 @@ playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QW
     this->headerctx = headerctx;
     this->bodyctx = new QMenu();
     this->emptyctx = new QMenu();
-    this->playing = new QTreeWidgetItem();
+    //this->playing = new QTreeWidgetItem();
     this->jag = jag;
 
     playlistview *p = qobject_cast<playlistview*>(parent);
@@ -38,7 +38,7 @@ playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QW
 
     QList<QAction*> *al = new QList<QAction*>();
     al->append(new QAction(QString("Clear playlist")));
-    connect(al->back(), &QAction::triggered, this, &playlist::clear);
+    connect(al->back(), &QAction::triggered, this, &playlist::clearchildren);
     al->append(new QAction(QString("Clear Selection")));
     connect(al->back(), &QAction::triggered, this, &QTreeWidget::clearSelection);
     al->append(new QAction(QString("Export playlist")));
@@ -113,10 +113,11 @@ void playlist::show_bodyctx(const QPoint & pos){
 }
 
 void playlist::clearchildren(){
-    this->playing = new QTreeWidgetItem();
     this->pl.clear();
-    this->selected->~QTreeWidgetItem();
     this->clear();
+    this->playing_index = 0;
+    this->playing = nullptr;
+    this->selected = nullptr;
 }
 
 void playlist::rebuild_columns(){
@@ -195,8 +196,9 @@ void playlist::append(QStringList f){
                 /* TODO option to not append playing */
                 this->clearSelection();
                 this->setItemSelected(nitem,true);
-                //if(this->playing!=nullptr)
-                this->playing->setData(0, Qt::EditRole,".");
+
+                if(this->playing != nullptr)
+                    this->playing->setData(0, Qt::EditRole,".");
                 this->playing = nitem;
                 this->playing->setData(0, Qt::EditRole,this->playchar);
                 this->playing_index++;
@@ -211,7 +213,7 @@ void playlist::append(QStringList f){
 
 void playlist::next(){
     if(this->playing_index-1 >= this->pl.length()-1){ /* case the end of playlist */
-        this->EOP();
+        //this->EOP();
         return;
     }
 

@@ -57,9 +57,9 @@ void library::process(){
         q->bindValue(":path", this->path);
         q->exec();
 
-        emit added(this->path);
+        //emit added(this->path);
     }
-    qInfo() << qPrintable("[INFO] Directory scan complete.");
+    //qInfo() << qPrintable("[INFO] Directory scan complete.");
 
     emit finished();
 }

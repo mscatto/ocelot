@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QThread>
 #include "library.hpp"
+#include "player.hpp"
 
 class vars : QObject
 {
@@ -24,6 +25,7 @@ public:
     QStringList *dumppaths();
     QStringList *dumplibinfo();
     QStringList *libs;
+    player *mp;
 
     vars();
     ~vars();
@@ -34,6 +36,7 @@ private:
     void initdb();
     void initlibs();
     void initdata();
+    void initplayer();
 public slots:
     void libfinished(uint *num);
 };

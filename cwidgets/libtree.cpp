@@ -53,6 +53,7 @@ libtree::libtree(mwindow *win) : QFrame(win){
     ctx->addSeparator();
     ctx->addAction(prop);
 
+    this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
     this->setFrameShape(QFrame::StyledPanel);
     this->setFrameShadow(QFrame::Sunken);
     this->layout()->setContentsMargins(1,1,1,1);

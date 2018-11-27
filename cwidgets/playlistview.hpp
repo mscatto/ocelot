@@ -34,6 +34,7 @@ private:
     playlist *plplaying; /* from currently playing track */
     QString order;
     QMenu *headermenu;
+    QMenu *ctx;
     vars *jag;
     mwindow *win;
     QDialog *renamer;
@@ -65,6 +66,10 @@ private slots:
     void tab_rename(QString key);
     void renamer_ok();
     void renamer_cancel();
+signals:
+    void clearsel();
+    void clearpl();
+    void exportpl();
 };
 
 #endif // PLAYLISTVIEW_HPP
