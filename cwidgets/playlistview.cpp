@@ -20,6 +20,7 @@
 #include "playlist.hpp"
 #include "renamepbtn.hpp"
 
+#include <QSqlQuery>
 #include <QHeaderView>
 #include <QPushButton>
 #include <QGridLayout>
@@ -40,7 +41,7 @@
 playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
     this->jag = jag;
     this->win = parent;
-
+    this->setContentsMargins(0,0,0,0);
     this->renamer = new QDialog(this);
     this->renamer->setFixedSize(480,48);
     this->renamer->setModal(true);
@@ -51,6 +52,7 @@ playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
     grid->addWidget(namebox,0,0,1,1);
     grid->addWidget(bb,0,1,1,1);
     this->renamer->setLayout(grid);
+
     connect(bb, &QDialogButtonBox::accepted, this, &playlistview::renamer_ok);
     connect(bb, &QDialogButtonBox::rejected, this, &playlistview::renamer_cancel);
 

@@ -33,6 +33,7 @@ playlist::playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QW
     //this->playing = new QTreeWidgetItem();
     this->jag = jag;
 
+
     playlistview *p = qobject_cast<playlistview*>(parent);
     connect(this, &playlist::play, p, &playlistview::swapitem);
 

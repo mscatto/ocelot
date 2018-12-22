@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia sql
+QT       += core gui multimedia sql KFileMetaData
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,7 +12,7 @@ TARGET = ocelot
 TEMPLATE = app
 OUTPUT += console
 QT_CONFIG -= no-pkg-config
-CONFIG += link_pkgconfig debug
+CONFIG += link_pkgconfig debug console
 CONFIG += static
 PKGCONFIG += taglib
 
@@ -43,12 +43,15 @@ SOURCES += \
 	dialogs/settings.cpp \
 	src/mwindow.cpp \
 	src/vars.cpp \
-    dialogs/transcoder.cpp \
-    cwidgets/playlistview.cpp \
-    cwidgets/playlist.cpp \
-    cwidgets/renamepbtn.cpp \
-    dialogs/tageditor.cpp \
-    src/player.cpp
+	dialogs/transcoder.cpp \
+	cwidgets/playlistview.cpp \
+	cwidgets/playlist.cpp \
+	cwidgets/renamepbtn.cpp \
+	dialogs/tageditor.cpp \
+	src/player.cpp \
+	cwidgets/dummywidget.cpp \
+	dialogs/wizard.cpp \
+    src/tagextractor.cpp
 
 HEADERS += \
 	src/library.hpp \
@@ -64,14 +67,20 @@ HEADERS += \
 	dialogs/settings.hpp \
 	src/mwindow.hpp \
 	src/vars.hpp \
-    dialogs/transcoder.hpp \
-    cwidgets/playlistview.hpp \
-    cwidgets/playlist.hpp \
-    cwidgets/renamepbtn.hpp \
-    dialogs/tageditor.hpp \
-    src/player.hpp
+	dialogs/transcoder.hpp \
+	cwidgets/playlistview.hpp \
+	cwidgets/playlist.hpp \
+	cwidgets/renamepbtn.hpp \
+	dialogs/tageditor.hpp \
+	src/player.hpp \
+	cwidgets/dummywidget.h \
+	dialogs/wizard.h \
+    src/tagextractor.h
 
 FORMS +=
 
 RESOURCES += \
 	pak.qrc
+
+DISTFILES += \
+	README.md

@@ -27,7 +27,7 @@
 #include "src/library.hpp"
 #include "src/mwindow.hpp"
 
-class libtree : public QFrame
+class libtree : public QWidget
 {
     Q_OBJECT
 private:

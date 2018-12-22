@@ -221,7 +221,13 @@ void vars::initdata(){
         '0')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_appendbehaviour',\
-                       '0')");
+        '0')");
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'general_runwizard',\
+        '1')");
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'ui_scheme',\
+        '0')");
 }
 
 void vars::initpmap(){

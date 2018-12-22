@@ -30,13 +30,26 @@
 #include "mwindow.hpp"
 #include "library.hpp"
 #include "vars.hpp"
+#include "dialogs/wizard.h"
+
+void checkwizard(vars *jag);
 
 int main(int argc, char *argv[]){
-    vars *jag = new vars();
-
     QApplication a(argc, argv);
+    vars *jag = new vars();
+    checkwizard(jag);
+
     mwindow *mw = new mwindow(jag);
     mw->show();
 
     return a.exec();
+}
+
+void checkwizard(vars *jag){
+    QSqlQuery q = jag->DB_REF->exec("SELECT val FROM data WHERE var='general_runwizard'");
+    q.next();
+    if(q.value(0)==1){
+        wizard *w = new wizard(jag);
+        w->show();
+    }
 }

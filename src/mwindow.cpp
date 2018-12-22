@@ -72,6 +72,7 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->statusBar()->addPermanentWidget(&this->proglabel);
 
 
+    connect(this, &mwindow::uilock_flip, this, &mwindow::uilock_respond);
     connect(this->jag->mp, &player::positionChanged, this, &mwindow::progslider_sync);
     connect(this->prog, &QSlider::sliderMoved, this, &mwindow::progslider_moved);
     connect(this->prog, &QSlider::valueChanged, this, &mwindow::progslider_changed);
@@ -90,6 +91,14 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     status.setText("<b>IDLE</b>");
     proglabel.setText("<b>"+QDateTime::fromTime_t(0).toString("mm:ss")+" / "+QDateTime::fromTime_t(0).toString("mm:ss")+"</b>");
 
+    this->wb = new workbench(jag, this);
+    this->setCentralWidget(this->wb);
+    /*d = new QDockWidget();
+    d->setWidget(new coverview(this));
+    this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea,d);*/
+
+    //this->wb = new workbench(jag, this);
+    //this->setCentralWidget(this->wb);
     /*QStringList *data = new QStringList();
     QSqlQuery d = this->lib->query("SELECT path FROM songs");
     while(d.next())
@@ -97,8 +106,38 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->lib->scan("/storage/music", data);
     data->~QStringList();*/
 
-    this->wb = new workbench(jag, this);
-    this->setCentralWidget(wb);
+    //this->wb = new workbench(jag, this);
+    /*QWidget dummy;
+    dummy.sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
+    dummy.sizePolicy().setVerticalPolicy(QSizePolicy::Minimum);
+    this->setCentralWidget(&dummy);
+
+    QDockWidget *cover = new QDockWidget();
+    cover->setWidget(new coverview(this));
+    //cover->setTitleBarWidget(new QWidget());
+    cover->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
+    this->addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, cover);
+
+    QDockWidget *tag = new QDockWidget();
+    tag->setWidget(new tagview(this->jag, this));
+    tag->setContentsMargins(0,0,0,0);
+    //tag->setTitleBarWidget(new QWidget());
+    tag->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
+    this->addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, tag);
+
+    QDockWidget *plmgr = new QDockWidget();
+    plmgr->setWidget(new playlistview(this->jag, this));
+    plmgr->setContentsMargins(0,0,0,0);
+    //plmgr->setTitleBarWidget(new QWidget());
+    plmgr->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
+    this->addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, plmgr);
+
+    QDockWidget *lib = new QDockWidget();
+    lib->setWidget(new libtree(this));
+    //lib->setTitleBarWidget(new QWidget());
+    lib->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
+    this->addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, lib);*/
+
     this->addToolBar(this->bar);
 
     qInfo() << "[INFO] Ocelot initialized successfully!\n\n";
@@ -266,6 +305,15 @@ void mwindow::player_respond(QMediaPlayer::MediaStatus status){
 
 }
 
+void mwindow::uilock_respond(){
+    if(this->windowTitle().contains("[LAYOUT EDITOR ENABLED]")){
+        this->setWindowTitle(this->windowTitle().remove("[LAYOUT EDITOR ENABLED] "));
+        //this->status.setText("<b>IDLE</b>");
+    }else{
+        this->setWindowTitle("[LAYOUT EDITOR ENABLED] "+this->windowTitle());
+        //this->status.setText("<b>[LAYOUT EDITOR ENABLED! DISABLE ON THE COGWHEEL MENU</b>");
+    }
+}
 
 /*void mwindow::media_status(QMediaPlayer::MediaStatus status){
     //qDebug() << status;

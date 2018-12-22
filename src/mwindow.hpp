@@ -25,7 +25,6 @@
 #include <QLabel>
 #include <QMediaPlayer>
 
-#include "libmgr.hpp"
 #include "workbench.hpp"
 #include "vars.hpp"
 
@@ -47,9 +46,9 @@ public:
 
     //vars *jaguatirica();
 private:
+    bool uimanager = false;
     TagLib::FileRef *fr;
     vars *jag;
-    libmgr *lib;
     QLabel status;
     QLabel proglabel;
     volslider *vol;
@@ -82,7 +81,9 @@ private slots:
     void progslider_changed(int x);
     void volslider_moved(int x);
     void player_respond(QMediaPlayer::MediaStatus status);
+    void uilock_respond();
 signals:
+    void uilock_flip();
     void player_play(QString *file);
     void clearcover();
     void selectionchanged(QString item);

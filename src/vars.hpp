@@ -3,6 +3,7 @@
 #include <QStringList>
 #include <QStandardPaths>
 #include <QSqlDatabase>
+#include <QSqlQuery>
 #include <QMap>
 #include <QThread>
 #include "library.hpp"
@@ -12,7 +13,7 @@ class vars : QObject
 {
 public:
     const char* VERSION = "0.3a";
-    QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/ocelot";
+    QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);//+"/ocelot";
     QString DB_PATH = DATA_PATH+"/ocelot.database";
     QSqlDatabase *DB_REF = new QSqlDatabase();
     QString translate_key(QString key);

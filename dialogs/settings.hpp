@@ -7,7 +7,6 @@
 
 
 #include "src/vars.hpp"
-#include "src/libmgr.hpp"
 
 class settings : public QDialog
 {

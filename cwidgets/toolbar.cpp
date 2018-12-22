@@ -15,7 +15,7 @@ toolbar::toolbar(QWidget *win, QMenu *conf) : QToolBar(win){
     conf->addSeparator();
     conf->addAction(new QAction("Settings"));
     conf->addSeparator();
-    conf->addAction(new QAction("Unlock Widget Manager"));
+    conf->addAction(new QAction("Toggle Layout Editor"));
     conf->addSeparator();
     conf->addAction(new QAction("About"));
     conf->addAction(new QAction("Exit"));
@@ -40,6 +40,7 @@ toolbar::toolbar(QWidget *win, QMenu *conf) : QToolBar(win){
 
     connect(act.last(), &QAction::triggered, conf, &QMenu::show);
     connect(conf->actions().at(4), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::config_spawn);
+    connect(conf->actions().at(6), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::uilock_flip);
     connect(conf->actions().at(8), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::about_spawn);
     //btn->setAutoRaise(true);
     this->addSeparator();

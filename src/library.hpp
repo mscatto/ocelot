@@ -20,7 +20,6 @@
 
 #include <QList>
 
-#include "database.hpp"
 #include <QSqlQueryModel>
 #include <QSqlDatabase>
 #include <QtWidgets>

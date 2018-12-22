@@ -25,10 +25,11 @@
 #include <QSqlRecord>
 #include <QSqlError>
 #include <QMenu>
+#include <QSqlQuery>
 
 #include "src/mwindow.hpp"
 
-libtree::libtree(mwindow *win) : QFrame(win){
+libtree::libtree(mwindow *win) : QWidget(){
     QGridLayout *grid =  new QGridLayout(this);
     QLineEdit *filterbox = new QLineEdit(this);
     QPushButton *help = new QPushButton("?", this);
@@ -54,8 +55,8 @@ libtree::libtree(mwindow *win) : QFrame(win){
     ctx->addAction(prop);
 
     this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
-    this->setFrameShape(QFrame::StyledPanel);
-    this->setFrameShadow(QFrame::Sunken);
+    //this->setFrameShape(QFrame::StyledPanel);
+    //this->setFrameShadow(QFrame::Sunken);
     this->layout()->setContentsMargins(1,1,1,1);
     this->layout()->setSpacing(1);
     this->setMinimumWidth(250);
