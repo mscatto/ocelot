@@ -28,55 +28,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += \
-		src/main.cpp \
-	src/library.cpp \
-	src/workbench.cpp \
-	cwidgets/coverview.cpp \
-	cwidgets/libtree.cpp \
-	cwidgets/progslider.cpp \
-	cwidgets/splitter.cpp \
-	cwidgets/tagview.cpp \
-	cwidgets/volslider.cpp \
-	dialogs/about.cpp \
-	cwidgets/toolbar.cpp \
-	dialogs/settings.cpp \
-	src/mwindow.cpp \
-	src/vars.cpp \
-	dialogs/transcoder.cpp \
-	cwidgets/playlistview.cpp \
-	cwidgets/playlist.cpp \
-	cwidgets/renamepbtn.cpp \
-	dialogs/tageditor.cpp \
-	src/player.cpp \
-	cwidgets/dummywidget.cpp \
-	dialogs/wizard.cpp \
-    src/tagextractor.cpp
-
-HEADERS += \
-	src/library.hpp \
-	src/workbench.hpp \
-	cwidgets/coverview.hpp \
-	cwidgets/tagview.hpp \
-	cwidgets/splitter.hpp \
-	cwidgets/progslider.hpp \
-	cwidgets/libtree.hpp \
-	cwidgets/volslider.hpp \
-	dialogs/about.hpp \
-	cwidgets/toolbar.hpp \
-	dialogs/settings.hpp \
-	src/mwindow.hpp \
-	src/vars.hpp \
-	dialogs/transcoder.hpp \
-	cwidgets/playlistview.hpp \
-	cwidgets/playlist.hpp \
-	cwidgets/renamepbtn.hpp \
-	dialogs/tageditor.hpp \
-	src/player.hpp \
-	cwidgets/dummywidget.h \
-	dialogs/wizard.h \
-    src/tagextractor.h
-
 FORMS +=
 
 RESOURCES += \
@@ -84,3 +35,54 @@ RESOURCES += \
 
 DISTFILES += \
 	README.md
+
+HEADERS += \
+    cwidgets/coverview.hpp \
+    cwidgets/dummywidget.hpp \
+    cwidgets/libtree.hpp \
+    cwidgets/playlist.hpp \
+    cwidgets/playlistview.hpp \
+    cwidgets/progslider.hpp \
+    cwidgets/renamepbtn.hpp \
+    cwidgets/splitter.hpp \
+    cwidgets/tagview.hpp \
+    cwidgets/toolbar.hpp \
+    cwidgets/volslider.hpp \
+    dialogs/about.hpp \
+    dialogs/settings.hpp \
+    dialogs/tageditor.hpp \
+    dialogs/transcoder.hpp \
+    dialogs/wizard.hpp \
+    src/library.hpp \
+    src/mwindow.hpp \
+    src/player.hpp \
+    src/tagextractor.hpp \
+    src/vars.hpp \
+    src/workbench.hpp \
+    src/topostfix.hpp
+
+SOURCES += \
+    cwidgets/coverview.cpp \
+    cwidgets/dummywidget.cpp \
+    cwidgets/libtree.cpp \
+    cwidgets/playlist.cpp \
+    cwidgets/playlistview.cpp \
+    cwidgets/progslider.cpp \
+    cwidgets/renamepbtn.cpp \
+    cwidgets/splitter.cpp \
+    cwidgets/tagview.cpp \
+    cwidgets/toolbar.cpp \
+    cwidgets/volslider.cpp \
+    dialogs/about.cpp \
+    dialogs/settings.cpp \
+    dialogs/tageditor.cpp \
+    dialogs/transcoder.cpp \
+    dialogs/wizard.cpp \
+    src/library.cpp \
+    src/main.cpp \
+    src/mwindow.cpp \
+    src/player.cpp \
+    src/tagextractor.cpp \
+    src/vars.cpp \
+    src/workbench.cpp \
+    src/topostfix.cpp

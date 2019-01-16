@@ -23,18 +23,10 @@
 #include <QApplication>
 #include <QMessageLogger>
 #include <QDebug>
-#include <QStandardPaths>
-#include <QSqlQueryModel>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QMainWindow>
-#include <QtWidgets>
-#include <QtConcurrent/QtConcurrent>
 
 #include "mwindow.hpp"
-#include "library.hpp"
 #include "vars.hpp"
-#include "dialogs/wizard.h"
+#include "dialogs/wizard.hpp"
 
 void checkwizard(vars *jag);
 

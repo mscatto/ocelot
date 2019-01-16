@@ -41,6 +41,13 @@
 #include "cwidgets/progslider.hpp"
 #include "cwidgets/toolbar.hpp"
 
+/*
+ * This class represents the main window. duh.
+ *
+ * it holds the statusbar, toolbar and the workbench,
+ * but it also parents all the other dialogs and reroutes some signals
+ * between its children, ensuring modularity between each other.
+ */
 class mwindow : public QMainWindow
 {
     Q_OBJECT
@@ -48,7 +55,6 @@ public:
     mwindow(vars *jag);
     ~mwindow();
 
-    //vars *jaguatirica();
 private:
     bool uimanager = false;
     TagLib::FileRef *fr;

@@ -33,6 +33,18 @@
 
 class workbench : public QWidget
 {
+    enum defwidgets{
+        VSPLIT = '-',
+        HSPLIT = '+',
+        DUMMY = 'z',
+        TREELIB = 'a',
+        PANELLIB = 'b',
+        PLMGR = 'c',
+        TAGVIEW = 'd',
+        COVERVIEW = 'e',
+        VISUALIZER = 'f'
+    };
+
 private:
     bool locked = true;
     QGridLayout *ml;
@@ -41,20 +53,32 @@ private:
     QMenu *ctx_replace;
     void inject(QWidget *w);
     void refreshdb();
-    void recurscan(QWidget *w, QString *out);
+    QRegularExpression *lsplitter = new QRegularExpression(".\\[(.*?\\]),(.*)\\]");
+    void setlayout(QString *l);
+    char fetchid(QString objname);
+    void dumplayout(QObject *n, QString *out);
+    QWidget *fetchwidget(const char *id);
     vars *jag;
+
+    QWidget *_vsplitter(bool filled);
+    QWidget *_hsplitter(bool filled);
+    QWidget *_libtree();
+    QWidget *_playlistmgr();
+    QWidget *_coverview();
+    QWidget *_tagview();
 public:
     workbench(vars *jag, QWidget* win);
+    bool islocked();
     ~workbench();
 public slots:
     void lock_flip();
     void ctx_req(QPoint p);
-    void add_vsplitter();
-    void add_hsplitter();
-    void add_libtree();
-    void add_playlistmgr();
-    void add_coverview();
-    void add_tagview();
+    void ctx_vsplitter();
+    void ctx_hsplitter();
+    void ctx_libtree();
+    void ctx_playlistmgr();
+    void ctx_coverview();
+    void ctx_tagview();
     void remove_parentwidget();
     void remove_widget();
     void clear();

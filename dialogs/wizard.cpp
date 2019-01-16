@@ -20,7 +20,7 @@
  * software or the use or other dealings in the Software.
  */
 
-#include "wizard.h"
+#include "wizard.hpp"
 
 #include <QSqlQuery>
 #include <QDialogButtonBox>

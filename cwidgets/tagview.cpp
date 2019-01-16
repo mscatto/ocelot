@@ -32,7 +32,7 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/tmap.h>
 
-tagview::tagview(vars *jag, mwindow *parent) : QTreeWidget(parent){
+tagview::tagview(vars *jag, mwindow *parent) : QTreeWidget(){
     this->jag = jag;
     this->setColumnCount(2);
     this->setColumnWidth(0, 200);

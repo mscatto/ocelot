@@ -43,7 +43,7 @@
 #include <taglib/tlist.h>
 #include <QFocusEvent>
 
-playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(parent){
+playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(){
     this->jag = jag;
     this->win = parent;
     this->setContentsMargins(0,0,0,0);

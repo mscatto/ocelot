@@ -98,50 +98,6 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
 
     this->wb = new workbench(jag, this);
     this->setCentralWidget(this->wb);
-    /*d = new QDockWidget();
-    d->setWidget(new coverview(this));
-    this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea,d);*/
-
-    //this->wb = new workbench(jag, this);
-    //this->setCentralWidget(this->wb);
-    /*QStringList *data = new QStringList();
-    QSqlQuery d = this->lib->query("SELECT path FROM songs");
-    while(d.next())
-        data->append(d.record().value(0).toString());
-    this->lib->scan("/storage/music", data);
-    data->~QStringList();*/
-
-    //this->wb = new workbench(jag, this);
-    /*QWidget dummy;
-    dummy.sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
-    dummy.sizePolicy().setVerticalPolicy(QSizePolicy::Minimum);
-    this->setCentralWidget(&dummy);
-
-    QDockWidget *cover = new QDockWidget();
-    cover->setWidget(new coverview(this));
-    //cover->setTitleBarWidget(new QWidget());
-    cover->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
-    this->addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, cover);
-
-    QDockWidget *tag = new QDockWidget();
-    tag->setWidget(new tagview(this->jag, this));
-    tag->setContentsMargins(0,0,0,0);
-    //tag->setTitleBarWidget(new QWidget());
-    tag->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
-    this->addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, tag);
-
-    QDockWidget *plmgr = new QDockWidget();
-    plmgr->setWidget(new playlistview(this->jag, this));
-    plmgr->setContentsMargins(0,0,0,0);
-    //plmgr->setTitleBarWidget(new QWidget());
-    plmgr->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
-    this->addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, plmgr);
-
-    QDockWidget *lib = new QDockWidget();
-    lib->setWidget(new libtree(this));
-    //lib->setTitleBarWidget(new QWidget());
-    lib->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
-    this->addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, lib);*/
 
     this->addToolBar(this->bar);
 
@@ -311,12 +267,10 @@ void mwindow::player_respond(QMediaPlayer::MediaStatus status){
 }
 
 void mwindow::uilock_respond(){
-    if(this->windowTitle().contains("[LAYOUT EDITOR ENABLED]")){
-        this->setWindowTitle(this->windowTitle().remove("[LAYOUT EDITOR ENABLED] "));
-        //this->status.setText("<b>IDLE</b>");
+    if(this->wb->islocked()){
+        this->status.setText("<b>LAYOUT EDITOR ENABLED!</b> :: You can disable it on the cogwheel button.");
     }else{
-        this->setWindowTitle("[LAYOUT EDITOR ENABLED] "+this->windowTitle());
-        //this->status.setText("<b>[LAYOUT EDITOR ENABLED! DISABLE ON THE COGWHEEL MENU</b>");
+        this->status.setText(QString("<b>Ocelot v")+this->jag->VERSION+"</b");
     }
 }
 

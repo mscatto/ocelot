@@ -49,7 +49,6 @@ public:
     QStringList *dumplibinfo();
     QStringList *libs;
     player *mp;
-
     vars();
     ~vars();
 private:

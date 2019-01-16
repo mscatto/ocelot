@@ -32,6 +32,7 @@
 #include "src/mwindow.hpp"
 
 class tagview : public QTreeWidget{
+    Q_OBJECT
 private:
     vars *jag;
     const QStringList order = (QStringList()<<"TITLE"<<"ALBUM"<<"ARTIST"<<"YEAR"<<"GENRE"<<"TRACKNUMBER"<<"DISCNUMBER");

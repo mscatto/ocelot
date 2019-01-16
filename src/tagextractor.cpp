@@ -20,7 +20,7 @@
  * software or the use or other dealings in the Software.
  */
 
-#include "tagextractor.h"
+#include "tagextractor.hpp"
 
 tagextractor::tagextractor(const QString &url,
                            const QString &mimetype,

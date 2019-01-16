@@ -20,7 +20,7 @@
  * software or the use or other dealings in the Software.
  */
 
-#include "dummywidget.h"
+#include "dummywidget.hpp"
 #include <QGridLayout>
 #include <QLabel>
 

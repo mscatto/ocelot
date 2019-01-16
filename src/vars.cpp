@@ -12,7 +12,7 @@
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * The Software is provided “as is”, without warranty of any kind, express or implied,
+ * The Software is provided “as is”, without warranty of any kind, sress or implied,
  * including but not limited to the warranties of merchantability, fitness for a
  * particular purpose and noninfringement. In no event shall the authors or copyright
  * holders be liable for any claim, damages or other liability, whether in an action
@@ -33,6 +33,7 @@
 #include <QSqlDriver>
 #include <QSqlRecord>
 #include <QSqlResult>
+#include<bits/stdc++.h>
 
 vars::vars(){
     qInfo("[INFO] Starting Ocelot Media Manager v%s", this->VERSION);
@@ -269,4 +270,3 @@ void vars::initpmap(){
     this->pmap.insert("COMPOSER","Composer");
     this->pmap.insert("LYRICS","Lyrics");
 }
-
