@@ -60,6 +60,7 @@ private:
     QWidget *fetchwidget(const char *id);
     vars *jag;
 
+    /* these _functions are responsible for new widgets allocations */
     QWidget *_vsplitter(bool filled);
     QWidget *_hsplitter(bool filled);
     QWidget *_libtree();
@@ -71,7 +72,7 @@ public:
     bool islocked();
     ~workbench();
 public slots:
-    void lock_flip();
+    /* ctx_ slots are called by the context menu inside the layout editor */
     void ctx_req(QPoint p);
     void ctx_vsplitter();
     void ctx_hsplitter();
@@ -79,6 +80,8 @@ public slots:
     void ctx_playlistmgr();
     void ctx_coverview();
     void ctx_tagview();
+    void lock_flip();
+
     void remove_parentwidget();
     void remove_widget();
     void clear();

@@ -71,6 +71,7 @@ private:
     tageditor *tagdiag;
     about *adiag;
     QMediaPlayer::MediaStatus prev = QMediaPlayer::MediaStatus::UnknownMediaStatus;
+    void closeEvent(QCloseEvent *event);
 public slots:
     void toolbar_pause(bool res=false);
     void toolbar_play();

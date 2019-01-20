@@ -271,7 +271,7 @@ void settings::lib_dirpicker(){
     if(dir.isEmpty())
         return;
 
-    qInfo() << "[INFO] Adding new library through settings dialog...";
+    qInfo() << "[INFO] Adding a new library through the settings dialog...";
     QThread *t = new QThread();
     library *l = new library(&dir,this->jag->DB_REF,this->jag->dumppaths());
     l->moveToThread(t);

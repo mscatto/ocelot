@@ -33,7 +33,14 @@ volslider::volslider(Qt::Orientation o, toolbar *bar, QWidget *parent) : QSlider
     this->setRange(0, 100);
     this->setValue(100);
     this->setToolTip("Playback volume");
-    connect(bar, &QToolBar::orientationChanged, this, &QSlider::setOrientation);
+    if(o==Qt::Horizontal){
+        this->setFixedWidth(96);
+        this->setFixedHeight(16);
+    }else{
+        this->setFixedWidth(16);
+        this->setFixedHeight(96);
+    }
+    connect(bar, &toolbar::orientationChanged, this, &volslider::rotate);
     this->setStyleSheet("\
         QSlider::groove:horizontal{\
         position: absolute;\
@@ -56,6 +63,44 @@ volslider::~volslider(){
 
 void volslider::rotate(Qt::Orientation o){
     this->setOrientation(o);
+    if(o==Qt::Horizontal){
+        this->setFixedWidth(128);
+        this->setFixedHeight(16);
+        this->setStyleSheet("\
+            QSlider::groove:horizontal{\
+            position: absolute;\
+            border: 1px solid #979797;\
+            background: solid #D9D9D9;\
+            height: 8px;\
+            margin: 6px 0; \
+            }QSlider::handle:horizontal{\
+            border: 2px solid #777777;\
+            background: solid #434343;\
+            height: 16px;\
+            width: 8px;\
+            margin: -8px 16px; \
+        }");
+    }else{
+        this->setFixedWidth(16);
+        this->setFixedHeight(128);
+        this->setStyleSheet("\
+            QSlider::groove:vertical{\
+            position: absolute;\
+            left: 16px;\
+            right: 16px;\
+            border: 1px solid #979797;\
+            background: solid #D9D9D9;\
+            margin: 32px -32px; \
+            }QSlider::handle:vertical{\
+            border: 2px solid #777777;\
+            background: solid #434343;\
+            height: 12px;\
+            width: 32px;\
+            margin: 0px -16px; \
+        }");
+    }
+    qInfo() << "lel";//position: absolute;
+
 }
 
 //void volslider::mousePressEvent(QMouseEvent *event){

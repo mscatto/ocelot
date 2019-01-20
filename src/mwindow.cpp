@@ -67,7 +67,7 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     //connect(jag->mp, &player::mediaStatusChanged, this, &mwindow::player_respond);
     //this->media_status(player->mediaStatus());
     this->setWindowIcon(QIcon(":/internals/icon"));
-    this->setMinimumSize(896, 504);
+    this->setMinimumSize(360, 220);
     this->layout()->setContentsMargins(0,0,0,0);
     this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
     this->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
@@ -106,6 +106,11 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
 
 mwindow::~mwindow(){
 
+}
+
+void mwindow::closeEvent(QCloseEvent *event){
+    qInfo() << "lel";
+    //event->ignore();
 }
 
 void mwindow::toolbar_pause(bool res){

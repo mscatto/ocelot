@@ -48,11 +48,10 @@
 #include "cwidgets/dummywidget.hpp"
 
 workbench::workbench(vars *jag, QWidget *win) : QWidget(){
-    //this->setFrameStyle(QFrame::Shape::StyledPanel);
-    //this->setFrameStyle(QFrame::Sunken);
     this->jag = jag;
     this->win = win;
     this->setContextMenuPolicy(Qt::CustomContextMenu);
+    this->setContentsMargins(0,0,0,0);
     connect(qobject_cast<mwindow*>(win), &mwindow::uilock_flip, this, &workbench::lock_flip);
     connect(this, &QWidget::customContextMenuRequested, this, &workbench::ctx_req);
     this->ml = new QGridLayout();
@@ -89,26 +88,6 @@ workbench::workbench(vars *jag, QWidget *win) : QWidget(){
     connect(act.at(6), &QAction::triggered, this, &workbench::ctx_playlistmgr);
     connect(act.at(7), &QAction::triggered, this, &workbench::ctx_tagview);
     connect(act.at(8), &QAction::triggered, this, &workbench::ctx_coverview);
-
-    //grid->addWidget(new libtree(qobject_cast<mwindow*>(win)));
-
-    /*splitter *x = new splitter(Qt::Horizontal, this);
-    splitter *y = new splitter(Qt::Vertical, this);
-    splitter *z = new splitter(Qt::Horizontal, this);
-    libtree *j = new libtree(qobject_cast<mwindow*>(win));
-    j->populate(jag->DB_REF);
-    //connect(j->tree, )
-    x->addWidget(j);
-    x->addWidget(y);
-
-    y->addWidget(new playlistview(jag, qobject_cast<mwindow*>(win)));
-    y->addWidget(z);
-
-    z->addWidget(new coverview(qobject_cast<mwindow*>(win)));
-    z->addWidget(new tagview(jag, qobject_cast<mwindow*>(win)));
-
-    grid->addWidget(x);*/
-    /* expand further...*/
 }
 
 bool workbench::islocked(){
@@ -178,6 +157,7 @@ void workbench::ctx_req(QPoint p){
     ctx.exec(this->mapToGlobal(p));
 }
 
+/* this reparents *w to the widget under ctx_lastpos click */
 void workbench::inject(QWidget *w){/////////////////////////
     if(this==this->childAt(this->ctx_lastpos))
         this->ml->addWidget(w);
@@ -185,8 +165,8 @@ void workbench::inject(QWidget *w){/////////////////////////
     else if(this==this->childAt(this->ctx_lastpos)->parent()){
         //if(this->children().count()>0){
             QWidget *old = this->childAt(this->ctx_lastpos);
-            //this->remo
-            this->ml->replaceWidget(old, w);
+            this->ml->removeWidget(old);
+            this->ml->addWidget(w);
             old->~QWidget();
         /*}else{
             this->ml->addWidget(w);
@@ -196,9 +176,12 @@ void workbench::inject(QWidget *w){/////////////////////////
     /* if it is not, expect the parent to be a splitter */
     else if(this->childAt(this->ctx_lastpos)->parent()->metaObject()->className()==QString("QSplitter")){
         QSplitter *par = qobject_cast<QSplitter*>(this->childAt(this->ctx_lastpos)->parent());
-        QWidget *old = par->widget(par->indexOf(this->childAt(this->ctx_lastpos)));
-        par->replaceWidget(par->indexOf(this->childAt(this->ctx_lastpos)), w);
-        old->~QWidget();
+        //QWidget *old = par->widget(par->indexOf(this->childAt(this->ctx_lastpos)));
+        int z = par->indexOf(this->childAt(this->ctx_lastpos));
+        par->widget(z)->~QWidget();
+        par->insertWidget(z, w);
+        //par->replaceWidget(par->indexOf(this->childAt(this->ctx_lastpos)), w);
+        //old->~QWidget();
     }
     /* but if it isn't, something went wrong */
     else qWarning() << "[WARNING] at workbench::inject - widget is neither a splitter or a dummy!";
@@ -206,6 +189,7 @@ void workbench::inject(QWidget *w){/////////////////////////
     this->refreshdb();
 }
 
+/* refreshdb handles writing the current layout to the database, converting it to postfix */
 void workbench::refreshdb(){
     QString s;
     this->dumplayout(this->children().constLast(), &s);
@@ -218,7 +202,7 @@ void workbench::refreshdb(){
     q->~QSqlQuery();
 }
 
-/* this function purpose is to rebuild the UI according to the postfix code */
+/* this function purpose is to rebuild the UI according to the postfix code on *l */
 void workbench::setlayout(QString *l){
     QWidgetList stack;
     while(l->length()>0){
@@ -243,6 +227,8 @@ void workbench::setlayout(QString *l){
         l->remove(0,1);
     }
     this->ml->addWidget(stack.first());
+    qobject_cast<mwindow*>(this->win)->libchanged(this->jag->DB_REF);
+    l->~QString();
 }
 
 char workbench::fetchid(QString objname){
@@ -258,10 +244,11 @@ char workbench::fetchid(QString objname){
         return defwidgets::DUMMY;
     else{
         qWarning() << "[WARNING] at workbench::fetchid: Unknown widget! _"<<objname;
-        return defwidgets::DUMMY;
+        return '$';
     }
 }
 
+/* this one recurs down each splitter generating an infix expression representing the layout */
 void workbench::dumplayout(QObject *n, QString *out){
     if(n->metaObject()->className()==QString("QSplitter")){
         out->append("(");
@@ -273,7 +260,9 @@ void workbench::dumplayout(QObject *n, QString *out){
         workbench::dumplayout(qobject_cast<QSplitter*>(n)->widget(1), out);
         out->append(")");
     }else{
-        out->append(workbench::fetchid(n->metaObject()->className()));
+        char c = workbench::fetchid(n->metaObject()->className());
+        if(strcmp(&c,"$")!=0)
+            out->append(c);
     }
 }
 
@@ -281,7 +270,7 @@ QWidget *workbench::fetchwidget(const char *id){
     if(strcmp(id,"z")==0)
         return new dummywidget("Right-click anywhere to replace this.");
     else if(strcmp(id,"a")==0)
-        return new libtree(qobject_cast<mwindow*>(this->win));
+        return workbench::_libtree();
     else if(strcmp(id,"c")==0)
         return new playlistview(this->jag, qobject_cast<mwindow*>(this->win));
     else if(strcmp(id,"e")==0)
@@ -328,7 +317,9 @@ void workbench::ctx_hsplitter(){
 }
 
 QWidget* workbench::_libtree(){
-    return new libtree(qobject_cast<mwindow*>(this->win));
+    libtree *nltree = new libtree(qobject_cast<mwindow*>(this->win));
+    nltree->populate(this->jag->DB_REF);
+    return nltree;
 }
 
 void workbench::ctx_libtree(){
@@ -348,7 +339,7 @@ QWidget* workbench::_coverview(){
 }
 
 void workbench::ctx_coverview(){
-    this->inject(workbench::_playlistmgr());
+    this->inject(workbench::_coverview());
 }
 
 QWidget* workbench::_tagview(){

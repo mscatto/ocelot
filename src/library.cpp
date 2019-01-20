@@ -51,7 +51,7 @@ library::~library(){
 }
 
 void library::process(){
-    this->db.open();
+    //this->db.open();
     this->scan(this->path);
     qInfo() << qPrintable("  -> "+QString::number(this->count).toUtf8()+" new tracks found at "+path);
 
