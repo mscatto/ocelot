@@ -31,16 +31,11 @@
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
 
-void tageditor::init(QStringList *l){
-    foreach(QString path, *l){
-        qDebug() << path;
-    }
-}
-
 tageditor::tageditor(QWidget *parent, vars *jag) : QDialog(parent){
     this->setWindowTitle(QString("Editing tags from ")+QString::number(0)+" items :: OCELOT v"+jag->VERSION);
     this->setFixedSize(400,500);
     this->setModal(false);
+    queue = new QStringList;
 
     QGridLayout *ml = new QGridLayout();
     QGridLayout *fl = new QGridLayout();
@@ -69,4 +64,13 @@ tageditor::tageditor(QWidget *parent, vars *jag) : QDialog(parent){
     this->setLayout(ml);
 }
 
-tageditor::~tageditor(){}
+tageditor::~tageditor(){
+
+}
+
+void tageditor::init(QStringList *l){
+    foreach(QString path, *l){
+        qDebug() << path;
+    }
+
+}

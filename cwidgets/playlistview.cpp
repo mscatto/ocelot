@@ -160,7 +160,7 @@ void playlistview::newplaylist(){
 
 
 void playlistview::context(QPoint p){
-
+    p = QPoint(); /* erase me¨ */
     //QModelIndex index = this->indexAt(p);
     //if (index.isValid() && index.row() % 2 == 0) {
         //hctx->popup(this->viewport()->mapToGlobal(p));
@@ -168,6 +168,7 @@ void playlistview::context(QPoint p){
 }
 
 void playlistview::playing(QString f){
+    f="0"; /* erase this one¨ */
     /*foreach(QStringList *sl, this->pl->values()){
         if(sl->contains(f)){
             QTreeWidgetItem *x = this->c
@@ -192,6 +193,7 @@ void playlistview::prev(){
 }
 
 void playlistview::medistatus(QMediaPlayer::MediaStatus status){
+    status = QMediaPlayer::MediaStatus::EndOfMedia; /* erase me¨ */
     //qDebug() << status;
 }
 
@@ -214,6 +216,8 @@ void playlistview::toggler(bool checked){
 
     this->order.chop(1);
     this->refreshpl();
+
+    if(checked)return;/* erase me¨ */
 }
 
 void playlistview::tab_close(int index){

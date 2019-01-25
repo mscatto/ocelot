@@ -27,7 +27,6 @@
 #include <QWidget>
 #include <QDialog>
 
-
 #include "src/vars.hpp"
 
 class settings : public QDialog
@@ -35,17 +34,18 @@ class settings : public QDialog
 private:
     const uint APPEND=0;
     const uint REPLACE=1;
-    const uint NOTHING=2;
+    //const uint NOTHING=2;
 
     const uint PLAY=0;
     const uint IFIDLE=1;
-    const uint DONTPLAY=2;
+    //const uint DONTPLAY=2;
 
     vars *jag;
     QWidget *win;
     QTreeWidget *libstree;
-    QWidget* spawn_maintab(QWidget *win);
-    QWidget* spawn_libtab(QWidget *win);
+    QWidget *spawn_maintab(QWidget *win);
+    QWidget *spawn_libtab(QWidget *win);
+    QWidget *spawn_advanced(QWidget *win);
 
 private slots:
     void lib_dirpicker();

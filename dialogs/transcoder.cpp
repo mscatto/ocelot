@@ -47,7 +47,7 @@ transcoder::~transcoder(){
 }
 
 void transcoder::handle(QStringList files){
-    //qDebug() << files;
+    QStringList()<<files;
 }
 
 

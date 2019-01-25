@@ -37,5 +37,6 @@ renamepbtn::~renamepbtn(){
 }
 
 void renamepbtn::slot_clicked(bool checked){
+    checked = !checked; /* ¨erase me */
     this->idclicked(this->mapkey);
 }

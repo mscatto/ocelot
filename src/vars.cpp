@@ -235,22 +235,36 @@ void vars::initlibs(){
 void vars::initdata(){
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'playlist_columnorder',\
-        '#PLAY#;#INDEX#;TRACKNUMBER;TITLE;ARTIST;ALBUM;YEAR')");
+        '#PLAY#;#INDEX#;TRACKNUMBER;TITLE;ARTIST;ALBUM;YEAR')"
+    );
+
+    /* INPUT VALUES */
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_doubleclick',\
-        '1')");
+        '1')"
+    );
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_middleclick',\
-        '0')");
+        '0')"
+    );
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_appendbehaviour',\
-        '0')");
+        '0')"
+    );
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_runwizard',\
-        '1')");
+        '1')"
+    );
+
+    /* UI DEFAULTS */
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'ui_scheme',\
-        '0')");
+        '0')"
+    );
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'ui_windowsize',\
+        '1024,600')"
+    );
 }
 
 void vars::initpmap(){

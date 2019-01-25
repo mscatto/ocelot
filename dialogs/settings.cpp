@@ -55,6 +55,7 @@ settings::settings(QWidget *win, vars *jag) : QDialog(win){
 
     tab->addTab(this->spawn_maintab(win),"General");
     tab->addTab(this->spawn_libtab(win),"Library");
+    tab->addTab(this->spawn_advanced(win), "Advanced");
     connect(bb, &QDialogButtonBox::accepted, this, &settings::accept);
     connect(bb, &QDialogButtonBox::rejected, this, &settings::reject);
 
@@ -261,6 +262,45 @@ QWidget* settings::spawn_libtab(QWidget *win){
     return w;
 }
 
+QWidget *settings::spawn_advanced(QWidget *win){
+    QWidget *adv = new QWidget(win);
+
+    QHBoxLayout *l = new QHBoxLayout;
+    adv->setLayout(l);
+
+    QTableWidget *vars = new QTableWidget(win);
+    vars->setColumnCount(1);
+    vars->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    vars->setColumnWidth(0, 360);
+    vars->setHorizontalHeaderLabels(QStringList()<<"Value");
+    vars->setFixedWidth(560);
+    vars->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+    //vars->setRowCount(30);
+    QSqlQuery q = this->jag->DB_REF->exec("SELECT var, val FROM data");
+    QStringList var;
+    while(q.next()){
+        var << q.value(0).toString();
+        vars->insertRow(vars->rowCount());
+        vars->setItem(var.length()-1, 0, new QTableWidgetItem(q.value(1).toString()));
+    }
+    vars->setVerticalHeaderLabels(var);
+    l->addWidget(vars);
+
+    QFrame *clicker = new QFrame(win);
+    //clicker->setContentsMargins(0,0,0,0);
+    clicker->setFrameStyle(QFrame::StyledPanel);
+    clicker->setFrameShadow(QFrame::Shadow::Sunken);
+    QFormLayout *f = new QFormLayout;
+    clicker->setAutoFillBackground(true);
+    clicker->setLayout(f);
+    QComboBox *a = new QComboBox;
+    a->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
+    f->addWidget(a);
+    l->addWidget(clicker);
+
+    return adv;
+}
+
 void settings::lib_dirpicker(){
     QString dir = QFileDialog::getExistingDirectory(
         this,
@@ -288,7 +328,7 @@ void settings::lib_dirpicker(){
 void settings::lib_treerefresh(){
     libstree->clear();
     QStringList libs = *this->jag->dumplibinfo();
-
+    qInfo() << libs;
     foreach(QString s, libs){
         QStringList l = s.split(";");
         l.last().append(" MiB");
@@ -348,5 +388,5 @@ void settings::thread_libscan(){
 
 void settings::thread_newlib(QString lib){
     this->jag->libs->append(lib);
-    //this->lib_treerefresh();
+    this->lib_treerefresh();
 }

@@ -83,6 +83,8 @@ void toolbar::addWidget(QWidget *widget){
 }
 
 void toolbar::orient(Qt::Orientation o){
+    Qt::Orientation x = o;
+    x = o;
     /*QWidget *w;
     foreach(w, this->docked){
         qobject_cast<?>(w).rotate(o);

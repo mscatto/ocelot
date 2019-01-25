@@ -101,6 +101,8 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
 
     this->addToolBar(this->bar);
 
+    mwindow::restorewinsize();
+
     qInfo() << "[INFO] Ocelot initialized successfully!\n\n";
 }
 
@@ -108,9 +110,37 @@ mwindow::~mwindow(){
 
 }
 
+void mwindow::resizeEvent(QResizeEvent* event){
+    QMainWindow::resizeEvent(event);
+
+    QString s = QString::number(this->window()->width())+","+QString::number(this->window()->height());
+    QSqlQuery *q = new QSqlQuery(*this->jag->DB_REF);
+    q->prepare("UPDATE data SET val = :size WHERE var LIKE 'ui_windowsize'");
+    q->bindValue(":size", s);
+    q->exec();
+    q->~QSqlQuery();
+}
+
+void mwindow::restorewinsize(){
+    QSqlQuery q = this->jag->DB_REF->exec("SELECT val FROM data WHERE var = 'ui_windowsize'");
+    if(!q.next())
+        return;
+
+    int sw = QGuiApplication::primaryScreen()->geometry().width();
+    int sh = QGuiApplication::primaryScreen()->geometry().height();
+    int nw = q.value(0).toString().split(",").first().toInt();
+    int nh = q.value(0).toString().split(",").last().toInt();
+    if(nw>=sw||nh>=sh){
+        this->setWindowState(Qt::WindowMaximized);
+        return;
+    }
+
+    mwindow::resize(nw, nh);
+}
+
 void mwindow::closeEvent(QCloseEvent *event){
     qInfo() << "lel";
-    //event->ignore();
+    event->accept();
 }
 
 void mwindow::toolbar_pause(bool res){
@@ -166,6 +196,7 @@ void mwindow::tageditor_spawn(QStringList *l){
     //qDebug() << l;
     //this->tagdiag->init(l);
     this->tagdiag->show();
+    l->~QStringList();
 }
 
 /* will be called every time the player changes position, which will be x */

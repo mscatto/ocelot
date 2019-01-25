@@ -46,21 +46,43 @@ class workbench : public QWidget
     };
 
 private:
+    /* this controls the layout editor toggler */
     bool locked = true;
+
+    /* the workbench's layout */
     QGridLayout *ml;
+
+    /* mwindow pointer, in QWidget form to avoi circular dependencies */
     QWidget *win;
+
+    /* last right-click position, stored to keep track to where to inject new widgets */
     QPoint ctx_lastpos;
+
+    /* menu shown when the user right-clicks on an existing widget */
     QMenu *ctx_replace;
+
+    /* this function inserts the widget *w on the position stored in ctx_lastpos; */
     void inject(QWidget *w);
+
+    /* refreshdb stores the current layout on the database */
     void refreshdb();
-    QRegularExpression *lsplitter = new QRegularExpression(".\\[(.*?\\]),(.*)\\]");
+
+    /* this applies the layout *l to the workbench */
     void setlayout(QString *l);
+
+    /* responsible for fetching the objname layout letter code for database storage */
     char fetchid(QString objname);
+
+    /* recursively dumps the workbench layout string to the *out pointer */
     void dumplayout(QObject *n, QString *out);
+
+    /* returns a pointer a for newly created widget corresponding to the letter code *id */
     QWidget *fetchwidget(const char *id);
+
+    /* globals */
     vars *jag;
 
-    /* these _functions are responsible for new widgets allocations */
+    /* these _functions are responsible for new allocating new widgets */
     QWidget *_vsplitter(bool filled);
     QWidget *_hsplitter(bool filled);
     QWidget *_libtree();
@@ -72,7 +94,7 @@ public:
     bool islocked();
     ~workbench();
 public slots:
-    /* ctx_ slots are called by the context menu inside the layout editor */
+    /* ctx_ slots are called by the context menu for the layout editor */
     void ctx_req(QPoint p);
     void ctx_vsplitter();
     void ctx_hsplitter();
@@ -80,10 +102,17 @@ public slots:
     void ctx_playlistmgr();
     void ctx_coverview();
     void ctx_tagview();
+
+    /* flips the layout editor lock */
     void lock_flip();
 
+    /* it removes the widget parent to the widget under ctx_lastpos */
     void remove_parentwidget();
+
+    /* destroy the widget under ctx_lastpos */
     void remove_widget();
+
+    /* clears the current layout */
     void clear();
 
 private slots:

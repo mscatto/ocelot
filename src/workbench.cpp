@@ -47,6 +47,8 @@
 #include "cwidgets/splitter.hpp"
 #include "cwidgets/dummywidget.hpp"
 
+#include <libprojectM/projectM.hpp>
+
 workbench::workbench(vars *jag, QWidget *win) : QWidget(){
     this->jag = jag;
     this->win = win;
@@ -67,7 +69,7 @@ workbench::workbench(vars *jag, QWidget *win) : QWidget(){
         this->ml->addWidget(new dummywidget("First, unlock the widgets on the cogwheel toolbar button\nThen replace this by right-clicking on an empty space!"));
     }else
         this->setlayout(new QString(q->record().value(0).toString()));
-
+    //projectM::
     this->ctx_replace = new QMenu();
     this->ctx_replace->addSection("Splitters");
     this->ctx_replace->addAction("Vertical (top and bottom)");
@@ -90,12 +92,12 @@ workbench::workbench(vars *jag, QWidget *win) : QWidget(){
     connect(act.at(8), &QAction::triggered, this, &workbench::ctx_coverview);
 }
 
-bool workbench::islocked(){
-    return this->locked;
-}
-
 workbench::~workbench(){
 
+}
+
+bool workbench::islocked(){
+    return this->locked;
 }
 
 void workbench::lock_flip(){
@@ -163,25 +165,18 @@ void workbench::inject(QWidget *w){/////////////////////////
         this->ml->addWidget(w);
     /* case it is the root widget */
     else if(this==this->childAt(this->ctx_lastpos)->parent()){
-        //if(this->children().count()>0){
-            QWidget *old = this->childAt(this->ctx_lastpos);
-            this->ml->removeWidget(old);
-            this->ml->addWidget(w);
-            old->~QWidget();
-        /*}else{
-            this->ml->addWidget(w);
-        }*/
+        QWidget *old = this->childAt(this->ctx_lastpos);
+        this->ml->removeWidget(old);
+        this->ml->addWidget(w);
+        old->~QWidget();
     }
 
     /* if it is not, expect the parent to be a splitter */
     else if(this->childAt(this->ctx_lastpos)->parent()->metaObject()->className()==QString("QSplitter")){
         QSplitter *par = qobject_cast<QSplitter*>(this->childAt(this->ctx_lastpos)->parent());
-        //QWidget *old = par->widget(par->indexOf(this->childAt(this->ctx_lastpos)));
         int z = par->indexOf(this->childAt(this->ctx_lastpos));
         par->widget(z)->~QWidget();
         par->insertWidget(z, w);
-        //par->replaceWidget(par->indexOf(this->childAt(this->ctx_lastpos)), w);
-        //old->~QWidget();
     }
     /* but if it isn't, something went wrong */
     else qWarning() << "[WARNING] at workbench::inject - widget is neither a splitter or a dummy!";

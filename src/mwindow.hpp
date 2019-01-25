@@ -54,9 +54,7 @@ class mwindow : public QMainWindow
 public:
     mwindow(vars *jag);
     ~mwindow();
-
 private:
-    bool uimanager = false;
     TagLib::FileRef *fr;
     vars *jag;
     QLabel status;
@@ -72,7 +70,11 @@ private:
     about *adiag;
     QMediaPlayer::MediaStatus prev = QMediaPlayer::MediaStatus::UnknownMediaStatus;
     void closeEvent(QCloseEvent *event);
+    void resizeEvent(QResizeEvent* event);
+
+    void restorewinsize();
 public slots:
+    /* responsible for handling the toolbar buttons actions */
     void toolbar_pause(bool res=false);
     void toolbar_play();
     void toolbar_stop();
@@ -81,19 +83,32 @@ public slots:
     void toolbar_menu();
     void config_spawn();
     void about_spawn();
+
+    /* spawns the transcoder window and contents */
     void transcoder_spawn();
+
+    /* spawns the tag editor window and children */
     void tageditor_spawn(QStringList *l);
+
+    /* it plays the QURL inside 'item' data */
     void play(QTreeWidgetItem* item);
+
+    /* stores the last clicked item */
     void select(QTreeWidgetItem *item);
 private slots:
+    /* syncs the playback position to the progslider state */
     void progslider_sync(qint64 pos);
+
+    /* called when progslider is dragged */
     void progslider_moved(int x);
+    /* called when progslider is clicked somewhere along its body */
     void progslider_clicked(int action);
     void progslider_changed(int x);
     void volslider_moved(int x);
     void player_respond(QMediaPlayer::MediaStatus status);
     void uilock_respond();
 signals:
+    /* signals when the layout editor lock has changed */
     void uilock_flip();
     void player_play(QString *file);
     void clearcover();

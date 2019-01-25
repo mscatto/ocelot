@@ -127,6 +127,6 @@ QWidget *about::mktab_ocelot(){
 }
 
 QWidget *about::mktab_qt(){
-
+    return new QWidget();
 }
 

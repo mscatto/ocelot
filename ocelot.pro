@@ -22,9 +22,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-
-FORMS +=
-
 RESOURCES += \
 	pak.qrc
 
@@ -53,7 +50,8 @@ HEADERS += \
 	src/player.hpp \
 	src/vars.hpp \
 	src/workbench.hpp \
-	src/topostfix.hpp
+	src/topostfix.hpp \
+    cwidgets/visualizer.hpp
 
 SOURCES += \
 	cwidgets/coverview.cpp \
@@ -78,4 +76,5 @@ SOURCES += \
 	src/player.cpp \
 	src/vars.cpp \
 	src/workbench.cpp \
-	src/topostfix.cpp
+	src/topostfix.cpp \
+    cwidgets/visualizer.cpp

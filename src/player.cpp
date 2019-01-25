@@ -68,9 +68,8 @@ void player::pause(){
     }/* ie. its paused but theres media loaded */
 }
 
-void player::load(QString *file)
-{
-
+void player::load(QString *file){
+    file->~QString();
 }
 
 void player::setVolume(int volume){
