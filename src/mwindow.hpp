@@ -70,9 +70,15 @@ private:
     about *adiag;
     QMediaPlayer::MediaStatus prev = QMediaPlayer::MediaStatus::UnknownMediaStatus;
     void closeEvent(QCloseEvent *event);
-    void resizeEvent(QResizeEvent* event);
 
+    /* the dumping of the window size to the db works behind a timer.
+     * every time the user resizes the window, a 1sec timer is started.
+     * new resize events while the timer is active will just reset it
+     * in an attempt to reduce db writes */
+    QTimer *resizetimer;
+    void resizeEvent(QResizeEvent* event);
     void restorewinsize();
+    void dumpwinsize();
 public slots:
     /* responsible for handling the toolbar buttons actions */
     void toolbar_pause(bool res=false);

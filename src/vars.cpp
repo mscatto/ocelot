@@ -215,7 +215,7 @@ void vars::initlibs(){
     QSqlQuery q = this->DB_REF->exec("SELECT path FROM libs");
     QThread *t;
     q.next();
-    if(q.isValid()){//!q.isNull(0)){
+    if(q.isValid()){
         do{
             this->libs->append(q.value(0).toString());
             t = new QThread();

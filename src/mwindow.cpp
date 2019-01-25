@@ -51,6 +51,9 @@
 
 mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     this->jag = jag;
+    this->resizetimer = new QTimer();
+    connect(this->resizetimer, &QTimer::timeout, this, &mwindow::dumpwinsize);
+
     this->bar = new toolbar(this, this->configmenu);
     this->prog = new progslider(Qt::Horizontal, this->bar, this);
     this->vol = new volslider(Qt::Horizontal, this->bar, this);
@@ -112,13 +115,7 @@ mwindow::~mwindow(){
 
 void mwindow::resizeEvent(QResizeEvent* event){
     QMainWindow::resizeEvent(event);
-
-    QString s = QString::number(this->window()->width())+","+QString::number(this->window()->height());
-    QSqlQuery *q = new QSqlQuery(*this->jag->DB_REF);
-    q->prepare("UPDATE data SET val = :size WHERE var LIKE 'ui_windowsize'");
-    q->bindValue(":size", s);
-    q->exec();
-    q->~QSqlQuery();
+    this->resizetimer->start(1000);
 }
 
 void mwindow::restorewinsize(){
@@ -138,19 +135,31 @@ void mwindow::restorewinsize(){
     mwindow::resize(nw, nh);
 }
 
+void mwindow::dumpwinsize(){
+    QString s = QString::number(this->window()->width())+","+QString::number(this->window()->height());
+    QSqlQuery *q = new QSqlQuery(*this->jag->DB_REF);
+    q->prepare("UPDATE data SET val = :size WHERE var LIKE 'ui_windowsize'");
+    q->bindValue(":size", s);
+    q->exec();
+    q->~QSqlQuery();
+
+    this->resizetimer->stop();
+}
+
 void mwindow::closeEvent(QCloseEvent *event){
     qInfo() << "lel";
     event->accept();
 }
 
 void mwindow::toolbar_pause(bool res){
+    qInfo() << res;
     if(res){/* isn't this ugly? */
         this->status.setText(this->status.text().replace("NOW PLAYING", "PAUSED"));
         this->setWindowTitle("PAUSED :: "+this->windowTitle());
         return;
     }
 
-    //this->jag->mp->pause(); /* if the player actually changes to a pause pause state */
+    this->jag->mp->pause(); /* if the player actually changes to a pause pause state */
     /* this function will be called again, but packing a true */
 }
 
