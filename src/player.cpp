@@ -37,14 +37,13 @@ void player::init(QMainWindow *win){
     connect(qobject_cast<mwindow*>(win), &mwindow::progsliderchanged, this, &player::setPosition);
     connect(this->mp, &QMediaPlayer::mediaStatusChanged, this, &player::mediaStatusChanged);
     connect(this->mp, &QMediaPlayer::positionChanged, this, &player::positionChanged);
-    connect(this, &player::paused, qobject_cast<mwindow*>(win), &mwindow::toolbar_pause);
+    //connect(this, &player::paused, qobject_cast<mwindow*>(win), &mwindow::toolbar_pause);
     connect(qobject_cast<mwindow*>(win), &mwindow::player_play, this, &player::playfile);
 }
 
 player::~player(){}
 
 void player::playfile(QString *file){
-    qDebug() << *file;
     if(file->isEmpty())
         return;
 
@@ -53,19 +52,16 @@ void player::playfile(QString *file){
 }
 
 void player::playloaded(){
-    qDebug() << "play without file";
+    this->mp->play();
 }
 
 void player::stop(){
-
+    this->mp->stop();
+    this->mp->setMedia(QMediaContent());
 }
 
 void player::pause(){
     this->mp->pause();
-
-    if(this->mp->mediaStatus() == QMediaPlayer::BufferedMedia){
-        this->paused(true); /* making sure this condition is satisfied */
-    }/* ie. its paused but theres media loaded */
 }
 
 void player::load(QString *file){

@@ -321,6 +321,7 @@ void settings::lib_dirpicker(){
     connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
     connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
     connect(t, &QThread::finished, this, &settings::thread_libscan);
+    //connect(t, &QThread::finished, this, &settings::lib_treerefresh);
     connect(l, &library::added, this, &settings::thread_newlib);
     t->start();
 }
@@ -328,7 +329,6 @@ void settings::lib_dirpicker(){
 void settings::lib_treerefresh(){
     libstree->clear();
     QStringList libs = *this->jag->dumplibinfo();
-    qInfo() << libs;
     foreach(QString s, libs){
         QStringList l = s.split(";");
         l.last().append(" MiB");

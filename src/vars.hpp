@@ -34,7 +34,7 @@
 class vars : QObject
 {
 public:
-    const char* VERSION = "0.3a";
+    const char* VERSION = "0.3b";
     QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);//+"/ocelot";
     QString DB_PATH = DATA_PATH+"/ocelot.database";
     QSqlDatabase *DB_REF = new QSqlDatabase();

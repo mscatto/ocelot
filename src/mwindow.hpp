@@ -55,6 +55,7 @@ public:
     mwindow(vars *jag);
     ~mwindow();
 private:
+    bool paused = false; //ugly
     TagLib::FileRef *fr;
     vars *jag;
     QLabel status;
@@ -68,8 +69,8 @@ private:
     transcoder *transcdiag;
     tageditor *tagdiag;
     about *adiag;
-    QMediaPlayer::MediaStatus prev = QMediaPlayer::MediaStatus::UnknownMediaStatus;
     void closeEvent(QCloseEvent *event);
+    QMediaPlayer::MediaStatus playerstatus = QMediaPlayer::MediaStatus::UnknownMediaStatus;
 
     /* the dumping of the window size to the db works behind a timer.
      * every time the user resizes the window, a 1sec timer is started.
@@ -81,7 +82,7 @@ private:
     void dumpwinsize();
 public slots:
     /* responsible for handling the toolbar buttons actions */
-    void toolbar_pause(bool res=false);
+    void toolbar_pause();
     void toolbar_play();
     void toolbar_stop();
     void toolbar_next();

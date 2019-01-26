@@ -51,7 +51,6 @@ library::~library(){
 }
 
 void library::process(){
-    //this->db.open();
     this->scan(this->path);
     qInfo() << qPrintable("  -> "+QString::number(this->count).toUtf8()+" new tracks found at "+path);
 
@@ -61,9 +60,8 @@ void library::process(){
         q->bindValue(":path", this->path);
         q->exec();
 
-        //emit added(this->path);
+        emit added(this->path);
     }
-    //qInfo() << qPrintable("[INFO] Directory scan complete.");
 
     emit finished();
 }

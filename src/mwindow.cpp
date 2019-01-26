@@ -147,29 +147,30 @@ void mwindow::dumpwinsize(){
 }
 
 void mwindow::closeEvent(QCloseEvent *event){
-    qInfo() << "lel";
     event->accept();
 }
 
-void mwindow::toolbar_pause(bool res){
-    qInfo() << res;
-    if(res){/* isn't this ugly? */
-        this->status.setText(this->status.text().replace("NOW PLAYING", "PAUSED"));
-        this->setWindowTitle("PAUSED :: "+this->windowTitle());
+void mwindow::toolbar_pause(){
+    if(this->playerstatus != QMediaPlayer::BufferedMedia)
         return;
+    if(!paused){
+        this->setWindowTitle(QString("[PAUSED] :: ")+this->windowTitle());
+        paused = !paused;
     }
 
-    this->jag->mp->pause(); /* if the player actually changes to a pause pause state */
-    /* this function will be called again, but packing a true */
+    this->jag->mp->pause();
 }
 
 void mwindow::toolbar_play(){
-    //this->jag->mp->play();
+    if(paused){
+        paused=!paused;
+        this->setWindowTitle(this->windowTitle().remove("[PAUSED] :: ").toUtf8());
+    }
+    this->jag->mp->playloaded();
 }
 
 void mwindow::toolbar_stop(){
-    //this->jag->mp->stop();
-    //this->player->setMedia(QMediaContent());
+    this->jag->mp->stop();
     this->prog->setValue(0);
     this->prog->setRange(0,0);
     this->status.setText("<b>IDLE</b>");
@@ -234,7 +235,7 @@ void mwindow::progslider_clicked(int action){
 }
 
 void mwindow::progslider_changed(int x){
-    qDebug() << x;
+    /////////////////////////////////////////////////////////////////////////////////////qDebug() << x;
 }
 
 void mwindow::volslider_moved(int x){
@@ -245,6 +246,8 @@ void mwindow::volslider_moved(int x){
 }
 
 void mwindow::player_respond(QMediaPlayer::MediaStatus status){
+    this->playerstatus = status;
+
     switch(status){
     case QMediaPlayer::MediaStatus::NoMedia: /* case stopped */
         this->coverchanged(new QPixmap());
