@@ -37,11 +37,5 @@ You can build and run with:
 * Playlist manager and export
 * Layout editor
 
->### <b>QUESTIONS</b>
-><b>Why?</b><br>I don't want to give up on what I had with Foobar2k, but unfortunately it is Windows-only. I'm also not very fond of the WINE experience, so I'm trying the recreate what I liked about it.</br></br>
-><b>When will [...]?</b></br>
-When it's done™</br></br>
-><b>Can I submit a patch?</b></br>Contributions are certainly welcome, but the codebase needs some cleanup and there's no documentation yet. If this does not drive you away, then sure!
-
 >### <b>SCREENSHOTS</b>
 ![alt text](https://raw.githubusercontent.com/mscatto/ocelot/master/ss.png)
