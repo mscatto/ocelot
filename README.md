@@ -10,7 +10,7 @@ It is built using Qt Widgets, with some key features made possible by the TagLib
 #
 
 >### <b>BINARY</b>
-A precompiled binary from JAN/2019 is available [here](https://raw.githubusercontent.com/mscatto/ocelot/master/ocelot-bin).
+A precompiled binary from FEB/2019 is available [here](https://raw.githubusercontent.com/mscatto/ocelot/master/ocelot-bin).
 >### <b>BUILDING</b>
 Ocelot requires Qt Frameworks version 5.10 or above and the latest TagLib development files. It also depends on Qt Multimedia, which in turn requires GStreamer on UNIX-like systems.
 
