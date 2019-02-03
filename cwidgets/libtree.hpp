@@ -31,23 +31,26 @@
 
 #include "src/library.hpp"
 #include "src/mwindow.hpp"
+#include "src/workbench.hpp"
 
 class libtree : public QWidget
 {
     Q_OBJECT
 private:
+    workbench *wb;
     QMenu *ctx;
+    void showctx(const QPoint &pos);
     QTreeWidget *tree;
     void recurtree(QTreeWidgetItem *parent, QStringList levels, QString conditions, QSqlDatabase *db);
     QStringList *extract(QString vars);
-    void menu_items(const QPoint &pos);
+
 public slots:
     void populate(QSqlDatabase *db);
     void gatherselected();
 signals:
     void dispatch(QStringList *l);
 public:
-    libtree(mwindow *win);
+    libtree(mwindow *win, workbench *wb);
     ~libtree();
 };
 

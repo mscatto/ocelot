@@ -34,12 +34,13 @@
 
 #include "src/mwindow.hpp"
 
-libtree::libtree(mwindow *win) : QWidget(){
+libtree::libtree(mwindow *win, workbench *wb) : QWidget(){
     QGridLayout *grid =  new QGridLayout(this);
     QLineEdit *filterbox = new QLineEdit(this);
     QPushButton *help = new QPushButton("?", this);
     QPushButton *config = new QPushButton(QIcon(":/internals/wrench"), "", this);
     QLabel *label = new QLabel("Filter", this);
+    this->wb = wb;
     tree = new QTreeWidget(this);
     tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -79,7 +80,7 @@ libtree::libtree(mwindow *win) : QWidget(){
 
     this->setLayout(grid);
     //parent->window()->
-    connect(tree, &QTreeWidget::customContextMenuRequested, this, &libtree::menu_items);
+    connect(tree, &QTreeWidget::customContextMenuRequested, this, &libtree::showctx);
     connect(tree, &QTreeWidget::itemDoubleClicked, win, &mwindow::play);
     connect(tree, &QTreeWidget::itemClicked, win, &mwindow::select);
     connect(win, &mwindow::libchanged, this, &libtree::populate);
@@ -137,8 +138,13 @@ QStringList* libtree::extract(QString vars){
     return out;
 }
 
-void libtree::menu_items(const QPoint &pos){
-    this->ctx->exec(tree->mapToGlobal(pos));
+void libtree::showctx(const QPoint &pos){
+    if(this->wb->islocked())
+        this->ctx->exec(this->mapToGlobal(pos));
+    else{
+        this->wb->setlastctx(this);
+        this->wb->ctx_req(this->mapTo(this->wb, pos));
+    }
 }
 
 void libtree::populate(QSqlDatabase *db){

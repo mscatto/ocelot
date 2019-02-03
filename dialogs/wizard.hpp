@@ -28,14 +28,25 @@
 
 class wizard : public QDialog
 {
+    Q_OBJECT
 private:
     vars *jag;
     void closeEvent(QCloseEvent *event);
+    QVBoxLayout *l;
+    QWidget *gen_start();
+    QWidget *gen_libs();
+    QWidget *gen_ui();
+    QWidget *current;
 public:
     wizard(vars *jag);
     ~wizard();
 private slots:
-    void on_close();
+    //void on_close();
+    void switch_start();
+    void switch_libs();
+    void switch_ui();
+signals:
+    void show_mwindow();
 };
 
 #endif // WIZARD_H

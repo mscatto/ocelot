@@ -32,8 +32,9 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/tmap.h>
 
-tagview::tagview(vars *jag, mwindow *parent) : QTreeWidget(){
+tagview::tagview(vars *jag, mwindow *parent, workbench *wb) : QTreeWidget(){
     this->jag = jag;
+    this->wb = wb;
     this->setColumnCount(2);
     this->setColumnWidth(0, 200);
     this->setHeaderHidden(false);
@@ -41,12 +42,23 @@ tagview::tagview(vars *jag, mwindow *parent) : QTreeWidget(){
     this->setHeaderLabels(QStringList() << "Tag" << "Data");
     this->setRootIsDecorated(false);
     this->setAlternatingRowColors(true);
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(parent, &mwindow::selectionchanged, this, &tagview::swap);
+    connect(this, &QTreeWidget::customContextMenuRequested, this, &tagview::showctx);
 }
 
 tagview::~tagview(){
 
+}
+
+void tagview::showctx(const QPoint &pos){
+    if(this->wb->islocked())
+        this->ctx->exec(this->mapToGlobal(pos));
+    else{
+        this->wb->setlastctx(this);
+        this->wb->ctx_req(this->mapTo(this->wb, pos));
+    }
 }
 
 void tagview::swap(QString item){

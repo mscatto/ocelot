@@ -27,28 +27,107 @@
 
 wizard::wizard(vars *jag) : QDialog(){
     this->jag = jag;
-    QGridLayout *l = new QGridLayout(this);
-    QTextEdit *msg = new QTextEdit();
-    msg->setText("<b>Welcome to Ocelot!</b></br><p>This assistent will help you initialize your libraries "
-                 "and main interface. If you wish to skip this process, you may close this window now.</p>"
+    this->setWindowTitle(QString("First Time Wizard :: OCELOT v")+jag->VERSION);
+    this->setModal(true);
+    this->setFixedSize(260,380);
+    this->l = new QVBoxLayout;
+    this->l->setContentsMargins(0,0,0,0);
+    this->current = this->gen_start();
+    this->l->addWidget(current);
+
+    this->setLayout(this->l);
+}
+
+QWidget *wizard::gen_start(){
+    QWidget *start = new QWidget();
+    QGridLayout *l = new QGridLayout(start);
+
+    QLabel *msg = new QLabel();
+    msg->setWordWrap(true);
+    msg->setFrameShape(QFrame::Shape::StyledPanel);
+    msg->setFrameShadow(QFrame::Shadow::Sunken);
+    msg->setFrameStyle(QFrame::Shape::StyledPanel);
+    msg->setText("<b>Welcome to Ocelot!</b></br><p>This wizard will help you initialize your libraries "
+                 "and main interface. If you wish to skip it, you may close this window.</p></br></br>"
                  "</br><p><i>You can always change these later through the Settings window.</i></p>");
+
+    QPushButton *next = new QPushButton("Next");
+    next->setIcon(QIcon::fromTheme("go-next-view"));
+
+    QPushButton *skip = new QPushButton("Skip");
+    skip->setIcon(QIcon::fromTheme("dialog-close"));
+
+    connect(skip, &QPushButton::clicked, this, &QDialog::close);
+    connect(next, &QPushButton::clicked, this, &wizard::switch_libs);
+
     l->addWidget(msg,0,0,1,2);
-    this->setLayout(l);
+    l->addWidget(skip,1,0,1,1);
+    l->addWidget(next,1,1,1,1);
 
-    this->setWindowTitle(QString("Quick Start Wizard :: OCELOT v")+jag->VERSION);
-    this->setFixedSize(600,350);
+    start->setLayout(l);
 
-    QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Close);
-    connect(bb->button(QDialogButtonBox::Close), &QPushButton::clicked, this, &QDialog::close);
-    l->addWidget(bb,1,0);
+    return start;
+}
 
+QWidget *wizard::gen_libs(){
+    QWidget *libs = new QWidget();
+    QGridLayout *x = new QGridLayout(libs);
+
+    QPushButton *next = new QPushButton("Next");
+    next->setIcon(QIcon::fromTheme("go-next-view"));
+
+    x->addWidget(new QTreeWidget,0,0,1,2);
+    x->addWidget(next,1,0,1,2);
+
+    connect(next, &QPushButton::clicked, this, &wizard::switch_ui);
+
+    libs->setLayout(x);
+    return libs;
+}
+
+QWidget *wizard::gen_ui(){
+    QWidget *ui = new QWidget();
+    QGridLayout *y = new QGridLayout(ui);
+
+    QPushButton *next = new QPushButton("Finish");
+    next->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+
+    y->addWidget(new QLabel("UI"),0,0,1,2);
+    y->addWidget(next,1,0,1,2);
+
+    connect(next, &QPushButton::clicked, this, &QDialog::close);
+
+    ui->setLayout(y);
+    this->show_mwindow();
+    return ui;
+}
+
+void wizard::switch_start(){
+    this->current->~QWidget();
+    this->current = this->gen_start();
+    this->l->addWidget(this->current);
+}
+
+void wizard::switch_libs(){
+    this->current->~QWidget();
+    this->current = this->gen_libs();
+    this->l->addWidget(this->current);
+}
+
+void wizard::switch_ui(){
+    this->current->~QWidget();
+    this->current = this->gen_ui();
+    this->l->addWidget(this->current);
 }
 
 void wizard::closeEvent(QCloseEvent *event){
     this->jag->DB_REF->exec("UPDATE data SET val = 0 WHERE var LIKE 'general_runwizard'");
+    this->show_mwindow();
     QDialog::closeEvent(event);
 }
 
 wizard::~wizard(){
 
 }
+
+

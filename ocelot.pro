@@ -36,7 +36,6 @@ HEADERS += \
 	cwidgets/playlistview.hpp \
 	cwidgets/progslider.hpp \
 	cwidgets/renamepbtn.hpp \
-	cwidgets/splitter.hpp \
 	cwidgets/tagview.hpp \
 	cwidgets/toolbar.hpp \
 	cwidgets/volslider.hpp \
@@ -61,7 +60,6 @@ SOURCES += \
 	cwidgets/playlistview.cpp \
 	cwidgets/progslider.cpp \
 	cwidgets/renamepbtn.cpp \
-	cwidgets/splitter.cpp \
 	cwidgets/tagview.cpp \
 	cwidgets/toolbar.cpp \
 	cwidgets/volslider.cpp \

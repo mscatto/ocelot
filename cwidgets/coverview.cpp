@@ -27,10 +27,13 @@
 #include <QFrame>
 #include <QPainter>
 
-coverview::coverview(mwindow *win) : QLabel(win){
+coverview::coverview(mwindow *win, workbench *wb) : QLabel(win){
     this->setMinimumSize(200, 200);
     this->setAutoFillBackground(true);
     this->setScaledContents(true);
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    this->win = win;
+    this->wb = wb;
 
     this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     this->setFrameStyle(QFrame::Sunken);
@@ -39,8 +42,23 @@ coverview::coverview(mwindow *win) : QLabel(win){
 
     this->setText("<b>[No Media]</b>");
 
+    this->ctx = new QMenu();
+    this->ctx->setTitle("Cover View");
+    this->ctx->addAction("Set cover...");
+    this->ctx->addAction("Keep cover ratio");
+
+    connect(this, &QLabel::customContextMenuRequested, this, &coverview::showctx);
     connect(win, &mwindow::coverchanged, this, &coverview::coverchanged);
     connect(win, &mwindow::clearcover, this, &coverview::clear);
+}
+
+void coverview::showctx(QPoint pos){
+    if(this->wb->islocked())
+        this->ctx->exec(this->mapToGlobal(pos));
+    else{
+        this->wb->setlastctx(this);
+        this->wb->ctx_req(this->mapTo(this->wb, pos));
+    }
 }
 
 void coverview::coverchanged(QPixmap *nc){

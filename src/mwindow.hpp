@@ -102,6 +102,8 @@ public slots:
 
     /* stores the last clicked item */
     void select(QTreeWidgetItem *item);
+
+    void show();
 private slots:
     /* syncs the playback position to the progslider state */
     void progslider_sync(qint64 pos);

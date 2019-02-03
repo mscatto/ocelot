@@ -43,9 +43,10 @@
 #include <taglib/tlist.h>
 #include <QFocusEvent>
 
-playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(){
+playlistview::playlistview(vars *jag, mwindow *win, workbench *wb) : QTabWidget(){
     this->jag = jag;
-    this->win = parent;
+    this->win = win;
+    this->wb = wb;
     this->setContentsMargins(0,0,0,0);
     this->renamer = new QDialog(this);
     this->renamer->setFixedSize(480,48);
@@ -117,20 +118,23 @@ playlistview::playlistview(vars *jag, mwindow *parent) : QTabWidget(){
     this->setTabsClosable(true);
 
     connect(this, &QTabWidget::tabCloseRequested, this, &playlistview::tab_close);
-    connect(this, &QTabWidget::customContextMenuRequested, this, &playlistview::ctxmenu);
+    connect(this, &QTabWidget::customContextMenuRequested, this, &playlistview::showctx);
     connect(this, &QTabWidget::currentChanged, this, &playlistview::tab_switch);
-    connect(parent, &mwindow::plappend, this, &playlistview::viewappend);
-    connect(parent, &mwindow::plnext, this, &playlistview::next);
-    connect(parent, &mwindow::plprev, this, &playlistview::prev);
-    connect(parent, &mwindow::mediastatus, this, &playlistview::medistatus);
+    connect(win, &mwindow::plappend, this, &playlistview::viewappend);
+    connect(win, &mwindow::plnext, this, &playlistview::next);
+    connect(win, &mwindow::plprev, this, &playlistview::prev);
+    connect(win, &mwindow::mediastatus, this, &playlistview::medistatus);
 }
 
-void playlistview::ctxmenu(const QPoint &pos){
-    if(this->tabBar()->tabAt(pos)==-1) /* case there isnt a tab there */
-        return;
-
-    //connect(ctx->actions().first(), &QAction::triggered, this)///wronggggg
-    ctx->exec(this->mapToGlobal(pos));
+void playlistview::showctx(const QPoint &pos){
+    if(this->wb->islocked())
+        this->ctx->exec(this->mapToGlobal(pos));
+    else{
+        if(this->tabBar()->tabAt(pos)==-1) /* case there isnt a tab there */
+            return;
+        this->wb->setlastctx(this);
+        this->wb->ctx_req(this->mapTo(this->wb, pos));
+    }
 }
 
 void playlistview::newplaylist(){

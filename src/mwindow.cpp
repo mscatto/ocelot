@@ -90,7 +90,6 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
     //connect(this->jag->mp, &player::mediaStatusChanged, this, &mwindow::media_status);
     connect(this->jag->mp, &player::mediaStatusChanged, this, &mwindow::player_respond);
 
-
     this->bar->addWidget(this->vol);
     this->bar->addSeparator();
     this->bar->addWidget(this->prog);
@@ -112,6 +111,7 @@ mwindow::mwindow(vars *jag) : QMainWindow(nullptr){
 mwindow::~mwindow(){
 
 }
+
 
 void mwindow::resizeEvent(QResizeEvent* event){
     QMainWindow::resizeEvent(event);
@@ -404,4 +404,8 @@ void mwindow::select(QTreeWidgetItem *item){
     QString *front = new QString(item->data(0, Qt::UserRole).toStringList().first());
     this->selectionchanged(*front);
     front->~QString();
+}
+
+void mwindow::show(){
+    QMainWindow::show();
 }

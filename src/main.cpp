@@ -28,24 +28,28 @@
 #include "vars.hpp"
 #include "dialogs/wizard.hpp"
 
-void checkwizard(vars *jag);
+bool showwizard(vars *jag, mwindow *mw);
 
 int main(int argc, char *argv[]){
     QApplication a(argc, argv);
     vars *jag = new vars();
-    checkwizard(jag);
-
     mwindow *mw = new mwindow(jag);
-    mw->show();
+    if(!showwizard(jag, mw))
+        mw->show();
 
     return a.exec();
 }
 
-void checkwizard(vars *jag){
+bool showwizard(vars *jag, mwindow *mw){
     QSqlQuery q = jag->DB_REF->exec("SELECT val FROM data WHERE var='general_runwizard'");
     q.next();
     if(q.value(0)==1){
         wizard *w = new wizard(jag);
+        QObject::connect(w, &wizard::show_mwindow, mw, &mwindow::show);
         w->show();
+
+        return true;
     }
+
+    return false;
 }

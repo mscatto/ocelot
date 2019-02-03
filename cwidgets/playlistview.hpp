@@ -28,6 +28,7 @@
 #include <QTabWidget>
 #include <QToolButton>
 #include "src/mwindow.hpp"
+#include "src/workbench.hpp"
 #include "playlist.hpp"
 
 class playlistview : public QTabWidget
@@ -42,18 +43,21 @@ private:
     QMenu *ctx;
     vars *jag;
     mwindow *win;
+    workbench *wb;
     QDialog *renamer;
     QLineEdit *namebox;
     QString tmpkey;
     QTreeWidgetItem *currentitem;
 
+    void showctx(const QPoint &pos);
+
     QToolButton *addbtn;
 
-    void ctxmenu(const QPoint &pos);
+    //void ctxmenu(const QPoint &pos);
     void newplaylist();
     //QMap<QString, QAction*> menuctx;
 public:
-    playlistview(vars *jag, mwindow *parent);
+    playlistview(vars *jag, mwindow *win, workbench *wb);
     ~playlistview();
 public slots:
     void viewappend(QStringList f);

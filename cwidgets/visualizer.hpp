@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QOpenGLWidget>
+#include "src/workbench.hpp"
 
 class visualizer : public QOpenGLWidget
 {

@@ -56,7 +56,7 @@ private:
     QWidget *win;
 
     /* last right-click position, stored to keep track to where to inject new widgets */
-    QPoint ctx_lastpos;
+    QWidget *lastctx;
 
     /* menu shown when the user right-clicks on an existing widget */
     QMenu *ctx_replace;
@@ -92,9 +92,11 @@ private:
 public:
     workbench(vars *jag, QWidget* win);
     bool islocked();
+    void setlastctx(QWidget *w);
     ~workbench();
 public slots:
     /* ctx_ slots are called by the context menu for the layout editor */
+    //void ctx_updlastpos(QPoint pos);
     void ctx_req(QPoint p);
     void ctx_vsplitter();
     void ctx_hsplitter();

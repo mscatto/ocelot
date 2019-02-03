@@ -44,7 +44,6 @@
 #include "cwidgets/libtree.hpp"
 #include "cwidgets/tagview.hpp"
 #include "cwidgets/playlistview.hpp"
-#include "cwidgets/splitter.hpp"
 #include "cwidgets/dummywidget.hpp"
 
 #include <libprojectM/projectM.hpp>
@@ -52,6 +51,7 @@
 workbench::workbench(vars *jag, QWidget *win) : QWidget(){
     this->jag = jag;
     this->win = win;
+    this->lastctx = this;
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->setContentsMargins(0,0,0,0);
     connect(qobject_cast<mwindow*>(win), &mwindow::uilock_flip, this, &workbench::lock_flip);
@@ -66,11 +66,12 @@ workbench::workbench(vars *jag, QWidget *win) : QWidget(){
     q->exec("select val from data where var='ui_scheme'");
     q->next();
     if(q->value(0)=="0"){
-        this->ml->addWidget(new dummywidget("First, unlock the widgets on the cogwheel toolbar button\nThen replace this by right-clicking on an empty space!"));
+        this->ml->addWidget(new dummywidget("First, unlock the widgets on the cogwheel toolbar button\nThen replace this by right-clicking on an empty space!", this));
     }else
         this->setlayout(new QString(q->record().value(0).toString()));
     //projectM::
     this->ctx_replace = new QMenu();
+    this->ctx_replace->setTitle("Replace with...");
     this->ctx_replace->addSection("Splitters");
     this->ctx_replace->addAction("Vertical (top and bottom)");
     this->ctx_replace->addAction("Horizontal (left and right)");
@@ -96,31 +97,37 @@ workbench::~workbench(){
 
 }
 
+/*void workbench::ctx_updlastpos(QPoint pos){
+    this->lastctxpos = pos;
+}*/
+
 bool workbench::islocked(){
     return this->locked;
+}
+
+void workbench::setlastctx(QWidget *w){
+    this->lastctx = w;
 }
 
 void workbench::lock_flip(){
     this->locked = !this->locked;
 
-    if(!this->locked){
-        qDebug() << "UNLOCKED!";
-    }
+    if(!this->locked)
+        qInfo() << "  -> Layout editor enabled!";
+    else
+        qInfo() << "  -> Layout editor disabled!";
 
 }
 
 void workbench::ctx_req(QPoint p){
-    if(this->locked)
+    if(this->islocked())
         return;
-
-    /* this will be used elsewhere by the actions below */
-    this->ctx_lastpos = p;
 
     QMenu ctx;
     QString *s;
     ctx.addSection("Layout Editor");
-    if(this->childAt(this->ctx_lastpos)!=nullptr){
-        s = new QString(this->childAt(this->ctx_lastpos)->metaObject()->className());
+    if(this->childAt(p)!=nullptr){
+        s = new QString(this->childAt(p)->metaObject()->className());
         if(*s=="QLabel")
             *s = "placeholder";
         else if(*s=="QSplitter")
@@ -129,11 +136,10 @@ void workbench::ctx_req(QPoint p){
         s = new QString("emptiness");
 
     //ctx.addSeparator();
-    this->ctx_replace->setTitle("Replace "+*s+" with...");
     ctx.addMenu(this->ctx_replace);
 
     QAction *remobj = new QAction();
-    if(this->childAt(this->ctx_lastpos)==nullptr){
+    if(this->childAt(p)==nullptr){
         remobj->setText("Can't remove workbench");
         remobj->setEnabled(false);
 
@@ -144,7 +150,7 @@ void workbench::ctx_req(QPoint p){
     //ctx.addAction(remobj);
 
 
-    if(this->childAt(this->ctx_lastpos)->parent()->metaObject()->className()==QString("QSplitter")){
+    if(this->childAt(p)->parent()->metaObject()->className()==QString("QSplitter")){
         QAction *rempar = new QAction();
         rempar->setText("Remove underlying splitter");
         connect(rempar, &QAction::triggered, this, &workbench::remove_parentwidget);
@@ -161,33 +167,34 @@ void workbench::ctx_req(QPoint p){
 
 /* this reparents *w to the widget under ctx_lastpos click */
 void workbench::inject(QWidget *w){/////////////////////////
-    if(this==this->childAt(this->ctx_lastpos))
+    if(this==this->lastctx)
         this->ml->addWidget(w);
     /* case it is the root widget */
-    else if(this==this->childAt(this->ctx_lastpos)->parent()){
-        QWidget *old = this->childAt(this->ctx_lastpos);
+    else if(this==this->lastctx->parent()){
+        QWidget *old = this->lastctx;
         this->ml->removeWidget(old);
         this->ml->addWidget(w);
         old->~QWidget();
     }
 
     /* if it is not, expect the parent to be a splitter */
-    else if(this->childAt(this->ctx_lastpos)->parent()->metaObject()->className()==QString("QSplitter")){
-        QSplitter *par = qobject_cast<QSplitter*>(this->childAt(this->ctx_lastpos)->parent());
-        int z = par->indexOf(this->childAt(this->ctx_lastpos));
+    else if(this->lastctx->parent()->metaObject()->className()==QString("QSplitter")){
+        QSplitter *par = qobject_cast<QSplitter*>(this->lastctx->parent());
+        int z = par->indexOf(this->lastctx);
         par->widget(z)->~QWidget();
         par->insertWidget(z, w);
     }
-    /* but if it isn't, something went wrong */
-    else qWarning() << "[WARNING] at workbench::inject - widget is neither a splitter or a dummy!";
-
+    /* but if it isn't, then replace it */
+    else {
+        qWarning() << "[WARNING] at workbench::inject - "<< w;
+    }
     this->refreshdb();
 }
 
 /* refreshdb handles writing the current layout to the database, converting it to postfix */
 void workbench::refreshdb(){
     QString s;
-    this->dumplayout(this->children().constLast(), &s);
+    this->dumplayout(this->findChildren<QWidget*>().first(), &s);
 
     QSqlQuery *q = new QSqlQuery(*this->jag->DB_REF);
     q->prepare("UPDATE data SET val = :scheme WHERE var LIKE 'ui_scheme'");
@@ -199,9 +206,21 @@ void workbench::refreshdb(){
 
 /* this function purpose is to rebuild the UI according to the postfix code on *l */
 void workbench::setlayout(QString *l){
+    if(l->isEmpty() || l->at(0)=="$"){
+        this->clear();
+        return;
+    }
     QWidgetList stack;
     while(l->length()>0){
-        if(l->front()!="+" && l->front()!="-"){ /* case it's a widget */
+        if(l->front()=="{"){
+            QString ss = l->section("}",0,0); /* regex would be cuter */
+            l->remove(0,l->indexOf("}"));
+            ss.remove("{");
+
+            QSize ws(ss.split(";").first().toInt(),ss.split(";").last().toInt());
+            stack.back()->resize(ws);
+        }
+        else if(l->front()!="+" && l->front()!="-"){ /* case it's a widget */
             stack.push_back(fetchwidget(qPrintable(l->at(0))));
         }else{
             QSplitter *ns;
@@ -212,6 +231,7 @@ void workbench::setlayout(QString *l){
             }else
                 return;
 
+            //connect(ns, &QSplitter::splitterMoved, this, &workbench::refreshdb);
             ns->insertWidget(1,stack.back());
             stack.pop_back();
             ns->insertWidget(0,stack.back());
@@ -245,6 +265,8 @@ char workbench::fetchid(QString objname){
 
 /* this one recurs down each splitter generating an infix expression representing the layout */
 void workbench::dumplayout(QObject *n, QString *out){
+    if(n->metaObject()->className()==QString("QPropertyAnimation"))
+        return;
     if(n->metaObject()->className()==QString("QSplitter")){
         out->append("(");
         workbench::dumplayout(qobject_cast<QSplitter*>(n)->widget(0), out);
@@ -256,22 +278,29 @@ void workbench::dumplayout(QObject *n, QString *out){
         out->append(")");
     }else{
         char c = workbench::fetchid(n->metaObject()->className());
-        if(strcmp(&c,"$")!=0)
-            out->append(c);
+        if(strcmp(&c,"$")==0)
+            return;
+        out->append(c);
+        QString size = "{"+QString::number(qobject_cast<QWidget*>(n)->size().width())
+                +";"
+                +QString::number(qobject_cast<QWidget*>(n)->size().height())
+                +"}";
+
+        out->append(size);
     }
 }
 
 QWidget *workbench::fetchwidget(const char *id){
     if(strcmp(id,"z")==0)
-        return new dummywidget("Right-click anywhere to replace this.");
+        return new dummywidget("Right-click anywhere to replace this.", this);
     else if(strcmp(id,"a")==0)
         return workbench::_libtree();
     else if(strcmp(id,"c")==0)
-        return new playlistview(this->jag, qobject_cast<mwindow*>(this->win));
+        return workbench::_playlistmgr();
     else if(strcmp(id,"e")==0)
-        return new coverview(qobject_cast<mwindow*>(this->win));
+        return workbench::_coverview();
     else if(strcmp(id,"d")==0)
-        return new tagview(this->jag, qobject_cast<mwindow*>(this->win));
+        return workbench::_tagview();
     else{
         qWarning() << "[WARNING] switcheroo can't handle a '" << id << "'!";
         return new QWidget;
@@ -283,9 +312,10 @@ QWidget* workbench::_vsplitter(bool filled){
     QSplitter *z = new QSplitter();
     z->setOrientation(Qt::Orientation::Vertical);
     z->setChildrenCollapsible(false);
+    //connect(z, &QSplitter::splitterMoved, this, &workbench::refreshdb);
     if(filled){
-        z->insertWidget(0, new dummywidget("[<b>VERTICAL SPLITTER</b> :: Widget #0]"));
-        z->insertWidget(1, new dummywidget("[<b>VERTICAL SPLITTER</b> :: Widget #1]"));
+        z->insertWidget(0, new dummywidget("[<b>VERTICAL SPLITTER</b> :: Widget #0]", this));
+        z->insertWidget(1, new dummywidget("[<b>VERTICAL SPLITTER</b> :: Widget #1]", this));
     }
 
     return z;
@@ -299,9 +329,10 @@ QWidget* workbench::_hsplitter(bool filled){
     QSplitter *z = new QSplitter();
     z->setOrientation(Qt::Orientation::Horizontal);
     z->setChildrenCollapsible(false);
+    //connect(z, &QSplitter::splitterMoved, this, &workbench::refreshdb);
     if(filled){
-        z->addWidget(new dummywidget("[<b>HORIZONTAL SPLITTER</b> :: Widget #0]"));
-        z->addWidget(new dummywidget("[<b>HORIZONTAL SPLITTER</b> :: Widget #1]"));
+        z->addWidget(new dummywidget("[<b>HORIZONTAL SPLITTER</b> :: Widget #0]", this));
+        z->addWidget(new dummywidget("[<b>HORIZONTAL SPLITTER</b> :: Widget #1]", this));
     }
 
     return z;
@@ -312,17 +343,17 @@ void workbench::ctx_hsplitter(){
 }
 
 QWidget* workbench::_libtree(){
-    libtree *nltree = new libtree(qobject_cast<mwindow*>(this->win));
+    libtree *nltree = new libtree(qobject_cast<mwindow*>(this->win), this);
     nltree->populate(this->jag->DB_REF);
     return nltree;
 }
 
 void workbench::ctx_libtree(){
-    this->inject(workbench::_libtree());
+    this->inject(workbench::_libtree());///////
 }
 
 QWidget* workbench::_playlistmgr(){
-    return new playlistview(this->jag, qobject_cast<mwindow*>(win));
+    return new playlistview(this->jag, qobject_cast<mwindow*>(win), this);
 }
 
 void workbench::ctx_playlistmgr(){
@@ -330,7 +361,7 @@ void workbench::ctx_playlistmgr(){
 }
 
 QWidget* workbench::_coverview(){
-    return new coverview(qobject_cast<mwindow*>(win));
+    return new coverview(qobject_cast<mwindow*>(win), this);
 }
 
 void workbench::ctx_coverview(){
@@ -338,7 +369,7 @@ void workbench::ctx_coverview(){
 }
 
 QWidget* workbench::_tagview(){
-    return new tagview(this->jag, qobject_cast<mwindow*>(win));
+    return new tagview(this->jag, qobject_cast<mwindow*>(win), this);
 }
 
 void workbench::ctx_tagview(){
@@ -348,32 +379,31 @@ void workbench::ctx_tagview(){
 /* removes the parent of a widget located at ctx_lastpos */
 /* --- apropriate checks should've already been made */
 void workbench::remove_parentwidget(){
-    QWidget *rem = this->childAt(this->ctx_lastpos)->parentWidget();
+    QWidget *rem = this->lastctx->parentWidget();
     QWidget *parent = rem->parentWidget();
     if(parent==this){
-        this->ml->replaceWidget(rem, new dummywidget("I'm just a placeholder.\nRight-click to replace me!"));
+        this->ml->replaceWidget(rem, new dummywidget("I'm just a placeholder.\nRight-click to replace me!", this));
         rem->~QWidget();
     }else{
         int pos = qobject_cast<QSplitter*>(parent)->indexOf(rem);
-        qobject_cast<QSplitter*>(parent)->replaceWidget(pos, new dummywidget("I'm just a placeholder.\nRight-click to replace me!"));
+        qobject_cast<QSplitter*>(parent)->replaceWidget(pos, new dummywidget("I'm just a placeholder.\nRight-click to replace me!", this));
         rem->~QWidget();
     }
 }
 
 /* removes the widget at ctx_lastpos */
 void workbench::remove_widget(){
-    qDebug() << this->childAt(this->ctx_lastpos);
-    if(this==this->childAt(this->ctx_lastpos)->parent()){
-        QWidget *w = this->childAt(this->ctx_lastpos);
+    if(this==this->lastctx->parent()){
+        QWidget *w = this->lastctx;
         this->ml->removeWidget(w);
         w->~QWidget();
-    }else if(this->childAt(this->ctx_lastpos)->parent()->metaObject()->className()==QString("QSplitter")){
-        QSplitter *par = qobject_cast<QSplitter*>(this->childAt(this->ctx_lastpos)->parent());
-        par->childAt(this->ctx_lastpos)->~QWidget();
+    }else if(this->lastctx->parent()->metaObject()->className()==QString("QSplitter")){
+        //QSplitter *par = qobject_cast<QSplitter*>(this->lastctx->parent());
+        this->lastctx->~QWidget();
     }
 
     if(this->ml->children().count()==0)
-        this->ml->addWidget(new dummywidget("First, unlock the widgets on the cogwheel toolbar button\nThen replace this by right-clicking on an empty space!"));
+        this->ml->addWidget(new dummywidget("First, unlock the widgets on the cogwheel toolbar button\nThen replace this by right-clicking on an empty space!", this));
 }
 
 /* removes all the widgets from the workbench's layout */
@@ -385,7 +415,7 @@ void workbench::clear(){
         o->metaObject()->className()!=QString("QPropertyAnimation"))
            o->~QObject();
 
-    this->ml->addWidget(new dummywidget("<b>[WORKBENCH]</b> :: You can right-click anywhere to add something useful to it."));
+    this->ml->addWidget(new dummywidget("<b>[WORKBENCH]</b> :: You can right-click anywhere to add something useful to it.", this));
     workbench::refreshdb();
 }
 

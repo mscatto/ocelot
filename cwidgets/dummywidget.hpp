@@ -23,14 +23,18 @@
 #ifndef DUMMYWIDGET_H
 #define DUMMYWIDGET_H
 
-#include<QLabel>
+#include <QLabel>
+#include "src/workbench.hpp"
 
 class dummywidget : public QLabel
 {
     Q_OBJECT
 public:
-    dummywidget(const QString text);
+    dummywidget(const QString text, workbench *wb);
     ~dummywidget();
+private:
+    workbench *wb;
+    void showctx(QPoint pos);
 };
 
 #endif // DUMMYWIDGET_H
