@@ -70,32 +70,26 @@ void library::process(){
 void library::scan(QString dir){
     dir.replace("//","/");
 
-    QDir *iter = new QDir(dir);
-    iter->setFilter(QDir::NoSymLinks | QDir::Readable | QDir::Files);
-    QStringList l = iter->entryList();
+    QDir iter(dir);
+    iter.setFilter(QDir::NoSymLinks | QDir::Readable | QDir::Files);
+    QStringList l = iter.entryList();
 
     if(l.size()>0){
         QMimeDatabase mimedb;
         QString fname;
         for(int i=0; i<l.size(); i++){
             fname = dir+"/"+l.at(i);
-            if(formats.contains(mimedb.mimeTypeForFile(fname).name())){ /* case file has a valid mimetype from enum */
+            if(formats.contains(mimedb.mimeTypeForFile(fname).name())) /* case file has a valid mimetype from enum */
                 if(!this->pathlist.contains(fname))
                     library::insert(fname);
-            }
         }
     }
 
-    iter->setFilter(QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Readable | QDir::Dirs); //now filters directories
-    l = iter->entryList();
-    if(l.size()>0){
-        for(int i=0; i<l.size(); i++){ // recur each directory
+    iter.setFilter(QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Readable | QDir::Dirs); //now filters directories
+    l = iter.entryList();
+    if(l.size()>0)
+        for(int i=0; i<l.size(); i++) // recur each directory
             library::scan(QString(dir + "/" + l.at(i)));
-        }
-    }
-
-    iter->~QDir();
-
 }
 
 /* appends and extracts metadata from track fpath to the database */

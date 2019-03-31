@@ -29,7 +29,7 @@
 
 toolbar::toolbar(QWidget *win, QMenu *conf) : QToolBar(win){
     this->setContextMenuPolicy(Qt::CustomContextMenu);
-
+    this->setObjectName("toolbar");
     conf = new QMenu(qobject_cast<mwindow*>(win));
     conf->addAction(new QAction("Open File..."));
     conf->addAction(new QAction("Play Disc..."));

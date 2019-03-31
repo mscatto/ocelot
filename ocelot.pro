@@ -26,7 +26,8 @@ RESOURCES += \
 	pak.qrc
 
 DISTFILES += \
-	README.md
+	README.md \
+    rules
 
 HEADERS += \
 	cwidgets/coverview.hpp \
@@ -50,7 +51,10 @@ HEADERS += \
 	src/vars.hpp \
 	src/workbench.hpp \
 	src/topostfix.hpp \
-    cwidgets/visualizer.hpp
+    cwidgets/visualizer.hpp \
+    dialogs/transchelper.hpp \
+    helpers/flac.hpp \
+    helpers/intro.hpp
 
 SOURCES += \
 	cwidgets/coverview.cpp \
@@ -75,4 +79,7 @@ SOURCES += \
 	src/vars.cpp \
 	src/workbench.cpp \
 	src/topostfix.cpp \
-    cwidgets/visualizer.cpp
+    cwidgets/visualizer.cpp \
+    dialogs/transchelper.cpp \
+    helpers/flac.cpp \
+    helpers/intro.cpp

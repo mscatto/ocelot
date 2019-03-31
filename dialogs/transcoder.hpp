@@ -28,14 +28,38 @@
 #include <QDialog>
 
 #include "src/vars.hpp"
-
+#include "dialogs/transchelper.hpp"
 class transcoder : public QDialog
 {
+    Q_OBJECT
+private:
+    bool qpreset = false;
+    QStringList *input;
+    QTreeWidget *inlist;
+    QTreeWidget *outlist;
+    QProgressBar *prog;
+    transchelper *helper;
+
+    QPushButton *preset_add;
+    QPushButton *preset_rem;
+    QPushButton *preset_adv;
+    QComboBox *preset_cbx;
+    QGroupBox *preset_gbx;
+
+private slots:
+
+    void flip_qpreset();
+    void refresh_output();
 public:
     transcoder(vars *jag, QWidget *win);
     ~transcoder();
 public slots:
-    void handle(QStringList files);
+    void clear();
+    void append(QStringList *files);
+    void replace(QStringList *files);
+    void spawnhelper();
+signals:
+
 };
 
 #endif // TRANSCODER_HPP

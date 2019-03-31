@@ -51,6 +51,7 @@ playlistview::playlistview(vars *jag, mwindow *win, workbench *wb) : QTabWidget(
     this->renamer = new QDialog(this);
     this->renamer->setFixedSize(480,48);
     this->renamer->setModal(true);
+    this->setObjectName("playlistview");
     QGridLayout *grid = new QGridLayout();
     QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Close);
     this->namebox = new QLineEdit();

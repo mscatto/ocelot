@@ -46,6 +46,9 @@ class workbench : public QWidget
     };
 
 private:
+    void splittertimer();
+    QTimer *resizetimer;
+
     /* this controls the layout editor toggler */
     bool locked = true;
 

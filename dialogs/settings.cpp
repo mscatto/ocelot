@@ -93,21 +93,27 @@ QWidget* settings::spawn_maintab(QWidget *win){
     mform->addRow(new QLabel("When appending:"), append);
 
     /* set selection from db */
-    dclick->setCurrentIndex(this->jag->fetchdata(new QString("general_doubleclick")).toInt());
-    mclick->setCurrentIndex(this->jag->fetchdata(new QString("general_middleclick")).toInt());
-    append->setCurrentIndex(this->jag->fetchdata(new QString("general_appendbehaviour")).toInt());
+    dclick->setCurrentIndex(this->jag->fetchdbdata("general_doubleclick").toInt());
+    mclick->setCurrentIndex(this->jag->fetchdbdata("general_middleclick").toInt());
+    append->setCurrentIndex(this->jag->fetchdbdata("general_appendbehaviour").toInt());
 
     connect(dclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mdclick);
     connect(mclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mmclick);
     connect(append, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mappend);
     mgbox->setLayout(mform);
 
-    /* other 1 */
-    QGroupBox *lelbox = new QGroupBox("the other one");
+    /* UI */
+    QGroupBox *uibox = new QGroupBox("UI and Colors");
+    QFormLayout *uil = new QFormLayout();
+    uil->setFormAlignment(Qt::AlignHCenter);
 
-    /* and another */
+    uibox->setLayout(uil);
 
-    QGroupBox *kekbox = new QGroupBox("the last one");
+    QCheckBox *ui_remsize = new QCheckBox();
+    uil->addRow("Remember window size for next start", ui_remsize);
+
+    QCheckBox *ui_rempos = new QCheckBox();
+    uil->addRow("Remember window position for next start", ui_rempos);
 
     /* and the last */
     QGroupBox *kbbox = new QGroupBox("Keyboard Shortcuts");
@@ -123,8 +129,7 @@ QWidget* settings::spawn_maintab(QWidget *win){
 
     /* entangle everything */
     grid->addWidget(mgbox,0,0,1,1);
-    grid->addWidget(lelbox,0,1,2,1);
-    grid->addWidget(kekbox,0,2,2,1);
+    grid->addWidget(uibox,0,1,2,1);
     grid->addWidget(kbbox,1,0,1,1);
     w->setLayout(grid);
 

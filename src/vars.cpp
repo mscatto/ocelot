@@ -29,6 +29,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTreeWidget>
+#include <QtDebug>
 #include <QtConcurrent/QtConcurrent>
 #include <QSqlDriver>
 #include <QSqlRecord>
@@ -47,7 +48,6 @@ vars::vars(){
 vars::~vars(){
 
 }
-
 void vars::initplayer(){
     this->mp = new player();
 }
@@ -60,21 +60,12 @@ QString vars::translate_val(QString val){
     return this->pmap.key(val);
 }
 
-QStringList vars::dumpvars(){
+QStringList vars::dumpval(){
     return this->pmap.values();
 }
 
 QStringList vars::dumpkeys(){
     return this->pmap.keys();
-}
-
-QString vars::fetchdata(QString *var){
-    QSqlQuery q;
-    q.exec("SELECT val FROM data WHERE var='"+*var+"'");
-    if(!q.isNull(0))
-        return QString();
-    q.next();
-    return q.value(0).toString();
 }
 
 void vars::remlibs(QString path){
@@ -131,11 +122,11 @@ void vars::initdb(){
 
     QDir().mkdir(this->DATA_PATH);
     if(!QDir(this->DATA_PATH).exists()){
-        qFatal("%s",qPrintable("[FATAL] Unable to create data directory in '"+this->DATA_PATH+"' !"));
+        qFatal("[FATAL] Unable to create data directory in \"%s\"!",qPrintable(DATA_PATH));
     }
 
     if(!this->DB_REF->open()){
-        qFatal("%s",qPrintable("[FATAL] Could not open database: "+this->DB_REF->lastError().driverText()));
+        qFatal("[FATAL] Could not open database: %s",qPrintable(this->DB_REF->lastError().driverText()));
     }
 
     QSqlQuery *x = new QSqlQuery();
@@ -178,17 +169,17 @@ void vars::initdb(){
         /* initialize default values */
         initdata();
 
-        qInfo() << "  -> created at" << this->DATA_PATH+"/ocelot.database";
+        qInfo("  -> new database placed under %s", qPrintable(this->DATA_PATH));
     }else{
-        qInfo("%s",qPrintable("[INFO] Database found at "+this->DB_REF->databaseName()+"..."));
+        qInfo("[INFO] Database found at %s...",qPrintable(this->DB_REF->databaseName()));
 
         x->exec("SELECT path FROM songs");
         x->last();
 
         if(x->isNull(0))
-            qInfo("%s",qPrintable("  -> 0 tracks on record."));
+            qInfo("  -> 0 tracks on record.");
         else
-            qInfo("%s",qPrintable("  -> "+QString::number(x->at()+1)+" tracks on record"));
+            qInfo("  -> %d tracks on record",x->at()+1);
 
         qInfo() << "[INFO] Running sanity check...";
 
@@ -202,10 +193,29 @@ void vars::initdb(){
                 this->DB_REF->exec("DELETE FROM songs WHERE path='"+x->value(0).toString()+"'");
             }
         }
-        qInfo("%s", qPrintable("  -> "+QString::number(inv)+" entries were removed."));
+        qInfo("  -> %d entries were removed.", inv);
     }
     x->~QSqlQuery();
-    //qInfo() << "[INFO] Database initialized successfully.";
+}
+
+void vars::setdbdata(const char *var, QVariant val){
+    QSqlQuery *x = new QSqlQuery(*this->DB_REF);
+    x->prepare("UPDATE data SET val = :val WHERE var LIKE :var");
+    x->bindValue(":var", var);
+    x->bindValue(":val", val);
+    x->exec();
+    x->~QSqlQuery();
+}
+
+QVariant vars::fetchdbdata(const char *var){
+    QSqlQuery q(*this->DB_REF);
+    q.prepare("SELECT val FROM data WHERE var = :var");
+    q.bindValue(":var", var);
+    q.exec();
+    if(!q.next())
+        return "";
+    else
+        return q.value(0);
 }
 
 void vars::initlibs(){
@@ -262,8 +272,20 @@ void vars::initdata(){
         '0')"
     );
     this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_windowsize',\
-        '1024,600')"
+        'ui_state',\
+        '0')"
+    );
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'ui_geometry',\
+        '300,200')"
+    );
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'ui_maximized',\
+        '0')"
+    );
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'ui_windowpos',\
+        '0,0')"
     );
 }
 

@@ -38,6 +38,7 @@ tagview::tagview(vars *jag, mwindow *parent, workbench *wb) : QTreeWidget(){
     this->setColumnCount(2);
     this->setColumnWidth(0, 200);
     this->setHeaderHidden(false);
+    this->setObjectName("tagview");
 
     this->setHeaderLabels(QStringList() << "Tag" << "Data");
     this->setRootIsDecorated(false);

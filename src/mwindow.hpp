@@ -54,6 +54,8 @@ class mwindow : public QMainWindow
 public:
     mwindow(vars *jag);
     ~mwindow();
+protected:
+     void closeEvent(QCloseEvent *event);
 private:
     bool paused = false; //ugly
     TagLib::FileRef *fr;
@@ -64,22 +66,26 @@ private:
     progslider *prog;
     workbench *wb;
     QMenu *configmenu;
+    QThread *playert;
     toolbar *bar;
     settings *sdiag;
     transcoder *transcdiag;
     tageditor *tagdiag;
     about *adiag;
-    void closeEvent(QCloseEvent *event);
     QMediaPlayer::MediaStatus playerstatus = QMediaPlayer::MediaStatus::UnknownMediaStatus;
+
+    void savestate();
+    void loadstate();
 
     /* the dumping of the window size to the db works behind a timer.
      * every time the user resizes the window, a 1sec timer is started.
      * new resize events while the timer is active will just reset it
      * in an attempt to reduce db writes */
-    QTimer *resizetimer;
+    //QTimer *resizetimer;
     void resizeEvent(QResizeEvent* event);
-    void restorewinsize();
-    void dumpwinsize();
+    //void restore_state();
+    //void restorewinsize();
+    //void dumpwinsize();
 public slots:
     /* responsible for handling the toolbar buttons actions */
     void toolbar_pause();
@@ -92,7 +98,7 @@ public slots:
     void about_spawn();
 
     /* spawns the transcoder window and contents */
-    void transcoder_spawn();
+    void transcoder_spawn(QStringList *l, bool discard);
 
     /* spawns the tag editor window and children */
     void tageditor_spawn(QStringList *l);
@@ -104,6 +110,7 @@ public slots:
     void select(QTreeWidgetItem *item);
 
     void show();
+    void child_resized();
 private slots:
     /* syncs the playback position to the progslider state */
     void progslider_sync(qint64 pos);
@@ -125,7 +132,7 @@ signals:
     void coverchanged(QPixmap *cover);
     void libchanged(QSqlDatabase *db);
     void plappend(QStringList l);
-    void convhandler(QStringList files);
+    void convhandler(QStringList *files);
     void plnext();
     void plprev();
     void mediastatus(QMediaPlayer::MediaStatus status);

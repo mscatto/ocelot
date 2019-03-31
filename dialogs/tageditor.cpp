@@ -45,12 +45,12 @@ tageditor::tageditor(QWidget *parent, vars *jag) : QDialog(parent){
 
     QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Discard);
     QTableWidget *tbl = new QTableWidget();
-    tbl->setRowCount(jag->dumpvars().count());
+    tbl->setRowCount(jag->dumpval().count());
     tbl->setColumnCount(1);
     tbl->setColumnWidth(0,264);
     tbl->setHorizontalHeaderLabels(QStringList()<<"Tag Data");
-    tbl->setVerticalHeaderLabels(jag->dumpvars());
-    for(int i=0;i<jag->dumpvars().count();i++){
+    tbl->setVerticalHeaderLabels(jag->dumpval());
+    for(int i=0;i<jag->dumpval().count();i++){
         //qDebug() << tbl->verticalHeaderItem(i)->text();
     }
 

@@ -34,21 +34,42 @@
 class vars : QObject
 {
 public:
-    const char* VERSION = "0.3b";
-    QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);//+"/ocelot";
-    QString DB_PATH = DATA_PATH+"/ocelot.database";
+    /* ocelot version */
+    const char *VERSION = "0.3b";
+    /* data root path */
+    const QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    /* DB file path */
+    const QString DB_PATH = DATA_PATH+"/ocelot.database";
+
+    /* shared DB instance */
     QSqlDatabase *DB_REF = new QSqlDatabase();
+    /* player instance */
+    player *mp;
+
+    //*// THESE DEAL WITH THE PROPERTY MAP TRANSLATION FROM INTERNAL TAGLIB TAG PROPERTIES
+    // TO A MORE READABLE FORM. ie var "ALBUMARTIST" to val "Album Artist".
+    //
+    /* returns the corresponding value according to key from property table */
     QString translate_key(QString key);
+    /* fetches the key from a given value from pmap*/
     QString translate_val(QString val);
-    QStringList dumpvars();
+    /* dumps values from property table pmap*/
+    QStringList dumpval();
+    /* dump pmap keys */
     QStringList dumpkeys();
-    QString fetchdata(QString *var);
-    void setdata(QString *var, QString *data);
+    //*//---
+
+    /* remove lib indicated by path */
     void remlibs(QString path);
+    /* set var on DB data table to var */
+    void setdbdata(const char *var, QVariant val);
+    /* fetch var's val from DB data table */
+    QVariant fetchdbdata(const char *var);
+
     QStringList *dumppaths();
     QStringList *dumplibinfo();
-    QStringList *libs;
-    player *mp;
+    QStringList *libs; // this is bad
+
     vars();
     ~vars();
 private:

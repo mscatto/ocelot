@@ -7,7 +7,7 @@
         <file alias="prev">internals/prev.png</file>
         <file alias="stop">internals/stop.png</file>
         <file alias="wrench">internals/wrench.png</file>
-        <file alias="icon">internals/icon.png</file>
         <file alias="caticon">internals/caticon.png</file>
+        <file alias="tapeicon">internals/tapeicon.png</file>
     </qresource>
 </RCC>

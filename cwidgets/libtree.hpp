@@ -43,12 +43,15 @@ private:
     QTreeWidget *tree;
     void recurtree(QTreeWidgetItem *parent, QStringList levels, QString conditions, QSqlDatabase *db);
     QStringList *extract(QString vars);
-
+private slots:
+    void transc_append(bool discard=false);
+    void transc_replace();
 public slots:
     void populate(QSqlDatabase *db);
     void gatherselected();
 signals:
     void dispatch(QStringList *l);
+    void transc_dispatch(QStringList *l, bool discard);
 public:
     libtree(mwindow *win, workbench *wb);
     ~libtree();

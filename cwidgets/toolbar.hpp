@@ -26,6 +26,7 @@
 #include<QToolBar>
 
 class toolbar : public QToolBar{
+    Q_OBJECT
 private:
     QMenu *conf;
     QList<QWidget*> docked;

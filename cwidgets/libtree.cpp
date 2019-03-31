@@ -48,19 +48,33 @@ libtree::libtree(mwindow *win, workbench *wb) : QWidget(){
     this->ctx = new QMenu();
     const QIcon c = QIcon::fromTheme("gtk-convert");
     const QIcon t = QIcon::fromTheme("tag-symbolic");
-    QAction *tagger = new QAction("Mass Tagger");
-    QAction *conv = new QAction(c, "Transcode");
+    QAction *tagger = new QAction(QIcon::fromTheme("amarok_playlist"), "Mass Tagger");
+    QMenu *conv = new QMenu(this->ctx);
+    conv->setIcon(c);
+    conv->setTitle("Transcoder");
+
+    QAction *append = new QAction(QIcon::fromTheme("document-new-from-template"), "Enqueue");
+    QAction *rep = new QAction(QIcon::fromTheme("document-new"),"Add to New Queue");
+
+    conv->addAction(append);
+    conv->addAction(rep);
+    conv->addSection("Quick Presets");
+    conv->addAction(QIcon::fromTheme("quickopen"), "FakeFLAC");
+    conv->addAction(QIcon::fromTheme("quickopen"), "FakeMP3");
     QAction *prop = new QAction(t, "Edit Tag");
 
     connect(prop, &QAction::triggered, this, &libtree::gatherselected);
+    connect(append, &QAction::triggered, this, &libtree::transc_append);
+    connect(rep, &QAction::triggered, this, &libtree::transc_replace);
+    connect(this, &libtree::transc_dispatch, win, &mwindow::transcoder_spawn);
     connect(this, &libtree::dispatch, win, &mwindow::tageditor_spawn);
 
-    ctx->addAction(conv);
+    ctx->addMenu(conv);
     ctx->addAction(tagger);
     ctx->addSeparator();
     ctx->addAction(prop);
 
-    this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
+    //this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
     //this->setFrameShape(QFrame::StyledPanel);
     //this->setFrameShadow(QFrame::Sunken);
     this->layout()->setContentsMargins(1,1,1,1);
@@ -136,6 +150,16 @@ QStringList* libtree::extract(QString vars){
         out->append(reg.next().captured(1));
 
     return out;
+}
+
+void libtree::transc_append(bool discard){
+    QStringList *sl = new QStringList(this->tree->selectedItems().first()->data(0, Qt::UserRole).toStringList());
+    emit this->transc_dispatch(sl, discard);
+    sl->~QStringList();
+}
+
+void libtree::transc_replace(){
+    this->transc_append(true);
 }
 
 void libtree::showctx(const QPoint &pos){

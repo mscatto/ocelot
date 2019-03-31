@@ -29,6 +29,7 @@ dummywidget::dummywidget(const QString text, workbench *wb) : QLabel(){
     this->setFrameShadow(QFrame::Raised);
     this->setFrameShape(QFrame::Shape::StyledPanel);
     this->setText(text);
+    this->setObjectName("dummy");
     this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 

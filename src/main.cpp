@@ -32,6 +32,8 @@ bool showwizard(vars *jag, mwindow *mw);
 
 int main(int argc, char *argv[]){
     QApplication a(argc, argv);
+    a.setApplicationName("ocelot");
+
     vars *jag = new vars();
     mwindow *mw = new mwindow(jag);
     if(!showwizard(jag, mw))
@@ -41,9 +43,7 @@ int main(int argc, char *argv[]){
 }
 
 bool showwizard(vars *jag, mwindow *mw){
-    QSqlQuery q = jag->DB_REF->exec("SELECT val FROM data WHERE var='general_runwizard'");
-    q.next();
-    if(q.value(0)==1){
+    if(jag->fetchdbdata("general_runwizard")==1){ /* first run */
         wizard *w = new wizard(jag);
         QObject::connect(w, &wizard::show_mwindow, mw, &mwindow::show);
         w->show();

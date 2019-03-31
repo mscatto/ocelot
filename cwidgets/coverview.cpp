@@ -31,6 +31,9 @@ coverview::coverview(mwindow *win, workbench *wb) : QLabel(win){
     this->setMinimumSize(200, 200);
     this->setAutoFillBackground(true);
     this->setScaledContents(true);
+    this->setParent(win);
+    this->setObjectName("coverview");
+    //this->setFixedSize(this->size());
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->win = win;
     this->wb = wb;
@@ -48,8 +51,11 @@ coverview::coverview(mwindow *win, workbench *wb) : QLabel(win){
     this->ctx->addAction("Keep cover ratio");
 
     connect(this, &QLabel::customContextMenuRequested, this, &coverview::showctx);
+    //connect(this, &coverview::, this, &coverview::showctx);
     connect(win, &mwindow::coverchanged, this, &coverview::coverchanged);
     connect(win, &mwindow::clearcover, this, &coverview::clear);
+
+    qInfo() << this->parent();
 }
 
 void coverview::showctx(QPoint pos){
