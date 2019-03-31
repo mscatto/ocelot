@@ -3,7 +3,7 @@ Ocelot is an audio player and (hopefully soon) a library manager.
 
 It is built using Qt Widgets, with some key features made possible by the TagLib and ProjectM projects.
 
->Ocelot is released under the MIT license, you can read more about it in the supplied LICENSE file.
+>Ocelot is released under the MIT license, you can read more about it inside the supplied LICENSE file.
 
 * _This project is currently in an early stage of development! As such, many planned features are still not present._
 
