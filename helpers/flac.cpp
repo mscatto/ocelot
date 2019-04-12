@@ -153,6 +153,7 @@ flac::flac(QWidget *parent) : QWidget(parent){
     /**/
     QLineEdit *ext = new QLineEdit;
     ext->setText("flac");
+    ext->setFixedWidth(60);
     l->addRow("File Extension:", ext);
 
     /* args field */
@@ -164,6 +165,14 @@ flac::flac(QWidget *parent) : QWidget(parent){
 
     argl->addWidget(args);
     l->addRow("Additional Paramaters:", argl);
+
+    QLabel *lbl = new QLabel();
+    lbl->setText("<b>Note:</b><br><i>Setting these parameters to values higher"
+                 " than those from the input files likely won't increase the "
+                 "quality, but will increase the filesize.</i>");
+    lbl->setFrameShape(QFrame::Shape::StyledPanel);
+    lbl->setWordWrap(true);
+    l->addRow(lbl);
 }
 
 flac::~flac(){}

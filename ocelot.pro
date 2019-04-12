@@ -54,7 +54,8 @@ HEADERS += \
     cwidgets/visualizer.hpp \
     dialogs/transchelper.hpp \
     helpers/flac.hpp \
-    helpers/intro.hpp
+    helpers/intro.hpp \
+    cwidgets/splitter.hpp
 
 SOURCES += \
 	cwidgets/coverview.cpp \
@@ -82,4 +83,5 @@ SOURCES += \
     cwidgets/visualizer.cpp \
     dialogs/transchelper.cpp \
     helpers/flac.cpp \
-    helpers/intro.cpp
+    helpers/intro.cpp \
+    cwidgets/splitter.cpp

@@ -46,8 +46,12 @@ private:
     QComboBox *preset_cbx;
     QGroupBox *preset_gbx;
 
+    QWidget *init_prev();
+    QWidget *init_input();
+    QWidget *init_enc();
+    QWidget *init_output();
+    QWidget *init_conf();
 private slots:
-
     void flip_qpreset();
     void refresh_output();
 public:

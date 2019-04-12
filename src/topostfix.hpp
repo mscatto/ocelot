@@ -23,4 +23,4 @@
 #include<bits/stdc++.h>
 
 std::string translate(std::string infix);
-int operatorPrecedence(char ch);
+int oprec(char ch);

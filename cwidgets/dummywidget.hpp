@@ -29,12 +29,15 @@
 class dummywidget : public QLabel
 {
     Q_OBJECT
-public:
-    dummywidget(const QString text, workbench *wb);
-    ~dummywidget();
 private:
     workbench *wb;
     void showctx(QPoint pos);
+    QString deftext = "<b>:: PLACEHOLDER ::</b><br>Activate the <i>Layout Editor"
+                      "</i> and right-click to replace this with something useful!";
+public:
+    dummywidget(workbench *wb, QString text = "");
+    ~dummywidget();
+
 };
 
 #endif // DUMMYWIDGET_H

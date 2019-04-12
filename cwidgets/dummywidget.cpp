@@ -24,11 +24,13 @@
 #include <QGridLayout>
 #include <QLabel>
 
-dummywidget::dummywidget(const QString text, workbench *wb) : QLabel(){
+dummywidget::dummywidget(workbench *wb, QString text) : QLabel(wb){
+    text.isEmpty() ? this->setText(this->deftext) : this->setText(text);
+
     this->wb = wb;
     this->setFrameShadow(QFrame::Raised);
     this->setFrameShape(QFrame::Shape::StyledPanel);
-    this->setText(text);
+
     this->setObjectName("dummy");
     this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -46,4 +48,5 @@ void dummywidget::showctx(QPoint pos){
         this->wb->ctx_req(this->mapTo(this->wb, pos));
     }
 }
+
 

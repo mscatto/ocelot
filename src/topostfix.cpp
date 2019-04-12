@@ -28,50 +28,50 @@ using namespace std;
 
 string translate(string infix){
     string postfix = "";
-    stack <char> myStack;
+    stack <char> ns;
     char ch;
 
     for(int i=0; infix[i]; i++){
         ch = infix[i];
 
         if(ch=='(') //if found opening bracket
-            myStack.push(ch);
+            ns.push(ch);
         else if(ch==')'){ //if found closing bracket
-            while(!myStack.empty() && myStack.top()!='('){
-                postfix = postfix + myStack.top();
-                myStack.pop();
+            while(!ns.empty() && ns.top()!='('){
+                postfix = postfix + ns.top();
+                ns.pop();
             }
 
-            if(!myStack.empty() && myStack.top()=='(')
-               myStack.pop();
+            if(!ns.empty() && ns.top()=='(')
+               ns.pop();
         }else{ //found operator or operand
-            int priority = operatorPrecedence(ch);
+            int priority = oprec(ch);
 
             if(priority==0) //found operand
                 postfix = postfix + ch;
             else{ //found operator
-                if(myStack.empty())
-                    myStack.push(ch);
+                if(ns.empty())
+                    ns.push(ch);
                 else{
-                    while(!myStack.empty() && myStack.top()!='(' && priority<=operatorPrecedence(myStack.top())){
-                        postfix = postfix + myStack.top();
-                        myStack.pop();
+                    while(!ns.empty() && ns.top()!='(' && priority<=oprec(ns.top())){
+                        postfix = postfix + ns.top();
+                        ns.pop();
                     }
-                    myStack.push(ch);
+                    ns.push(ch);
                 }
             }
         }
     }
 
-    while(!myStack.empty()){
-        postfix += myStack.top();
-        myStack.pop();
+    while(!ns.empty()){
+        postfix += ns.top();
+        ns.pop();
     }
 
     return postfix;
 }
 
-int operatorPrecedence(char ch){
+int oprec(char ch){
     if(ch=='+' || ch=='-')
         return 1;
     else
