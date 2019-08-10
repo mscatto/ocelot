@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/ui">
+        <file alias="wrench">wrench.png</file>
+        <file alias="stop">media-playback-stop.svg</file>
+        <file alias="next">next.svg</file>
+        <file alias="prev">prev.svg</file>
+        <file alias="play">media-playback-start.svg</file>
+        <file alias="pause">media-playback-pause.svg</file>
+        <file alias="gear">gear.svg</file>
+        <file>configure.svg</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>tapeicon.png</file>
+        <file>caticon.png</file>
+    </qresource>
+</RCC>

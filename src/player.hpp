@@ -6,51 +6,64 @@
  * of this software and associated documentation files (the “Software”), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is furnished
- * to do so, subject to the following conditions:
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * The Software is provided “as is”, without warranty of any kind, express or implied,
- * including but not limited to the warranties of merchantability, fitness for a
- * particular purpose and noninfringement. In no event shall the authors or copyright
- * holders be liable for any claim, damages or other liability, whether in an action
- * of contract, tort or otherwise, arising from, out of or in connection with the
- * software or the use or other dealings in the Software.
+ * The Software is provided “as is”, without warranty of any kind, express or
+ * implied, including but not limited to the warranties of merchantability,
+ * fitness for a particular purpose and noninfringement. In no event shall the
+ * authors or copyright holders be liable for any claim, damages or other
+ * liability, whether in an action of contract, tort or otherwise, arising from,
+ * out of or in connection with the software or the use or other dealings in the
+ * Software.
  */
 
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-#include <QObject>
-#include <QMediaPlayer>
 #include <QMainWindow>
-#include <QTreeWidgetItem>
+#include <QObject>
 #include <QThread>
+#include <QTimer>
+#include <QTreeWidgetItem>
 
-class player : public QObject
-{
+#include <Qt5GStreamer/QGst/Init>
+#include <Qt5GStreamer/QGst/Pipeline>
+#include <Qt5GStreamer/QGst/TagList>
+
+class player : public QObject {
     Q_OBJECT
 private:
-    QMediaPlayer *mp;
+    void onBusMessage(const QGst::MessagePtr& message);
+    void handlePipelineStateChange(const QGst::StateChangedMessagePtr& scm);
+
+    QGst::PipelinePtr m_pipeline;
+    QTimer m_positionTimer;
+
+    QTime position() const;
+    QTime length() const;
+    QTime clen;
+
 public:
-    explicit player(QObject *parent = nullptr);
-    void init(QMainWindow *win);
+    player();
     ~player();
+private slots:
+    void position_proxy();
 public slots:
-    void playfile(QString *file);
-    void playloaded();
+    void play();
     void stop();
     void pause();
-    void load(QString *file);
-    void setVolume(int volume);
-    void setPosition(int x);
+    void seek(short sec);
+    void set(QString file);
+    void setVolume(ushort v);
 signals:
+    void position_changed(QTime pos);
+    void length_changed(QTime len);
+    void paused(bool paused);
     void EOM();
-    void paused(bool res);
-    //void mediastatus(QMediaPlayer::MediaStatus status);
-    void mediaStatusChanged(QMediaPlayer::MediaStatus status);
-    void positionChanged(qint64 pos);
+    // void length_changed(QTime len);
 };
 #endif // PLAYER_HPP

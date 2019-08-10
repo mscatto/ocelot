@@ -4,12 +4,16 @@
 #
 #-------------------------------------------------
 
-QT += core gui multimedia sql widgets
+QT += core gui sql widgets
 
 TARGET = ocelot
+DESTDIR = bin
+OBJECTS_DIR = obj
+MOC_DIR = obj
 TEMPLATE = app
 CONFIG += link_pkgconfig
-PKGCONFIG += taglib
+PKGCONFIG += taglib Qt5GStreamer-1.0
+#LIBS +=
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -22,66 +26,69 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-RESOURCES += \
-	pak.qrc
-
 DISTFILES += \
+	LICENSE \
 	README.md \
-    rules
+	README.md \ \
+	uncrustify.cfg
 
 HEADERS += \
-	cwidgets/coverview.hpp \
-	cwidgets/dummywidget.hpp \
-	cwidgets/libtree.hpp \
-	cwidgets/playlist.hpp \
-	cwidgets/playlistview.hpp \
-	cwidgets/progslider.hpp \
-	cwidgets/renamepbtn.hpp \
-	cwidgets/tagview.hpp \
-	cwidgets/toolbar.hpp \
-	cwidgets/volslider.hpp \
-	dialogs/about.hpp \
-	dialogs/settings.hpp \
-	dialogs/tageditor.hpp \
-	dialogs/transcoder.hpp \
-	dialogs/wizard.hpp \
+	src/gui/cwidgets/coverview.hpp \
+	src/gui/cwidgets/dummywidget.hpp \
+	src/gui/cwidgets/libtree.hpp \
+	src/gui/cwidgets/playlist.hpp \
+	src/gui/cwidgets/playlistview.hpp \
+	src/gui/cwidgets/progslider.hpp \
+	src/gui/cwidgets/renamepbtn.hpp \
+	src/gui/cwidgets/splitter.hpp \
+	src/gui/cwidgets/tagview.hpp \
+	src/gui/cwidgets/toolbar.hpp \
+	src/gui/cwidgets/visualizer.hpp \
+	src/gui/cwidgets/volslider.hpp \
+	src/gui/dialogs/about.hpp \
+	src/gui/dialogs/settings.hpp \
+	src/gui/dialogs/tageditor.hpp \
+	src/gui/dialogs/transchelper.hpp \
+	src/gui/dialogs/transcoder.hpp \
+	src/gui/dialogs/wizard.hpp \
+	src/gui/helpers/flachelper.hpp \
+	src/gui/helpers/intro.hpp \
+	src/gui/mwindow.hpp \
+	src/gui/workbench.hpp \
 	src/library.hpp \
-	src/mwindow.hpp \
 	src/player.hpp \
-	src/vars.hpp \
-	src/workbench.hpp \
-	src/topostfix.hpp \
-    cwidgets/visualizer.hpp \
-    dialogs/transchelper.hpp \
-    helpers/flac.hpp \
-    helpers/intro.hpp \
-    cwidgets/splitter.hpp
+	src/utils/topostfix.hpp \
+	src/vars.hpp
+
 
 SOURCES += \
-	cwidgets/coverview.cpp \
-	cwidgets/dummywidget.cpp \
-	cwidgets/libtree.cpp \
-	cwidgets/playlist.cpp \
-	cwidgets/playlistview.cpp \
-	cwidgets/progslider.cpp \
-	cwidgets/renamepbtn.cpp \
-	cwidgets/tagview.cpp \
-	cwidgets/toolbar.cpp \
-	cwidgets/volslider.cpp \
-	dialogs/about.cpp \
-	dialogs/settings.cpp \
-	dialogs/tageditor.cpp \
-	dialogs/transcoder.cpp \
-	dialogs/wizard.cpp \
+	src/_main.cpp \
+	src/gui/cwidgets/coverview.cpp \
+	src/gui/cwidgets/dummywidget.cpp \
+	src/gui/cwidgets/libtree.cpp \
+	src/gui/cwidgets/playlist.cpp \
+	src/gui/cwidgets/playlistview.cpp \
+	src/gui/cwidgets/progslider.cpp \
+	src/gui/cwidgets/renamepbtn.cpp \
+	src/gui/cwidgets/splitter.cpp \
+	src/gui/cwidgets/tagview.cpp \
+	src/gui/cwidgets/toolbar.cpp \
+	src/gui/cwidgets/visualizer.cpp \
+	src/gui/cwidgets/volslider.cpp \
+	src/gui/dialogs/about.cpp \
+	src/gui/dialogs/settings.cpp \
+	src/gui/dialogs/tageditor.cpp \
+	src/gui/dialogs/transchelper.cpp \
+	src/gui/dialogs/transcoder.cpp \
+	src/gui/dialogs/wizard.cpp \
+	src/gui/helpers/flachelper.cpp \
+	src/gui/helpers/intro.cpp \
+	src/gui/mwindow.cpp \
+	src/gui/workbench.cpp \
 	src/library.cpp \
-	src/main.cpp \
-	src/mwindow.cpp \
 	src/player.cpp \
-	src/vars.cpp \
-	src/workbench.cpp \
-	src/topostfix.cpp \
-    cwidgets/visualizer.cpp \
-    dialogs/transchelper.cpp \
-    helpers/flac.cpp \
-    helpers/intro.cpp \
-    cwidgets/splitter.cpp
+	src/utils/topostfix.cpp \
+	src/vars.cpp
+
+RESOURCES += \
+	res/package.qrc
