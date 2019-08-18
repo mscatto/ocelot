@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_mwindow_t {
-    QByteArrayData data[58];
-    char stringdata0[614];
+    QByteArrayData data[62];
+    char stringdata0[642];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -84,12 +84,16 @@ QT_MOC_LITERAL(48, 496, 1), // "x"
 QT_MOC_LITERAL(49, 498, 15), // "volslider_moved"
 QT_MOC_LITERAL(50, 514, 14), // "player_respond"
 QT_MOC_LITERAL(51, 529, 14), // "uilock_respond"
-QT_MOC_LITERAL(52, 544, 13), // "on_player_set"
-QT_MOC_LITERAL(53, 558, 13), // "on_player_EOM"
-QT_MOC_LITERAL(54, 572, 15), // "progslider_sync"
-QT_MOC_LITERAL(55, 588, 3), // "pos"
-QT_MOC_LITERAL(56, 592, 14), // "progslider_set"
-QT_MOC_LITERAL(57, 607, 6) // "length"
+QT_MOC_LITERAL(52, 544, 6), // "notify"
+QT_MOC_LITERAL(53, 551, 7), // "playing"
+QT_MOC_LITERAL(54, 559, 7), // "summary"
+QT_MOC_LITERAL(55, 567, 4), // "body"
+QT_MOC_LITERAL(56, 572, 13), // "on_player_set"
+QT_MOC_LITERAL(57, 586, 13), // "on_player_EOM"
+QT_MOC_LITERAL(58, 600, 15), // "progslider_sync"
+QT_MOC_LITERAL(59, 616, 3), // "pos"
+QT_MOC_LITERAL(60, 620, 14), // "progslider_set"
+QT_MOC_LITERAL(61, 635, 6) // "length"
 
     },
     "mwindow\0player_play\0\0player_set\0file\0"
@@ -106,9 +110,10 @@ QT_MOC_LITERAL(57, 607, 6) // "length"
     "discard\0tageditor_spawn\0play\0"
     "QTreeWidgetItem*\0select\0show\0child_resized\0"
     "progslider_moved\0x\0volslider_moved\0"
-    "player_respond\0uilock_respond\0"
-    "on_player_set\0on_player_EOM\0progslider_sync\0"
-    "pos\0progslider_set\0length"
+    "player_respond\0uilock_respond\0notify\0"
+    "playing\0summary\0body\0on_player_set\0"
+    "on_player_EOM\0progslider_sync\0pos\0"
+    "progslider_set\0length"
 };
 #undef QT_MOC_LITERAL
 
@@ -118,7 +123,7 @@ static const uint qt_meta_data_mwindow[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      39,   14, // methods
+      40,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -126,47 +131,48 @@ static const uint qt_meta_data_mwindow[] = {
       17,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,  209,    2, 0x06 /* Public */,
-       3,    1,  210,    2, 0x06 /* Public */,
-       5,    0,  213,    2, 0x06 /* Public */,
-       6,    0,  214,    2, 0x06 /* Public */,
-       7,    1,  215,    2, 0x06 /* Public */,
-       9,    1,  218,    2, 0x06 /* Public */,
-      11,    0,  221,    2, 0x06 /* Public */,
-      12,    0,  222,    2, 0x06 /* Public */,
-      13,    1,  223,    2, 0x06 /* Public */,
-      15,    1,  226,    2, 0x06 /* Public */,
-      18,    1,  229,    2, 0x06 /* Public */,
-      21,    1,  232,    2, 0x06 /* Public */,
-      23,    1,  235,    2, 0x06 /* Public */,
-      26,    0,  238,    2, 0x06 /* Public */,
-      27,    0,  239,    2, 0x06 /* Public */,
-      28,    1,  240,    2, 0x06 /* Public */,
-      30,    1,  243,    2, 0x06 /* Public */,
+       1,    0,  214,    2, 0x06 /* Public */,
+       3,    1,  215,    2, 0x06 /* Public */,
+       5,    0,  218,    2, 0x06 /* Public */,
+       6,    0,  219,    2, 0x06 /* Public */,
+       7,    1,  220,    2, 0x06 /* Public */,
+       9,    1,  223,    2, 0x06 /* Public */,
+      11,    0,  226,    2, 0x06 /* Public */,
+      12,    0,  227,    2, 0x06 /* Public */,
+      13,    1,  228,    2, 0x06 /* Public */,
+      15,    1,  231,    2, 0x06 /* Public */,
+      18,    1,  234,    2, 0x06 /* Public */,
+      21,    1,  237,    2, 0x06 /* Public */,
+      23,    1,  240,    2, 0x06 /* Public */,
+      26,    0,  243,    2, 0x06 /* Public */,
+      27,    0,  244,    2, 0x06 /* Public */,
+      28,    1,  245,    2, 0x06 /* Public */,
+      30,    1,  248,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      31,    0,  246,    2, 0x0a /* Public */,
-      32,    0,  247,    2, 0x0a /* Public */,
-      33,    0,  248,    2, 0x0a /* Public */,
-      34,    0,  249,    2, 0x0a /* Public */,
-      35,    0,  250,    2, 0x0a /* Public */,
-      36,    0,  251,    2, 0x0a /* Public */,
-      37,    0,  252,    2, 0x0a /* Public */,
-      38,    0,  253,    2, 0x0a /* Public */,
-      39,    2,  254,    2, 0x0a /* Public */,
-      41,    1,  259,    2, 0x0a /* Public */,
-      42,    1,  262,    2, 0x0a /* Public */,
-      44,    1,  265,    2, 0x0a /* Public */,
-      45,    0,  268,    2, 0x0a /* Public */,
-      46,    0,  269,    2, 0x0a /* Public */,
-      47,    1,  270,    2, 0x08 /* Private */,
-      49,    1,  273,    2, 0x08 /* Private */,
-      50,    1,  276,    2, 0x08 /* Private */,
-      51,    0,  279,    2, 0x08 /* Private */,
-      52,    1,  280,    2, 0x08 /* Private */,
-      53,    0,  283,    2, 0x08 /* Private */,
-      54,    1,  284,    2, 0x08 /* Private */,
-      56,    1,  287,    2, 0x08 /* Private */,
+      31,    0,  251,    2, 0x0a /* Public */,
+      32,    0,  252,    2, 0x0a /* Public */,
+      33,    0,  253,    2, 0x0a /* Public */,
+      34,    0,  254,    2, 0x0a /* Public */,
+      35,    0,  255,    2, 0x0a /* Public */,
+      36,    0,  256,    2, 0x0a /* Public */,
+      37,    0,  257,    2, 0x0a /* Public */,
+      38,    0,  258,    2, 0x0a /* Public */,
+      39,    2,  259,    2, 0x0a /* Public */,
+      41,    1,  264,    2, 0x0a /* Public */,
+      42,    1,  267,    2, 0x0a /* Public */,
+      44,    1,  270,    2, 0x0a /* Public */,
+      45,    0,  273,    2, 0x0a /* Public */,
+      46,    0,  274,    2, 0x0a /* Public */,
+      47,    1,  275,    2, 0x08 /* Private */,
+      49,    1,  278,    2, 0x08 /* Private */,
+      50,    1,  281,    2, 0x08 /* Private */,
+      51,    0,  284,    2, 0x08 /* Private */,
+      52,    3,  285,    2, 0x08 /* Private */,
+      56,    1,  292,    2, 0x08 /* Private */,
+      57,    0,  295,    2, 0x08 /* Private */,
+      58,    1,  296,    2, 0x08 /* Private */,
+      60,    1,  299,    2, 0x08 /* Private */,
 
  // signals: parameters
     QMetaType::Void,
@@ -206,10 +212,11 @@ static const uint qt_meta_data_mwindow[] = {
     QMetaType::Void, QMetaType::Int,   48,
     QMetaType::Void, QMetaType::Int,   29,
     QMetaType::Void,
+    QMetaType::Void, QMetaType::Bool, QMetaType::QString, QMetaType::QString,   53,   54,   55,
     QMetaType::Void, QMetaType::QString,    4,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QTime,   55,
-    QMetaType::Void, QMetaType::QTime,   57,
+    QMetaType::Void, QMetaType::QTime,   59,
+    QMetaType::Void, QMetaType::QTime,   61,
 
        0        // eod
 };
@@ -255,10 +262,11 @@ void mwindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
         case 32: _t->volslider_moved((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 33: _t->player_respond((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 34: _t->uilock_respond(); break;
-        case 35: _t->on_player_set((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 36: _t->on_player_EOM(); break;
-        case 37: _t->progslider_sync((*reinterpret_cast< QTime(*)>(_a[1]))); break;
-        case 38: _t->progslider_set((*reinterpret_cast< QTime(*)>(_a[1]))); break;
+        case 35: _t->notify((*reinterpret_cast< bool(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3]))); break;
+        case 36: _t->on_player_set((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 37: _t->on_player_EOM(); break;
+        case 38: _t->progslider_sync((*reinterpret_cast< QTime(*)>(_a[1]))); break;
+        case 39: _t->progslider_set((*reinterpret_cast< QTime(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -414,13 +422,13 @@ int mwindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 39)
+        if (_id < 40)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 39;
+        _id -= 40;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 39)
+        if (_id < 40)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 39;
+        _id -= 40;
     }
     return _id;
 }

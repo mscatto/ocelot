@@ -33,12 +33,18 @@
 #include <QStringList>
 #include <QTreeWidget>
 #include <QtConcurrent/QtConcurrent>
+#include <QtDBus/QtDBus>
 #include <QtDebug>
 #include <bits/stdc++.h>
 
 vars::vars() : QObject() {
     qInfo("[INFO] Starting Ocelot Media Manager v%s", this->VERSION);
     setlocale(LC_NUMERIC, "C");
+
+    if(!QDBusConnection::sessionBus().isConnected())
+        qWarning("%s", "[WARNING] DBus connection could not be stablished!");
+    this->bus = new QDBusInterface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "",
+                                   QDBusConnection::sessionBus());
 
     initpmap();
     initdb();

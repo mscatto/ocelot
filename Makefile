@@ -14,10 +14,10 @@ EQ            = =
 
 CC            = clang
 CXX           = clang++
-DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_CORE_LIB -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_CORE_LIB
+DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_CORE_LIB -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_DBUS_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -pthread -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -pthread -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -isystem /usr/include/taglib -isystem /usr/include/Qt5GStreamer -isystem /usr/include/qt/QtCore -isystem /usr/include/qt -isystem /usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -isystem /usr/include/gstreamer-1.0 -isystem /usr/include/orc-0.4 -isystem /usr/include/qt/QtWidgets -isystem /usr/include/qt/QtGui -isystem /usr/include/qt/QtSql -Iobj -isystem /usr/include/libdrm -I/usr/lib/qt/mkspecs/linux-clang
+INCPATH       = -I. -isystem /usr/include/taglib -isystem /usr/include/Qt5GStreamer -isystem /usr/include/qt/QtCore -isystem /usr/include/qt -isystem /usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -isystem /usr/include/gstreamer-1.0 -isystem /usr/include/orc-0.4 -isystem /usr/include/qt/QtWidgets -isystem /usr/include/qt/QtGui -isystem /usr/include/qt/QtSql -isystem /usr/include/qt/QtDBus -Iobj -isystem /usr/include/libdrm -I/usr/lib/qt/mkspecs/linux-clang
 QMAKE         = /usr/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -40,7 +40,7 @@ DISTNAME      = ocelot1.0.0
 DISTDIR = /home/user/devel/projects/ocelot/obj/ocelot1.0.0
 LINK          = clang++
 LFLAGS        = -ccc-gcc-name g++
-LIBS          = $(SUBLIBS) -ltag -lQt5GStreamer-1.0 -lQt5GLib-2.0 -lQt5Core /usr/lib/libQt5Widgets.so /usr/lib/libQt5Gui.so /usr/lib/libQt5Sql.so /usr/lib/libQt5Core.so /usr/lib/libGL.so -lpthread   
+LIBS          = $(SUBLIBS) -ltag -lQt5GStreamer-1.0 -lQt5GLib-2.0 -lQt5Core /usr/lib/libQt5Widgets.so /usr/lib/libQt5Gui.so /usr/lib/libQt5Sql.so /usr/lib/libQt5DBus.so /usr/lib/libQt5Core.so /usr/lib/libGL.so -lpthread   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -76,6 +76,8 @@ SOURCES       = src/_main.cpp \
 		src/gui/mwindow.cpp \
 		src/gui/workbench.cpp \
 		src/library.cpp \
+		src/libs/libnotify-qt/Notification.cpp \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.cpp \
 		src/player.cpp \
 		src/utils/topostfix.cpp \
 		src/vars.cpp qrc_package.cpp \
@@ -95,6 +97,8 @@ SOURCES       = src/_main.cpp \
 		obj/moc_intro.cpp \
 		obj/moc_mwindow.cpp \
 		obj/moc_library.cpp \
+		obj/moc_Notification.cpp \
+		obj/moc_OrgFreedesktopNotificationsInterface.cpp \
 		obj/moc_player.cpp \
 		obj/moc_vars.cpp
 OBJECTS       = obj/_main.o \
@@ -121,6 +125,8 @@ OBJECTS       = obj/_main.o \
 		obj/mwindow.o \
 		obj/workbench.o \
 		obj/library.o \
+		obj/Notification.o \
+		obj/OrgFreedesktopNotificationsInterface.o \
 		obj/player.o \
 		obj/topostfix.o \
 		obj/vars.o \
@@ -141,12 +147,15 @@ OBJECTS       = obj/_main.o \
 		obj/moc_intro.o \
 		obj/moc_mwindow.o \
 		obj/moc_library.o \
+		obj/moc_Notification.o \
+		obj/moc_OrgFreedesktopNotificationsInterface.o \
 		obj/moc_player.o \
 		obj/moc_vars.o
 DIST          = LICENSE \
 		README.md \
 		README.md \
 		/ \
+		src/libs/libnotify-qt/LICENSE \
 		uncrustify.cfg \
 		/usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/common/unix.conf \
@@ -162,8 +171,10 @@ DIST          = LICENSE \
 		/usr/lib/qt/mkspecs/modules/qt_KActivities.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KActivitiesStats.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KArchive.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KAsync.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KAuth.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KBookmarks.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KCalCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCddb.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCMUtils.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCodecs.pri \
@@ -171,8 +182,10 @@ DIST          = LICENSE \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigGui.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigWidgets.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KContacts.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCoreAddons.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCrash.pri \
+		/usr/lib/qt/mkspecs/modules/qt_kdav2.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDBusAddons.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDeclarative.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDESu.pri \
@@ -186,6 +199,7 @@ DIST          = LICENSE \
 		/usr/lib/qt/mkspecs/modules/qt_KI18n.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIconThemes.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIdleTime.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KIMAP2.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOFileWidgets.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOGui.pri \
@@ -197,6 +211,7 @@ DIST          = LICENSE \
 		/usr/lib/qt/mkspecs/modules/qt_KJS.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KJSApi.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KJsEmbed.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KMime.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KNewStuff.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KNewStuffCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KNotifications.pri \
@@ -358,6 +373,9 @@ DIST          = LICENSE \
 		/usr/lib/qt/mkspecs/features/qt.prf \
 		/usr/lib/qt/mkspecs/features/resources.prf \
 		/usr/lib/qt/mkspecs/features/moc.prf \
+		/usr/lib/qt/mkspecs/features/dbuscommon.pri \
+		/usr/lib/qt/mkspecs/features/dbusinterfaces.prf \
+		/usr/lib/qt/mkspecs/features/dbusadaptors.prf \
 		/usr/lib/qt/mkspecs/features/unix/opengl.prf \
 		/usr/lib/qt/mkspecs/features/uic.prf \
 		/usr/lib/qt/mkspecs/features/unix/thread.prf \
@@ -390,6 +408,8 @@ DIST          = LICENSE \
 		src/gui/mwindow.hpp \
 		src/gui/workbench.hpp \
 		src/library.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/player.hpp \
 		src/utils/topostfix.hpp \
 		src/vars.hpp src/_main.cpp \
@@ -416,6 +436,8 @@ DIST          = LICENSE \
 		src/gui/mwindow.cpp \
 		src/gui/workbench.cpp \
 		src/library.cpp \
+		src/libs/libnotify-qt/Notification.cpp \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.cpp \
 		src/player.cpp \
 		src/utils/topostfix.cpp \
 		src/vars.cpp
@@ -445,8 +467,10 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 		/usr/lib/qt/mkspecs/modules/qt_KActivities.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KActivitiesStats.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KArchive.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KAsync.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KAuth.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KBookmarks.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KCalCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCddb.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCMUtils.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCodecs.pri \
@@ -454,8 +478,10 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 		/usr/lib/qt/mkspecs/modules/qt_KConfigCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigGui.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigWidgets.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KContacts.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCoreAddons.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCrash.pri \
+		/usr/lib/qt/mkspecs/modules/qt_kdav2.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDBusAddons.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDeclarative.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDESu.pri \
@@ -469,6 +495,7 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 		/usr/lib/qt/mkspecs/modules/qt_KI18n.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIconThemes.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIdleTime.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KIMAP2.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOFileWidgets.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOGui.pri \
@@ -480,6 +507,7 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 		/usr/lib/qt/mkspecs/modules/qt_KJS.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KJSApi.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KJsEmbed.pri \
+		/usr/lib/qt/mkspecs/modules/qt_KMime.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KNewStuff.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KNewStuffCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KNotifications.pri \
@@ -641,6 +669,9 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 		/usr/lib/qt/mkspecs/features/qt.prf \
 		/usr/lib/qt/mkspecs/features/resources.prf \
 		/usr/lib/qt/mkspecs/features/moc.prf \
+		/usr/lib/qt/mkspecs/features/dbuscommon.pri \
+		/usr/lib/qt/mkspecs/features/dbusinterfaces.prf \
+		/usr/lib/qt/mkspecs/features/dbusadaptors.prf \
 		/usr/lib/qt/mkspecs/features/unix/opengl.prf \
 		/usr/lib/qt/mkspecs/features/uic.prf \
 		/usr/lib/qt/mkspecs/features/unix/thread.prf \
@@ -668,8 +699,10 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 /usr/lib/qt/mkspecs/modules/qt_KActivities.pri:
 /usr/lib/qt/mkspecs/modules/qt_KActivitiesStats.pri:
 /usr/lib/qt/mkspecs/modules/qt_KArchive.pri:
+/usr/lib/qt/mkspecs/modules/qt_KAsync.pri:
 /usr/lib/qt/mkspecs/modules/qt_KAuth.pri:
 /usr/lib/qt/mkspecs/modules/qt_KBookmarks.pri:
+/usr/lib/qt/mkspecs/modules/qt_KCalCore.pri:
 /usr/lib/qt/mkspecs/modules/qt_KCddb.pri:
 /usr/lib/qt/mkspecs/modules/qt_KCMUtils.pri:
 /usr/lib/qt/mkspecs/modules/qt_KCodecs.pri:
@@ -677,8 +710,10 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 /usr/lib/qt/mkspecs/modules/qt_KConfigCore.pri:
 /usr/lib/qt/mkspecs/modules/qt_KConfigGui.pri:
 /usr/lib/qt/mkspecs/modules/qt_KConfigWidgets.pri:
+/usr/lib/qt/mkspecs/modules/qt_KContacts.pri:
 /usr/lib/qt/mkspecs/modules/qt_KCoreAddons.pri:
 /usr/lib/qt/mkspecs/modules/qt_KCrash.pri:
+/usr/lib/qt/mkspecs/modules/qt_kdav2.pri:
 /usr/lib/qt/mkspecs/modules/qt_KDBusAddons.pri:
 /usr/lib/qt/mkspecs/modules/qt_KDeclarative.pri:
 /usr/lib/qt/mkspecs/modules/qt_KDESu.pri:
@@ -692,6 +727,7 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 /usr/lib/qt/mkspecs/modules/qt_KI18n.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIconThemes.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIdleTime.pri:
+/usr/lib/qt/mkspecs/modules/qt_KIMAP2.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIOCore.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIOFileWidgets.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIOGui.pri:
@@ -703,6 +739,7 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 /usr/lib/qt/mkspecs/modules/qt_KJS.pri:
 /usr/lib/qt/mkspecs/modules/qt_KJSApi.pri:
 /usr/lib/qt/mkspecs/modules/qt_KJsEmbed.pri:
+/usr/lib/qt/mkspecs/modules/qt_KMime.pri:
 /usr/lib/qt/mkspecs/modules/qt_KNewStuff.pri:
 /usr/lib/qt/mkspecs/modules/qt_KNewStuffCore.pri:
 /usr/lib/qt/mkspecs/modules/qt_KNotifications.pri:
@@ -864,6 +901,9 @@ Makefile: ocelot.pro /usr/lib/qt/mkspecs/linux-clang/qmake.conf /usr/lib/qt/mksp
 /usr/lib/qt/mkspecs/features/qt.prf:
 /usr/lib/qt/mkspecs/features/resources.prf:
 /usr/lib/qt/mkspecs/features/moc.prf:
+/usr/lib/qt/mkspecs/features/dbuscommon.pri:
+/usr/lib/qt/mkspecs/features/dbusinterfaces.prf:
+/usr/lib/qt/mkspecs/features/dbusadaptors.prf:
 /usr/lib/qt/mkspecs/features/unix/opengl.prf:
 /usr/lib/qt/mkspecs/features/uic.prf:
 /usr/lib/qt/mkspecs/features/unix/thread.prf:
@@ -892,8 +932,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents res/package.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/gui/cwidgets/coverview.hpp src/gui/cwidgets/dummywidget.hpp src/gui/cwidgets/libtree.hpp src/gui/cwidgets/playlist.hpp src/gui/cwidgets/playlistview.hpp src/gui/cwidgets/progslider.hpp src/gui/cwidgets/renamepbtn.hpp src/gui/cwidgets/splitter.hpp src/gui/cwidgets/tagview.hpp src/gui/cwidgets/toolbar.hpp src/gui/cwidgets/visualizer.hpp src/gui/cwidgets/volslider.hpp src/gui/dialogs/about.hpp src/gui/dialogs/settings.hpp src/gui/dialogs/tageditor.hpp src/gui/dialogs/transchelper.hpp src/gui/dialogs/transcoder.hpp src/gui/dialogs/wizard.hpp src/gui/helpers/flachelper.hpp src/gui/helpers/intro.hpp src/gui/mwindow.hpp src/gui/workbench.hpp src/library.hpp src/player.hpp src/utils/topostfix.hpp src/vars.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/_main.cpp src/gui/cwidgets/coverview.cpp src/gui/cwidgets/dummywidget.cpp src/gui/cwidgets/libtree.cpp src/gui/cwidgets/playlist.cpp src/gui/cwidgets/playlistview.cpp src/gui/cwidgets/progslider.cpp src/gui/cwidgets/renamepbtn.cpp src/gui/cwidgets/splitter.cpp src/gui/cwidgets/tagview.cpp src/gui/cwidgets/toolbar.cpp src/gui/cwidgets/visualizer.cpp src/gui/cwidgets/volslider.cpp src/gui/dialogs/about.cpp src/gui/dialogs/settings.cpp src/gui/dialogs/tageditor.cpp src/gui/dialogs/transchelper.cpp src/gui/dialogs/transcoder.cpp src/gui/dialogs/wizard.cpp src/gui/helpers/flachelper.cpp src/gui/helpers/intro.cpp src/gui/mwindow.cpp src/gui/workbench.cpp src/library.cpp src/player.cpp src/utils/topostfix.cpp src/vars.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/gui/cwidgets/coverview.hpp src/gui/cwidgets/dummywidget.hpp src/gui/cwidgets/libtree.hpp src/gui/cwidgets/playlist.hpp src/gui/cwidgets/playlistview.hpp src/gui/cwidgets/progslider.hpp src/gui/cwidgets/renamepbtn.hpp src/gui/cwidgets/splitter.hpp src/gui/cwidgets/tagview.hpp src/gui/cwidgets/toolbar.hpp src/gui/cwidgets/visualizer.hpp src/gui/cwidgets/volslider.hpp src/gui/dialogs/about.hpp src/gui/dialogs/settings.hpp src/gui/dialogs/tageditor.hpp src/gui/dialogs/transchelper.hpp src/gui/dialogs/transcoder.hpp src/gui/dialogs/wizard.hpp src/gui/helpers/flachelper.hpp src/gui/helpers/intro.hpp src/gui/mwindow.hpp src/gui/workbench.hpp src/library.hpp src/libs/libnotify-qt/Notification.h src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h src/player.hpp src/utils/topostfix.hpp src/vars.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/_main.cpp src/gui/cwidgets/coverview.cpp src/gui/cwidgets/dummywidget.cpp src/gui/cwidgets/libtree.cpp src/gui/cwidgets/playlist.cpp src/gui/cwidgets/playlistview.cpp src/gui/cwidgets/progslider.cpp src/gui/cwidgets/renamepbtn.cpp src/gui/cwidgets/splitter.cpp src/gui/cwidgets/tagview.cpp src/gui/cwidgets/toolbar.cpp src/gui/cwidgets/visualizer.cpp src/gui/cwidgets/volslider.cpp src/gui/dialogs/about.cpp src/gui/dialogs/settings.cpp src/gui/dialogs/tageditor.cpp src/gui/dialogs/transchelper.cpp src/gui/dialogs/transcoder.cpp src/gui/dialogs/wizard.cpp src/gui/helpers/flachelper.cpp src/gui/helpers/intro.cpp src/gui/mwindow.cpp src/gui/workbench.cpp src/library.cpp src/libs/libnotify-qt/Notification.cpp src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.cpp src/player.cpp src/utils/topostfix.cpp src/vars.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -940,11 +980,13 @@ compiler_moc_predefs_clean:
 obj/moc_predefs.h: /usr/lib/qt/mkspecs/features/data/dummy.cpp
 	clang++ -pipe -g -pthread -Wall -W -dM -E -o obj/moc_predefs.h /usr/lib/qt/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: obj/moc_coverview.cpp obj/moc_dummywidget.cpp obj/moc_libtree.cpp obj/moc_playlist.cpp obj/moc_playlistview.cpp obj/moc_renamepbtn.cpp obj/moc_splitter.cpp obj/moc_tagview.cpp obj/moc_toolbar.cpp obj/moc_transchelper.cpp obj/moc_transcoder.cpp obj/moc_wizard.cpp obj/moc_flachelper.cpp obj/moc_intro.cpp obj/moc_mwindow.cpp obj/moc_library.cpp obj/moc_player.cpp obj/moc_vars.cpp
+compiler_moc_header_make_all: obj/moc_coverview.cpp obj/moc_dummywidget.cpp obj/moc_libtree.cpp obj/moc_playlist.cpp obj/moc_playlistview.cpp obj/moc_renamepbtn.cpp obj/moc_splitter.cpp obj/moc_tagview.cpp obj/moc_toolbar.cpp obj/moc_transchelper.cpp obj/moc_transcoder.cpp obj/moc_wizard.cpp obj/moc_flachelper.cpp obj/moc_intro.cpp obj/moc_mwindow.cpp obj/moc_library.cpp obj/moc_Notification.cpp obj/moc_OrgFreedesktopNotificationsInterface.cpp obj/moc_player.cpp obj/moc_vars.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) obj/moc_coverview.cpp obj/moc_dummywidget.cpp obj/moc_libtree.cpp obj/moc_playlist.cpp obj/moc_playlistview.cpp obj/moc_renamepbtn.cpp obj/moc_splitter.cpp obj/moc_tagview.cpp obj/moc_toolbar.cpp obj/moc_transchelper.cpp obj/moc_transcoder.cpp obj/moc_wizard.cpp obj/moc_flachelper.cpp obj/moc_intro.cpp obj/moc_mwindow.cpp obj/moc_library.cpp obj/moc_player.cpp obj/moc_vars.cpp
+	-$(DEL_FILE) obj/moc_coverview.cpp obj/moc_dummywidget.cpp obj/moc_libtree.cpp obj/moc_playlist.cpp obj/moc_playlistview.cpp obj/moc_renamepbtn.cpp obj/moc_splitter.cpp obj/moc_tagview.cpp obj/moc_toolbar.cpp obj/moc_transchelper.cpp obj/moc_transcoder.cpp obj/moc_wizard.cpp obj/moc_flachelper.cpp obj/moc_intro.cpp obj/moc_mwindow.cpp obj/moc_library.cpp obj/moc_Notification.cpp obj/moc_OrgFreedesktopNotificationsInterface.cpp obj/moc_player.cpp obj/moc_vars.cpp
 obj/moc_coverview.cpp: src/gui/cwidgets/coverview.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -959,7 +1001,7 @@ obj/moc_coverview.cpp: src/gui/cwidgets/coverview.hpp \
 		src/gui/cwidgets/volslider.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/coverview.hpp -o obj/moc_coverview.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/coverview.hpp -o obj/moc_coverview.cpp
 
 obj/moc_dummywidget.cpp: src/gui/cwidgets/dummywidget.hpp \
 		src/gui/workbench.hpp \
@@ -968,10 +1010,12 @@ obj/moc_dummywidget.cpp: src/gui/cwidgets/dummywidget.hpp \
 		src/player.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/dummywidget.hpp -o obj/moc_dummywidget.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/dummywidget.hpp -o obj/moc_dummywidget.cpp
 
 obj/moc_libtree.cpp: src/gui/cwidgets/libtree.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -986,10 +1030,12 @@ obj/moc_libtree.cpp: src/gui/cwidgets/libtree.hpp \
 		src/gui/cwidgets/volslider.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/libtree.hpp -o obj/moc_libtree.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/libtree.hpp -o obj/moc_libtree.cpp
 
 obj/moc_playlist.cpp: src/gui/cwidgets/playlist.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1004,10 +1050,12 @@ obj/moc_playlist.cpp: src/gui/cwidgets/playlist.hpp \
 		src/gui/cwidgets/volslider.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/playlist.hpp -o obj/moc_playlist.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/playlist.hpp -o obj/moc_playlist.cpp
 
 obj/moc_playlistview.cpp: src/gui/cwidgets/playlistview.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1023,23 +1071,25 @@ obj/moc_playlistview.cpp: src/gui/cwidgets/playlistview.hpp \
 		src/gui/cwidgets/playlist.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/playlistview.hpp -o obj/moc_playlistview.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/playlistview.hpp -o obj/moc_playlistview.cpp
 
 obj/moc_renamepbtn.cpp: src/gui/cwidgets/renamepbtn.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/renamepbtn.hpp -o obj/moc_renamepbtn.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/renamepbtn.hpp -o obj/moc_renamepbtn.cpp
 
 obj/moc_splitter.cpp: src/gui/cwidgets/splitter.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/splitter.hpp -o obj/moc_splitter.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/splitter.hpp -o obj/moc_splitter.cpp
 
 obj/moc_tagview.cpp: src/gui/cwidgets/tagview.hpp \
 		src/vars.hpp \
 		src/library.hpp \
 		src/player.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/gui/dialogs/about.hpp \
 		src/gui/dialogs/settings.hpp \
@@ -1051,7 +1101,7 @@ obj/moc_tagview.cpp: src/gui/cwidgets/tagview.hpp \
 		src/gui/cwidgets/volslider.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/tagview.hpp -o obj/moc_tagview.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/tagview.hpp -o obj/moc_tagview.cpp
 
 obj/moc_toolbar.cpp: src/gui/cwidgets/toolbar.hpp \
 		src/gui/cwidgets/progslider.hpp \
@@ -1061,7 +1111,7 @@ obj/moc_toolbar.cpp: src/gui/cwidgets/toolbar.hpp \
 		src/library.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/toolbar.hpp -o obj/moc_toolbar.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/cwidgets/toolbar.hpp -o obj/moc_toolbar.cpp
 
 obj/moc_transchelper.cpp: src/gui/dialogs/transchelper.hpp \
 		src/vars.hpp \
@@ -1069,7 +1119,7 @@ obj/moc_transchelper.cpp: src/gui/dialogs/transchelper.hpp \
 		src/player.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/dialogs/transchelper.hpp -o obj/moc_transchelper.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/dialogs/transchelper.hpp -o obj/moc_transchelper.cpp
 
 obj/moc_transcoder.cpp: src/gui/dialogs/transcoder.hpp \
 		src/vars.hpp \
@@ -1078,7 +1128,7 @@ obj/moc_transcoder.cpp: src/gui/dialogs/transcoder.hpp \
 		src/gui/dialogs/transchelper.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/dialogs/transcoder.hpp -o obj/moc_transcoder.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/dialogs/transcoder.hpp -o obj/moc_transcoder.cpp
 
 obj/moc_wizard.cpp: src/gui/dialogs/wizard.hpp \
 		src/vars.hpp \
@@ -1086,19 +1136,21 @@ obj/moc_wizard.cpp: src/gui/dialogs/wizard.hpp \
 		src/player.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/dialogs/wizard.hpp -o obj/moc_wizard.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/dialogs/wizard.hpp -o obj/moc_wizard.cpp
 
 obj/moc_flachelper.cpp: src/gui/helpers/flachelper.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/helpers/flachelper.hpp -o obj/moc_flachelper.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/helpers/flachelper.hpp -o obj/moc_flachelper.cpp
 
 obj/moc_intro.cpp: src/gui/helpers/intro.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/helpers/intro.hpp -o obj/moc_intro.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/helpers/intro.hpp -o obj/moc_intro.cpp
 
 obj/moc_mwindow.cpp: src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1113,24 +1165,34 @@ obj/moc_mwindow.cpp: src/gui/mwindow.hpp \
 		src/gui/cwidgets/volslider.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/mwindow.hpp -o obj/moc_mwindow.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/gui/mwindow.hpp -o obj/moc_mwindow.cpp
 
 obj/moc_library.cpp: src/library.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/library.hpp -o obj/moc_library.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/library.hpp -o obj/moc_library.cpp
+
+obj/moc_Notification.cpp: src/libs/libnotify-qt/Notification.h \
+		obj/moc_predefs.h \
+		/usr/bin/moc
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/libs/libnotify-qt/Notification.h -o obj/moc_Notification.cpp
+
+obj/moc_OrgFreedesktopNotificationsInterface.cpp: src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
+		obj/moc_predefs.h \
+		/usr/bin/moc
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h -o obj/moc_OrgFreedesktopNotificationsInterface.cpp
 
 obj/moc_player.cpp: src/player.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/player.hpp -o obj/moc_player.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/player.hpp -o obj/moc_player.cpp
 
 obj/moc_vars.cpp: src/vars.hpp \
 		src/library.hpp \
 		src/player.hpp \
 		obj/moc_predefs.h \
 		/usr/bin/moc
-	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/vars.hpp -o obj/moc_vars.cpp
+	/usr/bin/moc $(DEFINES) --include /home/user/devel/projects/ocelot/obj/moc_predefs.h -I/usr/lib/qt/mkspecs/linux-clang -I/home/user/devel/projects/ocelot -I/usr/include/taglib -I/usr/include/Qt5GStreamer -I/usr/include/qt/QtCore -I/usr/include/qt -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/gstreamer-1.0 -I/usr/include/orc-0.4 -I/usr/include/qt/QtWidgets -I/usr/include/qt/QtGui -I/usr/include/qt/QtSql -I/usr/include/qt/QtDBus -I/usr/include/c++/8.3.0 -I/usr/include/c++/8.3.0/x86_64-pc-linux-gnu -I/usr/include/c++/8.3.0/backward -I/usr/local/include -I/usr/lib/clang/8.0.0/include -I/usr/include src/vars.hpp -o obj/moc_vars.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -1153,6 +1215,8 @@ obj/_main.o: src/_main.cpp src/gui/dialogs/wizard.hpp \
 		src/library.hpp \
 		src/player.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/gui/dialogs/about.hpp \
 		src/gui/dialogs/settings.hpp \
@@ -1166,6 +1230,8 @@ obj/_main.o: src/_main.cpp src/gui/dialogs/wizard.hpp \
 
 obj/coverview.o: src/gui/cwidgets/coverview.cpp src/gui/cwidgets/coverview.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1189,6 +1255,8 @@ obj/dummywidget.o: src/gui/cwidgets/dummywidget.cpp src/gui/cwidgets/dummywidget
 
 obj/libtree.o: src/gui/cwidgets/libtree.cpp src/gui/cwidgets/libtree.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1205,6 +1273,8 @@ obj/libtree.o: src/gui/cwidgets/libtree.cpp src/gui/cwidgets/libtree.hpp \
 
 obj/playlist.o: src/gui/cwidgets/playlist.cpp src/gui/cwidgets/playlist.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1222,6 +1292,8 @@ obj/playlist.o: src/gui/cwidgets/playlist.cpp src/gui/cwidgets/playlist.hpp \
 
 obj/playlistview.o: src/gui/cwidgets/playlistview.cpp src/gui/cwidgets/playlistview.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1253,6 +1325,8 @@ obj/tagview.o: src/gui/cwidgets/tagview.cpp src/gui/cwidgets/tagview.hpp \
 		src/library.hpp \
 		src/player.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/gui/dialogs/about.hpp \
 		src/gui/dialogs/settings.hpp \
@@ -1271,6 +1345,8 @@ obj/toolbar.o: src/gui/cwidgets/toolbar.cpp src/gui/cwidgets/toolbar.hpp \
 		src/vars.hpp \
 		src/library.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/gui/dialogs/about.hpp \
 		src/gui/dialogs/settings.hpp \
@@ -1289,6 +1365,8 @@ obj/visualizer.o: src/gui/cwidgets/visualizer.cpp src/gui/cwidgets/visualizer.hp
 obj/volslider.o: src/gui/cwidgets/volslider.cpp src/gui/cwidgets/volslider.hpp \
 		src/player.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1312,6 +1390,8 @@ obj/settings.o: src/gui/dialogs/settings.cpp src/gui/dialogs/settings.hpp \
 		src/library.hpp \
 		src/player.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/gui/dialogs/about.hpp \
 		src/gui/dialogs/tageditor.hpp \
@@ -1342,6 +1422,8 @@ obj/transcoder.o: src/gui/dialogs/transcoder.cpp src/gui/dialogs/transcoder.hpp 
 		src/player.hpp \
 		src/gui/dialogs/transchelper.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/gui/dialogs/about.hpp \
 		src/gui/dialogs/settings.hpp \
@@ -1364,6 +1446,8 @@ obj/intro.o: src/gui/helpers/intro.cpp src/gui/helpers/intro.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/intro.o src/gui/helpers/intro.cpp
 
 obj/mwindow.o: src/gui/mwindow.cpp src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1384,6 +1468,8 @@ obj/workbench.o: src/gui/workbench.cpp src/gui/workbench.hpp \
 		src/player.hpp \
 		src/utils/topostfix.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/dialogs/about.hpp \
 		src/gui/dialogs/settings.hpp \
 		src/gui/dialogs/tageditor.hpp \
@@ -1406,8 +1492,17 @@ obj/library.o: src/library.cpp src/library.hpp \
 		src/player.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/library.o src/library.cpp
 
+obj/Notification.o: src/libs/libnotify-qt/Notification.cpp src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/Notification.o src/libs/libnotify-qt/Notification.cpp
+
+obj/OrgFreedesktopNotificationsInterface.o: src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.cpp src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/OrgFreedesktopNotificationsInterface.o src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.cpp
+
 obj/player.o: src/player.cpp src/player.hpp \
 		src/gui/mwindow.hpp \
+		src/libs/libnotify-qt/Notification.h \
+		src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 		src/gui/workbench.hpp \
 		src/library.hpp \
 		src/vars.hpp \
@@ -1479,6 +1574,12 @@ obj/moc_mwindow.o: obj/moc_mwindow.cpp
 
 obj/moc_library.o: obj/moc_library.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_library.o obj/moc_library.cpp
+
+obj/moc_Notification.o: obj/moc_Notification.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_Notification.o obj/moc_Notification.cpp
+
+obj/moc_OrgFreedesktopNotificationsInterface.o: obj/moc_OrgFreedesktopNotificationsInterface.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_OrgFreedesktopNotificationsInterface.o obj/moc_OrgFreedesktopNotificationsInterface.cpp
 
 obj/moc_player.o: obj/moc_player.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_player.o obj/moc_player.cpp

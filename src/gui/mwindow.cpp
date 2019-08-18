@@ -29,6 +29,8 @@
 #include "cwidgets/toolbar.hpp"
 #include "cwidgets/volslider.hpp"
 
+#include "src/libs/libnotify-qt/Notification.h"
+
 #include "dialogs/about.hpp"
 #include "dialogs/settings.hpp"
 #include "dialogs/tageditor.hpp"
@@ -76,6 +78,7 @@ mwindow::mwindow(vars* jag) : QMainWindow() {
     this->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
     this->sizePolicy().setVerticalPolicy(QSizePolicy::Expanding);
     this->status.setText("<b>IDLE</b>");
+
 
     this->update_proglabel(0, 0);
 
@@ -261,6 +264,19 @@ void mwindow::uilock_respond() {
     }
 }
 
+void mwindow::notify(bool playing, QString summary, QString body) {
+    Notification notify(summary);
+    playing ? notify.init("NOW PLAYING :: OCELOT") : notify.init("OCELOT");
+
+    notify.setBody(body);
+    notify.setIconName("caticon");
+    notify.setCategory("playback");
+    notify.setTimeout(3000);
+    notify.setUrgency(NOTIFICATION_URGENCY_LOW);
+
+    notify.show();
+}
+
 void mwindow::on_player_set(QString file) {
     this->playing = file;
     this->state = pstate::PLAYING;
@@ -276,6 +292,17 @@ void mwindow::on_player_set(QString file) {
                          + " :: " + QMimeDatabase().mimeTypeForFile(file).name().remove(0, 6).toUpper().append(" ")
                          + QString::number(this->curtag->audioProperties()->bitrate()) + "kb/s @"
                          + QString::number(this->curtag->audioProperties()->sampleRate()) + "Hz");
+
+    QString summary = "$t ($d)\n$a";
+    summary.replace("$t", this->curtag->tag()->title().toCString(true));
+    summary.replace("$d", QDateTime::fromTime_t(this->curtag->audioProperties()->lengthInSeconds()).toString("mm:ss"));
+    summary.replace("$a", this->curtag->tag()->artist().toCString(true));
+    qInfo() << summary;
+    QString body = "$a ($y)";
+    body.replace("$a", this->curtag->tag()->album().toCString(true));
+    body.replace("$y", QString::number(this->curtag->tag()->year()));
+
+    this->notify(true, summary, body);
 }
 
 

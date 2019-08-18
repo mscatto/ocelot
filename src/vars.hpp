@@ -31,6 +31,7 @@
 #include <QStandardPaths>
 #include <QStringList>
 #include <QThread>
+#include <QtDBus/QtDBus>
 
 class vars : QObject {
     Q_OBJECT
@@ -46,6 +47,8 @@ public:
     QSqlDatabase* DB_REF = new QSqlDatabase();
     /* player instance */
     player* pctx;
+
+    QDBusInterface* bus;
 
     //*// THESE DEAL WITH THE PROPERTY MAP TRANSLATION FROM INTERNAL TAGLIB TAG
     // PROPERTIES

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui sql widgets
+QT += core gui sql widgets dbus
 
 TARGET = ocelot
 DESTDIR = bin
@@ -13,7 +13,6 @@ MOC_DIR = obj
 TEMPLATE = app
 CONFIG += link_pkgconfig
 PKGCONFIG += taglib Qt5GStreamer-1.0
-#LIBS +=
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -30,6 +29,7 @@ DISTFILES += \
 	LICENSE \
 	README.md \
 	README.md \ \
+	src/libs/libnotify-qt/LICENSE \
 	uncrustify.cfg
 
 HEADERS += \
@@ -56,6 +56,8 @@ HEADERS += \
 	src/gui/mwindow.hpp \
 	src/gui/workbench.hpp \
 	src/library.hpp \
+	src/libs/libnotify-qt/Notification.h \
+	src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 	src/player.hpp \
 	src/utils/topostfix.hpp \
 	src/vars.hpp
@@ -86,6 +88,8 @@ SOURCES += \
 	src/gui/mwindow.cpp \
 	src/gui/workbench.cpp \
 	src/library.cpp \
+	src/libs/libnotify-qt/Notification.cpp \
+	src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.cpp \
 	src/player.cpp \
 	src/utils/topostfix.cpp \
 	src/vars.cpp

@@ -78,10 +78,6 @@ private:
     about* adiag;
     QString playing;
 
-    // QMediaPlayer::MediaStatus playerstatus =
-    // QMediaPlayer::MediaStatus::UnknownMediaStatus;
-
-
     void loadstate();
 
     void resizeEvent(QResizeEvent* event);
@@ -123,6 +119,7 @@ private slots:
     void volslider_moved(int x);
     void player_respond(int status);
     void uilock_respond();
+    void notify(bool playing, QString summary, QString body);
 
 
     /* these will come back from the player instance */
