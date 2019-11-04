@@ -53,7 +53,6 @@ workbench::workbench(vars* jag, QWidget* win) : QWidget() {
     this->win = win;
     this->lastctx = this;
     this->ml = new QGridLayout();
-    this->resizetimer = new QTimer();
 
     /* setter galore */
     this->setObjectName("workbench");
@@ -63,15 +62,10 @@ workbench::workbench(vars* jag, QWidget* win) : QWidget() {
     this->setLayout(this->ml);
     this->setGeometry(win->rect());
 
-    /* checks if there's a layout stored. if there isn't one, present a blank workbench */
-    QString* tmp = new QString(this->jag->fetchdbdata("ui_scheme").toString());
+    /* checks if there's a layout stored. if there isnt one, present a blank workbench */
+    QString tmp = this->jag->fetchdbdata("ui_scheme").toString();
 
-    (*tmp == "0") ? this->ml->addWidget(new dummywidget(this)) : this->setlayout(tmp);
-
-    /*if(*tmp=="0")
-        this->ml->addWidget(new dummywidget("First, unlock the Layout Editor under the cogwheel toolbar button\nThen
-    replace this by right-clicking anywhere", this)); else this->setlayout(tmp);*/
-    tmp->~QString();
+    this->setlayout(&tmp);
 
     /* sets up the layout editor's replace context menu */
     this->ctx_replace = new QMenu();
@@ -96,8 +90,6 @@ workbench::workbench(vars* jag, QWidget* win) : QWidget() {
     connect(act.at(6), &QAction::triggered, this, &workbench::ctx_playlistmgr);
     connect(act.at(7), &QAction::triggered, this, &workbench::ctx_tagview);
     connect(act.at(8), &QAction::triggered, this, &workbench::ctx_coverview);
-    connect(this->resizetimer, &QTimer::timeout, this, &workbench::refreshdb);
-    connect(qobject_cast<mwindow*>(win), &mwindow::uilock_flip, this, &workbench::lock_flip);
     connect(this, &QWidget::customContextMenuRequested, this, &workbench::ctx_req);
 }
 
@@ -115,13 +107,15 @@ void workbench::setlastctx(QWidget* w) {
 /* this reparents *w to the widget under ctx_lastpos click */
 void workbench::inject(QWidget* w) { /////////////////////////
     /* case it is the root widget */
-    if(this == this->lastctx)
+    if(this == this->lastctx) {
         this->ml->addWidget(w);
-
-    else if(this == this->lastctx->parent()) {
+        this->root = w;
+    } else if(this == this->lastctx->parent()) {
         QWidget* old = this->lastctx;
         this->ml->removeWidget(old);
         this->ml->addWidget(w);
+        // if(this->root == nullptr)
+        this->root = w;
         old->~QWidget();
     }
 
@@ -142,23 +136,25 @@ void workbench::inject(QWidget* w) { /////////////////////////
 /* refreshdb handles writing the current layout to the database, converting it to postfix */
 void workbench::refreshdb() {
     QString s;
-    this->dumplayout(this->findChildren<QWidget*>().first(), &s);
-    qInfo() << s;
+    QList<QSplitter*> spl;
+
+    this->dumplayout(this->root, &s, &spl);
+
     QSqlQuery* q = new QSqlQuery(*this->jag->DB_REF);
     q->prepare("UPDATE data SET val = :scheme WHERE var LIKE 'ui_scheme'");
     q->bindValue(":scheme", translate(s.toStdString()).c_str());
     q->exec();
 
     q->~QSqlQuery();
-    this->resizetimer->stop();
 }
 
 /* this function purpose is to rebuild the UI according to the postfix code on *l */
 void workbench::setlayout(QString* l) {
-    if(l->isEmpty() || l->at(0) == "$") {
+    if(l->isEmpty() || l->at(0) == "$" || l->at(0) == "0") {
         this->clear();
         return;
     }
+
     QWidgetList stack;
     while(l->length() > 0) {
         if(l->front() != "+" && l->front() != "-") { // checks if it is a widget
@@ -171,9 +167,12 @@ void workbench::setlayout(QString* l) {
             l->remove(0, 1); // l->indexOf("]") + 1);
         } else {
             splitter* ns;
-            (l->front() == "-") ? ns = new splitter(Qt::Vertical, this) : ns = new splitter(Qt::Horizontal, this);
+            if(l->front() == "-")
+                ns = new splitter(Qt::Vertical, static_cast<mwindow*>(this->win));
+            else
+                ns = new splitter(Qt::Horizontal, static_cast<mwindow*>(this->win));
 
-            connect(ns, &QSplitter::splitterMoved, qobject_cast<mwindow*>(win), &mwindow::child_resized);
+            // connect(ns, &QSplitter::splitterMoved, qobject_cast<mwindow*>(win), &mwindow::child_resized);
 
             ns->insertWidget(1, stack.back());
             stack.pop_back();
@@ -185,6 +184,7 @@ void workbench::setlayout(QString* l) {
         }
     }
     this->ml->addWidget(stack.first());
+    this->root = stack.first();
     qobject_cast<mwindow*>(this->win)->libchanged(this->jag->DB_REF);
 }
 
@@ -206,17 +206,16 @@ char workbench::fetchid(QString objname) {
 }
 
 /* this one recurs down each splitter generating an infix expression representing the layout */
-void workbench::dumplayout(QObject* n, QString* out) {
-    if(n->metaObject()->className() == QString("QPropertyAnimation"))
-        return;
+void workbench::dumplayout(QWidget* n, QString* out, QList<QSplitter*>* spl) {
     if(n->metaObject()->className() == QString("splitter")) { //////////////////////////
+        spl->append(static_cast<QSplitter*>(n));
         out->append("(");
-        workbench::dumplayout(qobject_cast<splitter*>(n)->widget(0), out);
+        workbench::dumplayout(qobject_cast<splitter*>(n)->widget(0), out, spl);
         if(qobject_cast<splitter*>(n)->orientation() == Qt::Orientation::Vertical)
             out->append(defwidgets::VSPLIT);
         else
             out->append(defwidgets::HSPLIT);
-        workbench::dumplayout(qobject_cast<splitter*>(n)->widget(1), out);
+        workbench::dumplayout(qobject_cast<splitter*>(n)->widget(1), out, spl);
         out->append(")");
     } else {
         char c = workbench::fetchid(n->metaObject()->className());
@@ -323,17 +322,15 @@ void workbench::ctx_tagview() {
     this->inject(workbench::_tagview());
 }
 
-/* removes all the widgets from the workbench's layout */
-/* it seems that it will always be 3 children from workbench: QGridLayout, QPropertyAnimation, */
-/* and whichever widget was first added. splitter's children do not show */
 void workbench::clear() {
-    foreach(QObject* o, this->children())
-        if(o->metaObject()->className() != QString("QGridLayout") && o->metaObject()->className() != QString("QPropertyAnimation"))
-            o->~QObject();
-
-    this->ml->addWidget(new dummywidget(this));
+    this->root->~QWidget();
+    this->root = new dummywidget(this);
+    this->ml->addWidget(this->root);
     workbench::refreshdb();
-} /* PURE CRAP */
+}
+
+
+/* PURE CRAP */
 
 /* removes the parent of a widget located at ctx_lastpos */
 /* --- apropriate checks should've already been made */
@@ -369,9 +366,9 @@ void workbench::remove_widget() {
  * ALLOCATORS
  * ***********/
 QWidget* workbench::_vsplitter(bool filled) {
-    splitter* ns = new splitter(Qt::Vertical, this);
+    splitter* ns = new splitter(Qt::Vertical, static_cast<mwindow*>(this->win));
     // ns->setObjectName("wbsplitter");
-    connect(ns, &splitter::splitterMoved, qobject_cast<mwindow*>(win), &mwindow::child_resized);
+    // connect(ns->handle(), &QSplitterHandle::, qobject_cast<mwindow*>(win), &mwindow::child_resized);
     if(filled) {
         ns->insertWidget(0, new dummywidget(this, "<b>:: PLACEHOLDER ::</b><br>[VERTICAL SPLITTER - Widget #0]"));
         ns->insertWidget(1, new dummywidget(this, "<b>:: PLACEHOLDER ::</b><br>[VERTICAL SPLITTER - Widget #1]"));
@@ -381,10 +378,10 @@ QWidget* workbench::_vsplitter(bool filled) {
 }
 
 QWidget* workbench::_hsplitter(bool filled) {
-    splitter* ns = new splitter(Qt::Horizontal, this);
+    splitter* ns = new splitter(Qt::Horizontal, static_cast<mwindow*>(this->win));
     // ns->setObjectName("wbsplitter");
 
-    connect(ns, &splitter::splitterMoved, qobject_cast<mwindow*>(win), &mwindow::child_resized);
+    // connect(ns, &splitter::splitterMoved, qobject_cast<mwindow*>(win), &mwindow::child_resized);
     if(filled) {
         ns->addWidget(new dummywidget(this, "<b>:: PLACEHOLDER ::</b><br>[HORIZONTAL SPLITTER - Widget #0]"));
         ns->addWidget(new dummywidget(this, "<b>:: PLACEHOLDER ::</b><br>[HORIZONTAL SPLITTER - Widget #1]"));

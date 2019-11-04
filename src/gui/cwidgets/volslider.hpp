@@ -23,7 +23,9 @@
 #ifndef volslider_HPP
 #define volslider_HPP
 
+#include "src/vars.hpp"
 #include "src/player.hpp"
+
 #include <QDateTime>
 #include <QDebug>
 #include <QMouseEvent>
@@ -34,18 +36,21 @@
 class volslider : public QSlider {
     // Q_OBJECT
 public:
-    volslider(Qt::Orientation o, player* p);
+    volslider(vars *jag);
     ~volslider();
 public slots:
     void rotate(Qt::Orientation o);
-
 private:
+    vars* jag;
     player* pctx;
     const uint MINSIZE = 64;
-
+    const int SAVEDELAY = 1000;
+    QTimer savetimer;
+private slots:
+    void start_save();
+    void save_vol();
 protected:
     void mousePressEvent(QMouseEvent* event) {
-
         QStyleOptionSlider opt;
         initStyleOption(&opt);
         QRect sr = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
@@ -103,22 +108,6 @@ protected:
         }
         // emit onClick(this->value());
     }
-    /*protected:
-        void mousePressEvent(QMouseEvent *event){
-            if (event->button() == Qt::LeftButton){
-                if (orientation() == Qt::Vertical)
-                    setValue(minimum() + ((maximum()-minimum()) * (height()-event->y())) / height()) ;
-                else
-                    setValue(minimum() + (maximum() - minimum()) * (static_cast<float>(event->x()) / static_cast<float>(width()))+1);
-
-                QPoint *p = new QPoint(this->mapToGlobal(this->pos()));
-                p->setX(QCursor::pos().rx());
-                QToolTip::showText(*p, QString::number(this->value()), this);
-                p->~QPoint();
-                event->accept();
-            }
-            QSlider::mousePressEvent(event);
-        }*/
 };
 
 #endif // volslider_HPP

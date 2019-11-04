@@ -30,6 +30,8 @@
 #include <QWidget>
 
 #include "src/gui/workbench.hpp"
+#include "src/libs/QSingleInstance/qsingleinstance.h"
+#include "src/trackdata.hpp"
 #include "src/vars.hpp"
 
 #include "src/gui/dialogs/about.hpp"
@@ -54,21 +56,23 @@ public:
     mwindow(vars* jag);
     ~mwindow() {
     }
-    void savestate();
+    workbench* wb;
 
 protected:
     void closeEvent(QCloseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void moveEvent(QMoveEvent* event);
 
 private:
     enum pstate { PLAYING, PAUSED, IDLE };
     pstate state = pstate::IDLE;
-    TagLib::FileRef* curtag;
+    // TagLib::FileRef* curtag;
     vars* jag;
     QLabel status;
     QLabel proglabel;
     volslider* vol;
     progslider* prog;
-    workbench* wb;
+
     QMenu* configmenu;
     QThread* playert;
     toolbar* bar;
@@ -76,7 +80,9 @@ private:
     transcoder* transcdiag;
     tageditor* tagdiag;
     about* adiag;
-    QString playing;
+    // QString playing;
+
+    trackdata* track = nullptr;
 
     void loadstate();
 
@@ -86,15 +92,17 @@ private:
     // void dumpwinsize();
     void update_proglabel(uint pos, uint len);
 public slots:
+    void newinstance_act(const QStringList args);
     /* responsible for handling the toolbar buttons actions */
     void toolbar_pause();
     void toolbar_play();
     void toolbar_stop();
     void toolbar_next();
     void toolbar_prev();
-    void toolbar_menu();
     void config_spawn();
     void about_spawn();
+
+    void playlist_enqueue(const QStringList files);
 
     /* spawns the transcoder window and contents */
     void transcoder_spawn(QStringList* l, bool discard);
@@ -102,14 +110,12 @@ public slots:
     /* spawns the tag editor window and children */
     void tageditor_spawn(QStringList* l);
 
-    /* it plays the QURL inside 'item' data */
-    void play(QTreeWidgetItem* item);
-
     /* stores the last clicked item */
     void select(QTreeWidgetItem* item);
 
+
     void show();
-    void child_resized();
+    void savestate();
 private slots:
     /* syncs the playback position to the progslider state */
 
@@ -117,14 +123,14 @@ private slots:
     // void progslider_clicked();
     // void progslider_changed(int x);
     void volslider_moved(int x);
-    void player_respond(int status);
+    // void player_respond(int status);
     void uilock_respond();
     void notify(bool playing, QString summary, QString body);
-
 
     /* these will come back from the player instance */
     void on_player_set(QString file);
     void on_player_EOM();
+
     void progslider_sync(QTime pos);
     void progslider_set(QTime length);
 signals:
@@ -137,6 +143,12 @@ signals:
     void player_setvol(uint vol);
     void player_seek(short sec);
 
+    void playlist_append(const QStringList files, const int playlist = -1);
+    void playlist_replace(const QStringList files, const int playlist = -1);
+    void playlist_next();
+    void playlist_prev();
+    void cover_set(QPixmap cover);
+
     /* signals when the layout editor lock has changed */
     void uilock_flip();
 
@@ -144,10 +156,8 @@ signals:
     void selectionchanged(QString item);
     void coverchanged(QPixmap* cover);
     void libchanged(QSqlDatabase* db);
-    void plappend(QStringList l);
+    // void plappend(QStringList l);
     void convhandler(QStringList* files);
-    void plnext();
-    void plprev();
     void mediastatus(int status);
     void volumechanged(int vol);
     // void progsliderchanged(int pos);

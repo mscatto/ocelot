@@ -23,24 +23,26 @@
 #include "tagview.hpp"
 #include "../mwindow.hpp"
 
-#include <taglib/flacfile.h>
-#include <taglib/oggfile.h>
-#include <taglib/mpegfile.h>
-#include <taglib/mp4file.h>
-#include <taglib/wavfile.h>
 #include <taglib/fileref.h>
-#include <taglib/tpropertymap.h>
+#include <taglib/flacfile.h>
+#include <taglib/mp4file.h>
+#include <taglib/mpegfile.h>
+#include <taglib/oggfile.h>
 #include <taglib/tmap.h>
+#include <taglib/tpropertymap.h>
+#include <taglib/wavfile.h>
 
-tagview::tagview(vars *jag, mwindow *parent, workbench *wb) : QTreeWidget(){
+tagview::tagview(vars* jag, mwindow* parent, workbench* wb) : QTreeWidget() {
     this->jag = jag;
     this->wb = wb;
+    this->ctx = new QMenu;
     this->setColumnCount(2);
     this->setColumnWidth(0, 200);
     this->setHeaderHidden(false);
     this->setObjectName("tagview");
 
-    this->setHeaderLabels(QStringList() << "Tag" << "Data");
+    this->setHeaderLabels(QStringList() << "Tag"
+                                        << "Data");
     this->setRootIsDecorated(false);
     this->setAlternatingRowColors(true);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -49,34 +51,33 @@ tagview::tagview(vars *jag, mwindow *parent, workbench *wb) : QTreeWidget(){
     connect(this, &QTreeWidget::customContextMenuRequested, this, &tagview::showctx);
 }
 
-tagview::~tagview(){
-
+tagview::~tagview() {
 }
 
-void tagview::showctx(const QPoint &pos){
+void tagview::showctx(const QPoint& pos) {
     if(this->wb->islocked())
         this->ctx->exec(this->mapToGlobal(pos));
-    else{
+    else {
         this->wb->setlastctx(this);
         this->wb->ctx_req(this->mapTo(this->wb, pos));
     }
 }
 
-void tagview::swap(QString item){
+void tagview::swap(QString item) {
     this->clear();
 
-    TagLib::FileRef *x = new TagLib::FileRef(qPrintable(item));
+    TagLib::FileRef* x = new TagLib::FileRef(qPrintable(item));
 
-    QStringList *keylist = new QStringList();
+    QStringList* keylist = new QStringList();
     keylist->append(QString(x->file()->properties().toString().toCString(true)).split("\n"));
 
     QString s;
-    foreach(s, *keylist){
-        if(s.contains("=", Qt::CaseInsensitive)){
-            QStringList *qsl = new QStringList(s.split("="));
-            if(this->jag->translate_key(qsl->first())!="")/* case there's a translation on record */
-                qsl->replace(0,this->jag->translate_key(qsl->first()));
-            this->addTopLevelItem(new QTreeWidgetItem(this, *qsl));/* or else just show the taglib name for it */
+    foreach(s, *keylist) {
+        if(s.contains("=", Qt::CaseInsensitive)) {
+            QStringList* qsl = new QStringList(s.split("="));
+            if(this->jag->translate_key(qsl->first()) != "") /* case there's a translation on record */
+                qsl->replace(0, this->jag->translate_key(qsl->first()));
+            this->addTopLevelItem(new QTreeWidgetItem(this, *qsl)); /* or else just show the taglib name for it */
             qsl->~QStringList();
         }
     }

@@ -44,13 +44,10 @@ class workbench : public QWidget {
     };
 
 private:
-    void splittertimer();
-    QTimer* resizetimer;
-
     /* this controls the layout editor toggler */
     bool locked = true;
 
-    /* the workbench's layout */
+    /* the workbench layout */
     QGridLayout* ml;
 
     /* mwindow pointer, in QWidget form to avoi circular dependencies */
@@ -74,14 +71,12 @@ private:
     /* responsible for fetching the objname layout letter code for database storage */
     char fetchid(QString objname);
 
-    /* recursively dumps the workbench layout string to the *out pointer */
-    void dumplayout(QObject* n, QString* out);
-
     /* returns a pointer a for newly created widget corresponding to the letter code *id */
     QWidget* fetchwidget(const char* id);
 
     /* globals */
     vars* jag;
+
 
     /* these _functions are responsible for new allocating new widgets */
     QWidget* _vsplitter(bool filled);
@@ -95,6 +90,11 @@ public:
     workbench(vars* jag, QWidget* win);
     bool islocked();
     void setlastctx(QWidget* w);
+    QWidget* root = new QWidget();
+
+    /* recursively dumps the workbench layout string to the *out pointer */
+    void dumplayout(QWidget* n, QString* out, QList<QSplitter*>* spl);
+
     ~workbench();
 public slots:
     /* ctx_ slots are called by the context menu for the layout editor */
@@ -120,7 +120,6 @@ public slots:
     void clear();
 
 private slots:
-    // void a
 };
 
 #endif // WORKBENCH_HPP

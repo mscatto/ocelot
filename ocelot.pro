@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui sql widgets dbus
+QT += core gui sql widgets dbus network
 
 TARGET = ocelot
 DESTDIR = bin
@@ -29,6 +29,7 @@ DISTFILES += \
 	LICENSE \
 	README.md \
 	README.md \ \
+	src/libs/QSingleInstance/LICENSE \
 	src/libs/libnotify-qt/LICENSE \
 	uncrustify.cfg
 
@@ -56,9 +57,13 @@ HEADERS += \
 	src/gui/mwindow.hpp \
 	src/gui/workbench.hpp \
 	src/library.hpp \
+	src/libs/QSingleInstance/clientinstance.h \
+	src/libs/QSingleInstance/qsingleinstance.h \
+	src/libs/QSingleInstance/qsingleinstance_p.h \
 	src/libs/libnotify-qt/Notification.h \
 	src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.h \
 	src/player.hpp \
+	src/trackdata.hpp \
 	src/utils/topostfix.hpp \
 	src/vars.hpp
 
@@ -88,9 +93,13 @@ SOURCES += \
 	src/gui/mwindow.cpp \
 	src/gui/workbench.cpp \
 	src/library.cpp \
+	src/libs/QSingleInstance/clientinstance.cpp \
+	src/libs/QSingleInstance/qsingleinstance.cpp \
+	src/libs/QSingleInstance/qsingleinstance_p.cpp \
 	src/libs/libnotify-qt/Notification.cpp \
 	src/libs/libnotify-qt/OrgFreedesktopNotificationsInterface.cpp \
 	src/player.cpp \
+	src/trackdata.cpp \
 	src/utils/topostfix.cpp \
 	src/vars.cpp
 

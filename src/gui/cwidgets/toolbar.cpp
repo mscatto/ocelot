@@ -23,7 +23,7 @@
 
 #include "toolbar.hpp"
 #include "../mwindow.hpp"
-
+#include "src/gui/cwidgets/splitter.hpp"
 #include <QMenu>
 #include <QToolBar>
 #include <QToolButton>
@@ -31,11 +31,9 @@
 toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, vars* jag) : QToolBar(win) {
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->setObjectName("toolbar");
-    this->progvol = new QSplitter(Qt::Horizontal);
+    this->progvol = new splitter(Qt::Horizontal, static_cast<mwindow*>(win));
     this->progvol->setObjectName("progvol_splitter");
     this->progvol->setChildrenCollapsible(false);
-    connect(this->progvol, &QSplitter::splitterMoved, this, &toolbar::store_volsize);
-    connect(this->progvol, &QSplitter::splitterMoved, static_cast<mwindow*>(win), &mwindow::savestate);
     this->vol = vol;
     this->prog = prog;
     this->jag = jag;
@@ -78,10 +76,7 @@ toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, va
     this->addAction(new QAction(QIcon(":/ui/stop"), "Stop media playback"));
     this->addAction(new QAction(QIcon(":/ui/prev"), "Previous on playlist"));
     this->addAction(new QAction(QIcon(":/ui/next"), "Next on playlist"));
-    QAction* a = new QAction(QIcon(":/ui/gear"), "Tweak settings");
-    a->setMenu(conf);
-
-    this->addAction(a);
+    this->addAction(new QAction(QIcon(":/ui/gear"), "Tweak settings"));
 
     QList<QAction*> act = this->actions();
     connect(act.at(0), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_play);
@@ -89,9 +84,14 @@ toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, va
     connect(act.at(2), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_stop);
     connect(act.at(3), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_prev);
     connect(act.at(4), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_next);
-    connect(act.at(5), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_menu);
+    //connect(act.at(5), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_menu);
 
-    connect(act.last(), &QAction::triggered, conf, &QMenu::show);
+    QToolButton *gear = static_cast<QToolButton*>(this->widgetForAction(act.last()));
+    gear->setMenu(conf);
+    gear->setArrowType(Qt::ArrowType::NoArrow);
+    gear->setPopupMode(QToolButton::ToolButtonPopupMode::InstantPopup);
+
+    //connect(gear, &QToolButton::triggered, gear, &QToolButton::showMenu);
     connect(conf->actions().at(4), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::config_spawn);
     connect(conf->actions().at(6), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::uilock_flip);
     connect(conf->actions().at(8), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::about_spawn);
@@ -105,6 +105,14 @@ toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, va
 toolbar::~toolbar() {
 }
 
+QByteArray toolbar::splitterstate() {
+    return this->progvol->saveState();
+}
+
+void toolbar::restore_splitterstate(QByteArray ba) {
+    this->progvol->restoreState(ba);
+}
+
 void toolbar::rotate(Qt::Orientation o) {
     this->prog->rotate(o);
     this->vol->rotate(o);
@@ -116,4 +124,8 @@ void toolbar::on_progvol_resize() {
 
 void toolbar::store_volsize() {
     this->jag->setdbdata("ui_volsize", this->vol->width());
+}
+
+void toolbar::menu_show(){
+    this->conf->showTearOffMenu();
 }

@@ -55,9 +55,9 @@ QWidget *about::mktab_ocelot(){
     /* info pane */
     QLabel *info = new QLabel(QString("<h1>OCELOT v")+
           this->jag->VERSION+
-          "</h1>A music player and library manager written in C++ using the Qt Frameworks<br><br>"+
+          "</h1>A music player and library manager written in C++ using the Qt Widgets framework<br><br>"+
           "<a href=\"https://github.com/mscatto/ocelot\">https://github.com/mscatto/ocelot</a><br><br>"+
-          "2018 - 2019 Matheus Scattolin Anselmo");
+          "2018, 2019 Matheus Scattolin Anselmo");
     info->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
     info->setOpenExternalLinks(true);
     info->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -76,7 +76,7 @@ QWidget *about::mktab_ocelot(){
     QVBoxLayout *lp_l = new QVBoxLayout();
     lp_l->setSpacing(0);
     lp_l->setContentsMargins(0,0,0,0);
-    QLabel *lp_tlbl = new QLabel("<h4>Ocelot depends on</h4>");
+    QLabel *lp_tlbl = new QLabel("<h4>Ocelot makes use of</h4>");
     lp_tlbl->sizePolicy().setVerticalPolicy(QSizePolicy::Minimum);
     lp_tlbl->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
     QFontMetrics fm(lp_tlbl->fontMetrics());
@@ -98,7 +98,7 @@ QWidget *about::mktab_ocelot(){
     contribs->setAutoFillBackground(true);
     contribs->setEnabled(false);
     contribs->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    contribs->setText("<center>Can you hear the crickets?");
+    contribs->setText("<center>...");
     contribs->sizePolicy().setVerticalPolicy(QSizePolicy::Maximum);
 
     QWidget *w = new QWidget();
@@ -123,6 +123,7 @@ QWidget *about::mktab_ocelot(){
     l->insertWidget(2, w);
 
     o->setLayout(l);
+
     return o;
 }
 

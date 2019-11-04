@@ -37,7 +37,7 @@ class vars : QObject {
     Q_OBJECT
 public:
     /* ocelot version */
-    const char* VERSION = "0.3b";
+    const char* VERSION = "0.3c";
     /* data root path */
     const QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     /* DB file path */
@@ -71,8 +71,8 @@ public:
     /* fetch var's val from DB data table */
     QVariant fetchdbdata(const char* var);
 
-    QStringList* dumppaths();
-    QStringList* dumplibinfo();
+    QStringList dumppaths();
+    QStringList dumplibinfo();
     QStringList* libs; // this is bad
 
     vars();
@@ -90,5 +90,7 @@ private:
 public slots:
     // void libfinished(uint *num);
     // void p();
+signals:
+    void sendargs(int argc, char** argv);
 };
 #endif // VARS_HPP

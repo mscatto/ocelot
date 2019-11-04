@@ -20,38 +20,28 @@
  * software or the use or other dealings in the Software.
  */
 
-#include "volslider.hpp"
-#include "../mwindow.hpp"
-#include "toolbar.hpp"
+#include "src/gui/cwidgets/volslider.hpp"
+#include "src/gui/cwidgets/toolbar.hpp"
+
 #include <QMouseEvent>
 #include <QPainter>
 #include <QToolTip>
 
-volslider::volslider(Qt::Orientation o, player* p) : QSlider(o) {
-    this->pctx = p;
+volslider::volslider(vars *jag) : QSlider() {
+    this->jag = jag;
+    this->setOrientation(Qt::Horizontal);
+    this->pctx = jag->pctx;
     this->setObjectName("volume_widget");
     this->setTracking(true);
     this->setMaximum(100);
     this->setMinimumWidth(32);
     this->setRange(0, 100);
-    this->setValue(100);
     this->setToolTip("Playback volume");
     this->setInvertedControls(false);
-    // connect(bar, &toolbar::orientationChanged, this, &volslider::rotate);
-    /*this->setStyleSheet("\
-        QSlider::groove:horizontal{\
-        position: absolute;\
-        border: 1px solid #979797;\
-        background: solid #D9D9D9;\
-        height: 8px;\
-        margin: 6px 0; \
-        }QSlider::handle:horizontal{\
-        border: 2px solid #777777;\
-        background: solid #434343;\
-        height: 16px;\
-        width: 8px;\
-        margin: -8px 0; \
-    }");*/
+    connect(this, &volslider::valueChanged, this, &volslider::start_save);
+    connect(&this->savetimer, &QTimer::timeout, this, &volslider::save_vol);
+
+    this->setValue(this->jag->fetchdbdata("general_volume").toInt());
 }
 
 volslider::~volslider() {
@@ -66,83 +56,12 @@ void volslider::rotate(Qt::Orientation o) {
         this->setMinimumSize(int(MINSIZE), 0);
         this->setInvertedControls(false);
     }
-    /*if(o == Qt::Horizontal) {
-        this->setFixedWidth(128);
-        this->setFixedHeight(16);
-        this->setStyleSheet("\
-            QSlider::groove:horizontal{\
-            position: absolute;\
-            border: 1px solid #979797;\
-            background: solid #D9D9D9;\
-            height: 8px;\
-            margin: 6px 0; \
-            }QSlider::handle:horizontal{\
-            border: 2px solid #777777;\
-            background: solid #434343;\
-            height: 16px;\
-            width: 8px;\
-            margin: -8px 16px; \
-        }");
-    } else {
-        this->setFixedWidth(16);
-        this->setFixedHeight(128);
-        this->setStyleSheet("\
-            QSlider::groove:vertical{\
-            position: absolute;\
-            left: 16px;\
-            right: 16px;\
-            border: 1px solid #979797;\
-            background: solid #D9D9D9;\
-            margin: 32px -32px; \
-            }QSlider::handle:vertical{\
-            border: 2px solid #777777;\
-            background: solid #434343;\
-            height: 12px;\
-            width: 32px;\
-            margin: 0px -16px; \
-        }");
-    }*/
-    // position: absolute;
 }
 
-// void volslider::mousePressEvent(QMouseEvent *event){
-// this->setValue(event->localPos().toPoint().rx()-8-1); /* half width of handle */
-// QToolTip::showText(QCursor::pos(), QString::number(this->value()), this);
-// QSlider::mousePressEvent(event);
-//}
+void volslider::start_save(){
+    this->savetimer.start(SAVEDELAY);
+}
 
-// void volslider::paintEvent(QPaintEvent *event){
-// QWidget::paintEvent(event);
-// create a QPainter and pass a pointer to the device.
-// A paint device can be a QWidget, a QPixmap or a QImage
-// QPainter painter(this);
-
-// a simple line
-// painter.drawLine(1,1,500,100);
-
-/*//create a black pen that has solid line
-//and the width is 2.
-QPen myPen(Qt::black, 2, Qt::SolidLine);
-painter.setPen(myPen);
-painter.drawLine(100,100,100,1);
-
-//draw a point
-myPen.setColor(Qt::red);
-painter.drawPoint(110,110);
-
-//draw a polygon
-QPolygon polygon;
-polygon << QPoint(130, 140) << QPoint(180, 170)
-         << QPoint(180, 140) << QPoint(220, 110)
-         << QPoint(140, 100);
- painter.drawPolygon(polygon);
-
- //draw an ellipse
- //The setRenderHint() call enables antialiasing, telling QPainter to use different
- //color intensities on the edges to reduce the visual distortion that normally
- //occurs when the edges of a shape are converted into pixels
- painter.setRenderHint(QPainter::Antialiasing, true);
- painter.setPen(QPen(Qt::black, 3, Qt::DashDotLine, Qt::RoundCap));
- painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
- painter.drawEllipse(200, 80, 400, 240);*/
-//}
+void volslider::save_vol(){
+    this->jag->setdbdata("general_volume",this->value());
+}

@@ -22,13 +22,12 @@
 
 #include "coverview.hpp"
 #include "../mwindow.hpp"
-#include <QMainWindow>
-#include <QLabel>
 #include <QFrame>
+#include <QLabel>
+#include <QMainWindow>
 #include <QPainter>
 
-coverview::coverview(mwindow * win, workbench * wb) : QLabel(win)
-{
+coverview::coverview(mwindow* win, workbench* wb) : QLabel(win) {
     this->setMinimumSize(200, 200);
     this->setAutoFillBackground(true);
     this->setScaledContents(true);
@@ -37,7 +36,7 @@ coverview::coverview(mwindow * win, workbench * wb) : QLabel(win)
     // this->setFixedSize(this->size());
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->win = win;
-    this->wb  = wb;
+    this->wb = wb;
 
     this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     this->setFrameStyle(QFrame::Sunken);
@@ -53,16 +52,12 @@ coverview::coverview(mwindow * win, workbench * wb) : QLabel(win)
 
     connect(this, &QLabel::customContextMenuRequested, this, &coverview::showctx);
     // connect(this, &coverview::, this, &coverview::showctx);
-    connect(win, &mwindow::coverchanged, this, &coverview::coverchanged);
-    connect(win, &mwindow::clearcover, this, &coverview::clear);
-
-    qInfo() << this->parent();
+    connect(win, &mwindow::cover_set, this, &coverview::set);
+    // connect(win, &mwindow::clearcover, this, &coverview::clear);
 }
 
-void
-coverview::showctx(QPoint pos)
-{
-    if (this->wb->islocked()) {
+void coverview::showctx(QPoint pos) {
+    if(this->wb->islocked()) {
         this->ctx->exec(this->mapToGlobal(pos));
     } else {
         this->wb->setlastctx(this);
@@ -70,17 +65,13 @@ coverview::showctx(QPoint pos)
     }
 }
 
-void
-coverview::coverchanged(QPixmap * nc)
-{
-    this->setPixmap(*nc);
+void coverview::set(QPixmap cover) {
+    this->setPixmap(cover);
 }
 
-void
-coverview::clear()
-{
+void coverview::clear() {
     this->setText("<b>[No Media]</b>");
 }
 
-coverview::~coverview()
-{ }
+coverview::~coverview() {
+}

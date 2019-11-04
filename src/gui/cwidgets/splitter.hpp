@@ -1,18 +1,35 @@
 #ifndef SPLITTER_HPP
 #define SPLITTER_HPP
 
-#include <QWidget>
+#include "src/gui/mwindow.hpp"
 #include <QSplitter>
+#include <QWidget>
 
-class splitter : public QSplitter
-{
+class splitter : public QSplitter {
+    Q_OBJECT
+private:
+    mwindow* winptr;
+
+public:
+    splitter(Qt::Orientation o, mwindow* win);
+    ~splitter() override {
+    }
+
+protected:
+    QSplitterHandle* createHandle() override;
+};
+
+class handle : public QSplitterHandle {
     Q_OBJECT
 public:
-    splitter(Qt::Orientation o, QWidget *parent = nullptr);
-    ~splitter();
+    handle(Qt::Orientation o, QSplitter* parent, mwindow* win);
+    ~handle() override {
+    }
 signals:
+    void savestate();
 
-public slots:
+protected:
+    void mouseReleaseEvent(QMouseEvent* e) override;
 };
 
 #endif // SPLITTER_HPP

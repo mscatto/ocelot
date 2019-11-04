@@ -37,28 +37,31 @@
 
 class libtree : public QWidget {
     Q_OBJECT
-  private:
-    mwindow *win;
-    workbench *wb;
-    QMenu *ctx;
-    void showctx(const QPoint &pos);
-    QTreeWidget *tree;
-    void recurtree(QTreeWidgetItem *parent, QStringList levels,
-                   QString conditions, QSqlDatabase *db);
-    QStringList *extract(QString vars);
-  private slots:
+private:
+    mwindow* win;
+    workbench* wb;
+    QDialog* config;
+    QMenu* ctx;
+    void showctx(const QPoint& pos);
+    QTreeWidget* tree;
+    void recurtree(QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db);
+    QStringList extract(QString vars);
+
+    void listchildren(QTreeWidgetItem *item, QStringList *children);
+private slots:
     void transc_append(bool discard = false);
     void transc_replace();
-    void media_dispatch(QTreeWidgetItem *item, int column = 0);
-  public slots:
-    void populate(QSqlDatabase *db);
+    void media_dispatch(QTreeWidgetItem* item);
+    void config_show();
+public slots:
+    void populate(QSqlDatabase* db);
     void gatherselected();
-  signals:
-    void dispatch(QStringList *l);
-    void transc_dispatch(QStringList *l, bool discard);
-
-  public:
-    libtree(mwindow *win, workbench *wb, vars *jag);
+signals:
+    void dispatch(QStringList* l);
+    void transc_dispatch(QStringList* l, bool discard);
+    void playlist_set(const QStringList files);
+public:
+    libtree(mwindow* win, workbench* wb, vars* jag);
     ~libtree();
 };
 

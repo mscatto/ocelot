@@ -23,43 +23,54 @@
 #ifndef PLAYLIST_HPP
 #define PLAYLIST_HPP
 
-#include <QTreeWidget>
-#include "../mwindow.hpp"
+#include "src/gui/mwindow.hpp"
+#include "src/gui/workbench.hpp"
 
-class playlist : public QTreeWidget
-{
+#include <QTreeWidget>
+
+class playlist : public QTreeWidget {
     Q_OBJECT
 private:
-    QString *order;
-    vars *jag;
-    QMenu *headerctx;
-    QMenu *bodyctx;
-    QMenu *emptyctx;
-    ushort playing_index=0;
-    QTreeWidgetItem *playing;
-    QTreeWidgetItem *selected;
-    QStringList pl;
-    QTabWidget *view;
-
     const char* playchar = "►";
+    const char* queuechar = "·";
+
+    vars* jag;
+    mwindow* win;
+    QString* order;
+    QTabWidget *view;
+    QMenu* headerctx;
+    QMenu* bodyctx;
+    QMenu* emptyctx;
+
+    int playing = 0;
+    int selected = 0;
+
+    QList<QTreeWidgetItem*> pl;
+
     bool contains(QString path);
-    void dump(QString *path);
+    void dump(QString* path);
+    void media_dispatch(QTreeWidgetItem* item);
+    void showctx(const QPoint& pos, bool is_header);
+    QTreeWidgetItem* gen_treeitem(const char* const file);
+
 public:
-    playlist(QString *order, QMenu *headerctx, vars *jag, mwindow *win, QWidget *parent);
-    ~playlist();
+    playlist(QString* order, QMenu* headerctx, vars* jag, mwindow* win, QWidget* parent);
+    ~playlist(){}
 private slots:
-    void show_headerctx(const QPoint & pos);
-    void show_bodyctx(const QPoint &pos);
+    void show_headerctx(const QPoint& pos);
+    void show_bodyctx(const QPoint& pos);
 public slots:
     void rebuild_columns();
-    void append(QStringList f);
+    /* index > 0 means don't change */
+    void append(QStringList files);
+    void replace(const QStringList files);
     void next();
     void prev();
-    void doubleclick(QTreeWidgetItem*item);
+    void doubleclick(QTreeWidgetItem* item);
     void exportpl();
     void clearchildren();
 signals:
-    void changesel(TagLib::FileRef *f);
+    void changesel(TagLib::FileRef* f);
     void play(QTreeWidgetItem*);
     void EOP();
 };

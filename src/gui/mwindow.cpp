@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * Copyright (c) 2018 Matheus Scattolin Anselmo
  *
@@ -22,8 +22,9 @@
  */
 
 #include "mwindow.hpp"
-#include "../library.hpp"
-#include "../vars.hpp"
+#include "src/library.hpp"
+#include "src/trackdata.hpp"
+#include "src/vars.hpp"
 
 #include "cwidgets/progslider.hpp"
 #include "cwidgets/toolbar.hpp"
@@ -56,9 +57,8 @@ mwindow::mwindow(vars* jag) : QMainWindow() {
     this->jag = jag;
 
     this->prog = new progslider(Qt::Horizontal, jag->pctx);
-    this->vol = new volslider(Qt::Horizontal, jag->pctx);
+    this->vol = new volslider(this->jag);
     this->bar = new toolbar(this, this->configmenu, this->prog, this->vol, jag);
-    this->curtag = new TagLib::FileRef();
     this->sdiag = new settings(this, jag);
     this->adiag = new about(this, jag);
     this->tagdiag = new tageditor(this, jag);
@@ -72,7 +72,7 @@ mwindow::mwindow(vars* jag) : QMainWindow() {
     this->statusBar()->addPermanentWidget(&this->proglabel);
 
     this->setWindowIcon(QIcon(":/internals/caticon"));
-    this->setMinimumSize(360, 220);
+    this->setMinimumSize(400, 220);
     this->layout()->setContentsMargins(0, 0, 0, 0);
     this->setWindowTitle(QString("OCELOT v") + jag->VERSION);
     this->sizePolicy().setHorizontalPolicy(QSizePolicy::Expanding);
@@ -104,16 +104,8 @@ mwindow::mwindow(vars* jag) : QMainWindow() {
     /* restore the previous saved UI state */
     this->loadstate();
 
-    /* so it picks up the saved position */
-    // this->bar->rotate(this->bar->orientation());
-
-    /* then we're golden. hopefully. */
+    /* we are now golden */
     qInfo() << "[INFO] Ocelot initialized successfully!\n::";
-}
-
-void mwindow::resizeEvent(QResizeEvent* event) {
-    // this->savestate();
-    event->accept();
 }
 
 void mwindow::update_proglabel(uint pos, uint len) {
@@ -122,49 +114,39 @@ void mwindow::update_proglabel(uint pos, uint len) {
                             + QDateTime::fromTime_t(len).toString("mm:ss") + "</b>");
 }
 
-/*void mwindow::restore_state(){
-    QSqlQuery q = this->jag->DB_REF->exec("SELECT val FROM data WHERE var =
-'ui_state'"); if(!q.next()) return;
-
-    qInfo() << this->restoreState(q.value(0).toByteArray());
+void mwindow::newinstance_act(const QStringList args) {
+    if(args.length() <= 1)
+        return; // simply discards the message. maybe bring window to the front?
+    if(QMimeDatabase().mimeTypeForFile(args.at(1)).name() == "audio/flac") {
+        emit this->player_stop();
+        emit this->player_set(args.at(1));
+        emit this->player_play();
+    }
+    // check for multiple files and a less shitty format check
 }
 
-void mwindow::restorewinsize(){
-    QSqlQuery q = this->jag->DB_REF->exec("SELECT val FROM data WHERE var =
-'ui_windowsize'"); if(!q.next()) return;
-
-    int sw = QGuiApplication::primaryScreen()->geometry().width();
-    int sh = QGuiApplication::primaryScreen()->geometry().height();
-    int nw = q.value(0).toString().split(",").first().toInt();
-    int nh = q.value(0).toString().split(",").last().toInt();
-    if(nw>=sw||nh>=sh){
-        this->setWindowState(Qt::WindowMaximized);
-        return;
-    }
-
-    this->resize(nw, nh);
-}*/
-
-/*void mwindow::dumpwinsize(){
-    qInfo() << "mwindow::dumpwinsize";
-    QString s =
-QString::number(this->window()->width())+","+QString::number(this->window()->height());
-    QSqlQuery *q = new QSqlQuery(*this->jag->DB_REF);
-    q->prepare("UPDATE data SET val = :size WHERE var LIKE 'ui_windowsize'");
-    q->bindValue(":size", s);
-    q->exec();
-    q->~QSqlQuery();
-
-    this->resizetimer->stop();
-}*/
+void mwindow::resizeEvent(QResizeEvent* event) {
+    // this->savestate();
+    event->accept();
+}
 
 void mwindow::closeEvent(QCloseEvent* event) {
     this->savestate();
     event->accept();
 }
 
+void mwindow::mouseReleaseEvent(QMouseEvent* event) {
+    //qInfo() << "release!";
+    event->accept();
+}
+
+void mwindow::moveEvent(QMoveEvent* event) {
+    //qInfo() << event->type();
+    event->accept();
+}
+
 void mwindow::savestate() {
-    qInfo() << "[FIX] mwindow::savestate"; // this->children();
+    qInfo() << "[DEBUG] mwindow::savestate";
     this->jag->setdbdata("ui_geometry", this->saveGeometry());
     this->jag->setdbdata("ui_state", this->saveState());
     this->jag->setdbdata("ui_maximized", QString::number(this->isMaximized()));
@@ -173,6 +155,22 @@ void mwindow::savestate() {
         // (QString::number(this->size().width())+","+QString::number(this->size().height())));
         this->jag->setdbdata("ui_windowpos", (QString::number(this->pos().x()) + "," + QString::number(this->pos().y())));
     }
+
+    QList<QSplitter*> spl;
+    QString tmp;
+    this->wb->dumplayout(this->wb->root, &tmp, &spl);
+    QSqlQuery("DELETE FROM splitterstate").exec();
+    tmp.clear();
+
+    foreach(QSplitter* s, spl) {
+        QByteArray ba = s->saveState();
+        QSqlQuery x(*this->jag->DB_REF);
+        x.prepare("INSERT INTO splitterstate VALUES(:raw)");
+        x.bindValue(":raw", ba);
+        x.exec();
+    }
+
+    this->jag->setdbdata("ui_tbsplstate", this->bar->splitterstate());
 }
 
 void mwindow::loadstate() {
@@ -185,10 +183,20 @@ void mwindow::loadstate() {
     this->restoreGeometry(this->jag->fetchdbdata("ui_geometry").toByteArray());
     this->restoreState(this->jag->fetchdbdata("ui_state").toByteArray());
 
-    /*QStringList tmpsize =
-    this->jag->fetchdbdata("ui_windowsize").toString().split(",");
-    this->resize(QSize(tmpsize.first().toInt(), tmpsize.last().toInt()));*/
-    // qInfo() << this->fetchdbdata("ui_maximized");
+    QList<QSplitter*> spl;
+    QString tmp;
+    this->wb->dumplayout(this->wb->root, &tmp, &spl);
+    QSqlQuery q("SELECT val FROM splitterstate", *this->jag->DB_REF);
+    q.exec();
+    q.next();
+    if(!q.isValid())
+        return;
+    foreach(QSplitter* s, spl) {
+        s->restoreState(q.value(0).toByteArray());
+        q.next();
+    }
+
+    this->bar->restore_splitterstate(this->jag->fetchdbdata("ui_tbsplstate").toByteArray());
 }
 
 void mwindow::volslider_moved(int x) {
@@ -203,15 +211,6 @@ void mwindow::volslider_moved(int x) {
     emit player_setvol(uint(x));
 }
 
-void mwindow::play(QTreeWidgetItem* item) {
-    qInfo() << "cy";
-    this->plappend(item->data(0, Qt::UserRole).toStringList());
-    emit player_set(item->data(0, Qt::UserRole).toStringList().first());
-
-
-    // this->fr->~FileRef();
-    // this->fr = new TagLib::FileRef(qPrintable(item->data(0, Qt::UserRole).toStringList().first()));
-}
 
 void mwindow::select(QTreeWidgetItem* item) {
     // qDebug() << "lel";
@@ -256,11 +255,14 @@ void mwindow::progslider_moved(int x) {
 }
 
 void mwindow::uilock_respond() {
-    if(this->wb->islocked()) {
-        this->status.setText("<b>LAYOUT EDITOR ENABLED!</b> :: You can disable "
-                             "it on the cogwheel button.");
+    this->wb->lock_flip();
+    if(!this->wb->islocked()) {
+        this->status.setText("<b>LAYOUT EDITOR ENABLED!</b> :: You may disable "
+                             "it inside the cogwheel toolbar menu when you're done.");
+        this->setWindowTitle(QString("[LAYOUT EDITOR ENABLED] OCELOT v") + this->jag->VERSION);
     } else {
-        this->status.setText(QString("<b>OCELOT v") + this->jag->VERSION + "</b");
+        this->status.setText("<b>IDLE</b");
+        this->setWindowTitle(QString("OCELOT v") + this->jag->VERSION);
     }
 }
 
@@ -269,51 +271,54 @@ void mwindow::notify(bool playing, QString summary, QString body) {
     playing ? notify.init("NOW PLAYING :: OCELOT") : notify.init("OCELOT");
 
     notify.setBody(body);
+    // QImage img = QImage(":/icons/caticon.png");
+    // notify.setIconFromByteArray(QByteArray::fromRawData((const char*)img.bits(), img.byteCount()));
     notify.setIconName("caticon");
     notify.setCategory("playback");
-    notify.setTimeout(3000);
+    notify.setTimeout(4000);
     notify.setUrgency(NOTIFICATION_URGENCY_LOW);
 
     notify.show();
 }
 
 void mwindow::on_player_set(QString file) {
-    this->playing = file;
+    if(this->track != nullptr)
+        this->track->~trackdata();
+    this->track = new trackdata(file.toUtf8());
     this->state = pstate::PLAYING;
-    this->curtag->~FileRef();
-    this->curtag = new TagLib::FileRef(file.toUtf8());
+
     this->prog->setEnabled(true);
+    this->cover_set(this->track->cover());
+    emit this->player_setvol(static_cast<uint>(this->vol->value()));
 
     this->setWindowTitle(QString("OCELOT v") + this->jag->VERSION);
-    QString t = this->curtag->tag()->artist().toCString(true) + QString(": ");
-    this->setWindowTitle(t + this->curtag->tag()->title().toCString(true) + " :: " + this->windowTitle());
+    this->setWindowTitle(this->track->artist() + ": " + this->track->title() + " :: " + this->windowTitle());
 
-    this->status.setText("<b>PLAYING:</b> " + QString(this->curtag->tag()->title().toCString(true))
+    this->status.setText("<b>PLAYING:</b> " + this->track->title()
                          + " :: " + QMimeDatabase().mimeTypeForFile(file).name().remove(0, 6).toUpper().append(" ")
-                         + QString::number(this->curtag->audioProperties()->bitrate()) + "kb/s @"
-                         + QString::number(this->curtag->audioProperties()->sampleRate()) + "Hz");
+                         + QString::number(this->track->bitrate()) + "kb/s @" + QString::number(this->track->samples()) + "Hz");
 
     QString summary = "$t ($d)\n$a";
-    summary.replace("$t", this->curtag->tag()->title().toCString(true));
-    summary.replace("$d", QDateTime::fromTime_t(this->curtag->audioProperties()->lengthInSeconds()).toString("mm:ss"));
-    summary.replace("$a", this->curtag->tag()->artist().toCString(true));
-    qInfo() << summary;
+    summary.replace("$t", this->track->title());
+    summary.replace("$d", QDateTime::fromTime_t(this->track->length_sec()).toString("mm:ss"));
+    summary.replace("$a", this->track->artist());
+
     QString body = "$a ($y)";
-    body.replace("$a", this->curtag->tag()->album().toCString(true));
-    body.replace("$y", QString::number(this->curtag->tag()->year()));
+    body.replace("$a", this->track->album());
+    body.replace("$y", QString::number(this->track->year()));
 
     this->notify(true, summary, body);
 }
 
 
 void mwindow::on_player_EOM() {
-
     this->prog->setEnabled(false);
     this->prog->setValue(0);
     this->prog->setRange(0, 0);
     this->status.setText("<b>IDLE</b>");
     this->setWindowTitle(QString("OCELOT v") + jag->VERSION);
     this->update_proglabel(0, 0);
+    this->cover_set(QPixmap());
 }
 
 void mwindow::progslider_set(QTime length) {
@@ -323,10 +328,6 @@ void mwindow::progslider_set(QTime length) {
     this->prog->setEnabled(true);
     this->prog->setRange(0, QTime(0, 0).secsTo(length));
     this->prog->setValue(0);
-}
-
-void mwindow::child_resized() {
-    this->savestate();
 }
 
 void mwindow::toolbar_pause() {
@@ -359,15 +360,11 @@ void mwindow::toolbar_stop() {
 }
 
 void mwindow::toolbar_next() {
-    this->plnext();
+    emit this->playlist_next();
 }
 
 void mwindow::toolbar_prev() {
-    this->plprev();
-}
-
-void mwindow::toolbar_menu() {
-    // this->configmenu->show();
+    emit this->playlist_prev();
 }
 
 void mwindow::config_spawn() {
@@ -378,84 +375,17 @@ void mwindow::about_spawn() {
     this->adiag->show();
 }
 
+void mwindow::playlist_enqueue(const QStringList files){
+    if(this->jag->fetchdbdata("general_playlistappend")=="1")
+        emit this->playlist_append(files);
+    else
+        emit this->playlist_replace(files);
+
+}
+
 void mwindow::transcoder_spawn(QStringList* l, bool discard) {
     if(discard)
         this->transcdiag->clear();
     this->transcdiag->append(l);
     this->transcdiag->show();
-}
-
-void mwindow::player_respond(int status) {
-    /*this->playerstatus = status;
-
-    switch(status){
-    case QMediaPlayer::MediaStatus::NoMedia: // case stopped
-        this->coverchanged(new QPixmap());
-        this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
-        this->status.setText("<b>IDLE</b>");
-        this->clearcover();
-        this->prog->setValue(0);
-        this->prog->setEnabled(false);
-        break;
-    case QMediaPlayer::MediaStatus::LoadingMedia: //when a new song is being
-    loaded break; //BufferedMedia is sent when it finishes case
-    QMediaPlayer::MediaStatus::LoadedMedia:
-        this->status.setText(this->status.text().replace("PAUSED", "NOW
-    PLAYING")); this->setWindowTitle(this->windowTitle().replace("PAUSED :: ",
-    "")); break; case QMediaPlayer::MediaStatus::EndOfMedia: this->plnext();
-        break;
-    case QMediaPlayer::MediaStatus::InvalidMedia:
-        this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
-        this->status.setText("<b>INVALID MEDIA!</b>");
-        break;
-    case QMediaPlayer::MediaStatus::UnknownMediaStatus:
-        this->setWindowTitle(QString("OCELOT v")+jag->VERSION);
-        this->status.setText("<b>NO MEDIA</b>");
-        break;
-    case QMediaPlayer::MediaStatus::StalledMedia:
-    case QMediaPlayer::MediaStatus::BufferingMedia:
-        break;
-    case QMediaPlayer::MediaStatus::BufferedMedia: // this usually means it
-    started playing
-        //TagLib::FileRef *ref = new TagLib::FileRef();
-        QMimeDatabase *db = new QMimeDatabase;
-        QString *fmt = new
-    QString(db->mimeTypeForFile(fr->file()->name()).name().remove(0,6).toUpper());
-
-        this->prog->setRange(0, this->fr->audioProperties()->lengthInSeconds());
-        this->prog->setEnabled(true);
-
-        this->setWindowTitle(QString(this->fr->tag()->artist().toCString(true))+"
-    - "+QString(this->fr->tag()->title().toCString(true))+" :: OCELOT
-    v"+jag->VERSION); this->status.setText("<b>NOW PLAYING:</b>
-    "+QString(this->fr->tag()->title().toCString(true))+" :: "+*fmt+"
-    "+QString::number(this->fr->audioProperties()->bitrate())+"kb/s
-    @"+QString::number(this->fr->audioProperties()->sampleRate())+"Hz");
-
-        if(db->mimeTypeForFile(this->fr->file()->name()).name().remove(0,6) ==
-    "flac"){ // chops the 'audio/' from mime name TagLib::FLAC::File *x = new
-    TagLib::FLAC::File(qPrintable(this->fr->file()->name()));
-            if(x->pictureList().front() != nullptr){
-                QPixmap *np = new QPixmap();
-                np->loadFromData((const
-    uchar*)x->pictureList().front()->data().data(),
-    x->pictureList().front()->data().size()); np->scaled(200, 200,
-    Qt::KeepAspectRatio); this->coverchanged(np); np->~QPixmap(); }else{
-                //this->gcover->
-                //ui->coverview->setText("<b>Cover not set!</b>");
-            }
-
-            x->~File();
-        }else
-    if(db->mimeTypeForFile(this->fr->file()->name()).name().remove(0,6) ==
-    "mpeg"){
-
-        }else{
-            //return;
-        }
-        db->~QMimeDatabase();
-        fmt->~QString();
-        break;
-    }
-*/
 }

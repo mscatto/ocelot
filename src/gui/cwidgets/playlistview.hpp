@@ -23,44 +23,45 @@
 #ifndef PLAYLISTVIEW_HPP
 #define PLAYLISTVIEW_HPP
 
-#include <QObject>
-#include <QWidget>
-#include <QTabWidget>
-#include <QToolButton>
 #include "../mwindow.hpp"
 #include "../workbench.hpp"
 #include "playlist.hpp"
+#include <QObject>
+#include <QTabWidget>
+#include <QToolButton>
+#include <QWidget>
 
-class playlistview : public QTabWidget
-{
+class playlistview : public QTabWidget {
     Q_OBJECT
 private:
+    vars* jag;
+    mwindow* win;
+    workbench* wb;
+
     QMap<QString, playlist*> pl;
-    playlist *plactive; /* the one on display */
-    playlist *plplaying; /* from currently playing track */
+    playlist* plactive;  /* the one on display */
+    playlist* plplaying; /* from currently playing track */
     QString order;
-    QMenu *headermenu;
-    QMenu *ctx;
-    vars *jag;
-    mwindow *win;
-    workbench *wb;
-    QDialog *renamer;
-    QLineEdit *namebox;
+    QMenu* headermenu;
+    QMenu* ctx;
+
+    QDialog* renamer;
+    QLineEdit* namebox;
     QString tmpkey;
-    QTreeWidgetItem *currentitem;
+    QTreeWidgetItem* currentitem;
+    QToolButton* addbtn;
 
-    void showctx(const QPoint &pos);
-
-    QToolButton *addbtn;
-
-    //void ctxmenu(const QPoint &pos);
+    void showctx(const QPoint& pos);
+    // void ctxmenu(const QPoint &pos);
     void newplaylist();
-    //QMap<QString, QAction*> menuctx;
+    // QMap<QString, QAction*> menuctx;
 public:
-    playlistview(vars *jag, mwindow *win, workbench *wb);
+    playlistview(vars* jag, mwindow* win, workbench* wb);
     ~playlistview();
 public slots:
-    void viewappend(QStringList f);
+    void playlist_append(const QStringList files, const int playlist);
+    void playlist_replace(const QStringList files, const int playlist);
+
     void context(QPoint p);
     void playing(QString f);
     void refreshpl();

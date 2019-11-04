@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * Copyright (c) 2018 Matheus Scattolin Anselmo
  *
@@ -42,8 +42,7 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     QGridLayout* grid = new QGridLayout(this);
     QLineEdit* filterbox = new QLineEdit(this);
     QPushButton* help = new QPushButton("?", this);
-    QPushButton* config = new QPushButton(QIcon(":/internals/wrench"), "", this);
-    QLabel* label = new QLabel("Filter", this);
+    QLabel* label = new QLabel("Filter:", this);
     this->wb = wb;
     tree = new QTreeWidget(this);
     tree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -72,7 +71,7 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     connect(rep, &QAction::triggered, this, &libtree::transc_replace);
     connect(this, &libtree::transc_dispatch, win, &mwindow::transcoder_spawn);
     connect(this, &libtree::dispatch, win, &mwindow::tageditor_spawn);
-
+    connect(this, &libtree::playlist_set, win, &mwindow::playlist_enqueue);
     ctx->addMenu(conv);
     ctx->addAction(tagger);
     ctx->addSeparator();
@@ -86,15 +85,22 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     this->setMinimumWidth(250);
     tree->setHeaderHidden(true);
     help->setMaximumWidth(20);
-    label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    label->setMinimumWidth(40);
-    filterbox->setPlaceholderText("Enter a keyword or SQL statement to begin");
+    label->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
+    label->setFixedWidth(50);
+    filterbox->setPlaceholderText("Type in any tag data: album, year, genre, etc.");
+
+    QComboBox *scheme = new QComboBox;
+    QLabel *treelabel = new QLabel("Layout:");
+    treelabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
+    treelabel->setFixedWidth(50);
+    scheme->insertItem(0,"DEFAULT: artist/year album/track title");
 
     grid->addWidget(tree, 0, 0, 1, 5);
-    grid->addWidget(label, 1, 1);
-    grid->addWidget(filterbox, 1, 2);
-    grid->addWidget(help, 1, 3);
-    grid->addWidget(config, 1, 4);
+    grid->addWidget(label, 1, 0, 1, 1);
+    grid->addWidget(filterbox, 1, 1, 1, 3);
+    grid->addWidget(help, 1, 4, 1, 1);
+    grid->addWidget(treelabel, 2, 0, 1, 1);
+    grid->addWidget(scheme, 2, 1, 1, 4);
 
     this->setLayout(grid);
     // parent->window()->
@@ -109,19 +115,19 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
 void libtree::recurtree(QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db) {
     QString root = levels.first();
     levels.removeFirst();
-    QStringList* sroot = libtree::extract(root);
-    QString vars = sroot->join(", ");
+    QStringList sroot = libtree::extract(root);
+    QString vars = sroot.join(", ");
 
     QSqlQuery rq;
-    rq.prepare("SELECT DISTINCT " + vars + " FROM songs WHERE " + conditions + " ORDER BY " + sroot->first());
+    rq.prepare("SELECT DISTINCT " + vars + " FROM songs WHERE " + conditions + " ORDER BY " + sroot.first());
     rq.exec();
     while(rq.next()) { /* query again to fetch paths */
         /* starting by generating condition string */
         QString name = root;
         sroot = libtree::extract(root);
-        for(int i = sroot->length() - 1; i >= 0; i--) {
-            name.replace(sroot->at(i), rq.record().value(i).toString());
-            sroot->replace(i, sroot->at(i) + "=\"" + rq.record().value(i).toString() + "\"");
+        for(int i = sroot.length() - 1; i >= 0; i--) {
+            name.replace(sroot.at(i), rq.record().value(i).toString());
+            sroot.replace(i, sroot.at(i) + "=\"" + rq.record().value(i).toString() + "\"");
         }
         name.remove("#");
 
@@ -129,7 +135,7 @@ void libtree::recurtree(QTreeWidgetItem* parent, QStringList levels, QString con
         QStringList act;
         QTreeWidgetItem* child = new QTreeWidgetItem(parent, QStringList(name));
         QSqlQuery qpath;
-        qpath.prepare("SELECT DISTINCT path FROM songs WHERE " + sroot->join(" AND ") + " ORDER BY track");
+        qpath.prepare("SELECT DISTINCT path FROM songs WHERE " + sroot.join(" AND ") + " ORDER BY track");
         qpath.exec();
 
         /* filling in the data */
@@ -137,9 +143,9 @@ void libtree::recurtree(QTreeWidgetItem* parent, QStringList levels, QString con
             act.append(qpath.record().value(0).toString());
         child->setData(0, Qt::UserRole, act);
 
-        /* and recurring down if so needed */
+        /* and recurring down if needed */
         if(levels.length() >= 1) {
-            libtree::recurtree(child, levels, conditions + " AND " + sroot->join(" AND "), db);
+            libtree::recurtree(child, levels, conditions + " AND " + sroot.join(" AND "), db);
             child->setText(0, child->text(0) + " (" + QString::number(child->childCount()) + ")");
         }
 
@@ -147,14 +153,25 @@ void libtree::recurtree(QTreeWidgetItem* parent, QStringList levels, QString con
     }
 }
 
-QStringList* libtree::extract(QString vars) {
-    QStringList* out = new QStringList();
+QStringList libtree::extract(QString vars) {
+    QStringList out;
     QRegularExpressionMatchIterator reg = QRegularExpression("#(\\w+)#").globalMatch(vars);
     while(reg.hasNext())
-        out->append(reg.next().captured(1));
+        out.append(reg.next().captured(1));
 
     return out;
 }
+
+void libtree::listchildren(QTreeWidgetItem *item, QStringList *children){
+    if(item->childCount()==0)
+        *children << item->data(0, Qt::UserRole).toString();
+    for(int i=0;i<item->childCount();i++)
+        if(item->child(i)->childCount()>0)
+            listchildren(item->child(i),children);
+        else
+            *children << item->child(i)->data(0, Qt::UserRole).toString();
+}
+
 
 void libtree::transc_append(bool discard) {
     QStringList* sl = new QStringList(this->tree->selectedItems().first()->data(0, Qt::UserRole).toStringList());
@@ -166,10 +183,21 @@ void libtree::transc_replace() {
     this->transc_append(true);
 }
 
-void libtree::media_dispatch(QTreeWidgetItem* item, int column) {
+void libtree::media_dispatch(QTreeWidgetItem* item) {
+    QStringList files;
+
+    this->listchildren(item, &files);
+    files.removeAll(QString(""));
+
     emit this->win->player_stop();
-    emit this->win->player_set(item->data(column, Qt::UserRole).toString());
+    emit this->win->player_set(files.front());
     emit this->win->player_play();
+
+    emit this->win->playlist_enqueue(files);
+}
+
+void libtree::config_show(){
+    this->config->show();
 }
 
 void libtree::showctx(const QPoint& pos) {
@@ -186,29 +214,28 @@ void libtree::populate(QSqlDatabase* db) {
 
     QStringList order = QString("#artist#/[#year#] #album#/#track#. #title#").split("/");
     QString root = order.first();
+    QString qtext("SELECT DISTINCT :f FROM songs ORDER BY :f");
+    qtext.replace(":f", libtree::extract(order.first()).join(", "));
 
-    QSqlQuery* query = new QSqlQuery();
-    query->prepare("SELECT DISTINCT " + libtree::extract(order.first())->join(", ") + " FROM songs ORDER BY "
-                   + libtree::extract(order.first())->join(", "));
-    query->exec();
-    // query->next();
+    QSqlQuery query(*db);
+    query.prepare(qtext);
+    query.exec();
 
     order.removeFirst();
     QList<QTreeWidgetItem*> items;
 
-    while(query->next()) {
-
-        QStringList* caseq = libtree::extract(root);
+    while(query.next()) {
+        QStringList caseq = libtree::extract(root);
         QString name = root;
-        for(int i = 0; i < caseq->length(); i++) {
-            name.replace(caseq->at(i), query->record().value(i).toString());
-            caseq->replace(i, caseq->at(i) + "=\"" + query->record().value(i).toString() + "\"");
+        for(int i = 0; i < caseq.length(); i++) {
+            name.replace(caseq.at(i), query.record().value(i).toString());
+            caseq.replace(i, caseq.at(i) + "=\"" + query.record().value(i).toString() + "\"");
         }
         name.remove("#");
 
         items.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(name)));
         QSqlQuery sidequery;
-        sidequery.prepare("SELECT DISTINCT path FROM songs WHERE " + caseq->join(" AND ") + " ORDER BY track");
+        sidequery.prepare("SELECT DISTINCT path FROM songs WHERE " + caseq.join(" AND ") + " ORDER BY track");
         sidequery.exec();
         // sidequery.next();
 
@@ -224,8 +251,7 @@ void libtree::populate(QSqlDatabase* db) {
         }*/
 
         items.last()->setData(0, Qt::UserRole, act);
-        libtree::recurtree(items.last(), order, caseq->join(" AND "), db);
-        caseq->~QStringList();
+        libtree::recurtree(items.last(), order, caseq.join(" AND "), db);
         items.last()->setText(0, items.last()->text(0) + " (" + QString::number(items.last()->childCount()) + ")");
     }
     this->tree->insertTopLevelItem(0, new QTreeWidgetItem((QTreeWidget*)0, QStringList("")));

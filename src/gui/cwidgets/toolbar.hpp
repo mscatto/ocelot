@@ -24,6 +24,7 @@
 #define TOOLBAR_HPP
 
 #include "src/gui/cwidgets/progslider.hpp"
+//#include "src/gui/cwidgets/splitter.hpp"
 #include "src/gui/cwidgets/volslider.hpp"
 #include "src/vars.hpp"
 #include <QSplitter>
@@ -38,15 +39,18 @@ private:
     progslider* prog;
     volslider* vol;
     vars* jag;
-
+    QList<QAction*> *acts;
 public:
     toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, vars* jag);
     ~toolbar();
+    QByteArray splitterstate();
+    void restore_splitterstate(QByteArray ba);
 public slots:
     void rotate(Qt::Orientation o);
 private slots:
     void on_progvol_resize();
     void store_volsize();
+    void menu_show();
 };
 
 #endif // TOOLBAR_HPP

@@ -25,30 +25,25 @@
 
 #include <QList>
 
-#include <QSqlQueryModel>
 #include <QSqlDatabase>
+#include <QSqlQueryModel>
 #include <QtWidgets>
 
-class library : public QObject
-{
+class library : public QObject {
     Q_OBJECT
 private:
-    const QStringList formats = {"audio/mpeg",
-                                 "audio/mp4",
-                                 "audio/ogg",
-                                 "audio/wav",
-                                 "audio/flac"
-    };
+    const QStringList formats = { "audio/mpeg", "audio/mp4", "audio/ogg", "audio/wav", "audio/flac" };
     QString path;
     QStringList pathlist;
     QSqlDatabase db;
 
-    qint64 count=0;
+    qint64 count = 0;
 
     void insert(QString fpath);
     void scan(QString dir);
+
 public:
-    explicit library(QString *path, QSqlDatabase *db, QStringList *pathlist);
+    explicit library(QString* path, QSqlDatabase* db, QStringList pathlist);
     ~library();
 public slots:
     void process();

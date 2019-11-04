@@ -87,18 +87,18 @@ void vars::remlibs(QString path) {
     this->DB_REF->exec("DELETE FROM libs WHERE path='" + path + "'");
 }
 
-QStringList* vars::dumppaths() {
-    QSqlQuery* x = new QSqlQuery(this->DB_REF->exec("SELECT path FROM songs"));
-    QStringList* out = new QStringList();
+QStringList vars::dumppaths() {
+    QSqlQuery x(this->DB_REF->exec("SELECT path FROM songs"));
+    QStringList out;
 
-    while(x->next())
-        out->append(x->value(0).toString());
+    while(x.next())
+        out.append(x.value(0).toString());
 
     return out;
 }
 
-QStringList* vars::dumplibinfo() {
-    QStringList* out = new QStringList();
+QStringList vars::dumplibinfo() {
+    QStringList out;
     foreach(QString s, *this->libs) {
         QFileInfo i;
         uint count = 0;
@@ -116,7 +116,7 @@ QStringList* vars::dumplibinfo() {
             s.append(QString::number(size / 1024 / 1024));
         else
             s.append(QString::number(0));
-        out->append(s);
+        out.append(s);
     }
     return out;
 }
@@ -136,11 +136,11 @@ void vars::initdb() {
         qFatal("[FATAL] Could not open database: %s", qPrintable(this->DB_REF->lastError().driverText()));
     }
 
-    QSqlQuery* x = new QSqlQuery();
-    *x = this->DB_REF->exec("SELECT _rowid_ FROM data");
-    x->last();
+    QSqlQuery x("SELECT _rowid_ FROM data", *this->DB_REF);
+    x.exec();
+    x.last();
 
-    if(x->isNull(0)) {
+    if(x.isNull(0)) {
         qInfo() << "[INFO] No valid database found! generating defaults...";
         this->DB_REF->exec("CREATE TABLE libs(\
             path TEXT NOT NULL, PRIMARY KEY('path')\
@@ -149,7 +149,7 @@ void vars::initdb() {
             var TEXT NOT NULL, val TEXT NOT NULL\
         )");
         this->DB_REF->exec("CREATE TABLE splitterstate(\
-            pos INTEGER, val BLOB NOT NULL\
+            val BLOB NOT NULL\
         )");
         this->DB_REF->exec("CREATE TABLE songs (\
             root TEXT,\
@@ -183,29 +183,28 @@ void vars::initdb() {
     } else {
         qInfo("[INFO] Database found at %s...", qPrintable(this->DB_REF->databaseName()));
 
-        x->exec("SELECT path FROM songs");
-        x->last();
+        x.exec("SELECT path FROM songs");
+        x.last();
 
-        if(x->isNull(0))
+        if(x.isNull(0))
             qInfo("  -> 0 tracks on record.");
         else
-            qInfo("  -> %d tracks on record", x->at() + 1);
+            qInfo("  -> %d tracks on record", x.at() + 1);
 
         qInfo() << "[INFO] Running sanity check...";
 
-        x->seek(0);
+        x.seek(0);
         QFile dummy;
         uint inv = 0;
-        while(x->next()) {
-            dummy.setFileName(x->value(0).toString());
+        while(x.next()) {
+            dummy.setFileName(x.value(0).toString());
             if(!dummy.exists()) {
                 inv++;
-                this->DB_REF->exec("DELETE FROM songs WHERE path='" + x->value(0).toString() + "'");
+                this->DB_REF->exec("DELETE FROM songs WHERE path='" + x.value(0).toString() + "'");
             }
         }
         qInfo("  -> %d entries were removed.", inv);
     }
-    x->~QSqlQuery();
 }
 
 void vars::setdbdata(const char* var, QVariant val) {
@@ -265,11 +264,14 @@ void vars::initdata() {
         'general_middleclick',\
         '0')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
-        'general_appendbehaviour',\
+        'general_playlistappend',\
         '0')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_runwizard',\
         '1')");
+    this->DB_REF->exec("INSERT INTO data VALUES(\
+        'general_volume',\
+        '50')");
 
     /* UI DEFAULTS */
     this->DB_REF->exec("INSERT INTO data VALUES(\
@@ -288,8 +290,8 @@ void vars::initdata() {
         'ui_windowpos',\
         '0,0')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_volsize',\
-        '128')");
+        'ui_tbsplstate',\
+        '0')");
 }
 
 void vars::initpmap() {

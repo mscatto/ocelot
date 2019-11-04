@@ -21,13 +21,13 @@
  * Software.
  */
 
+#include "gui/dialogs/wizard.hpp"
+#include "gui/mwindow.hpp"
+#include "src/libs/QSingleInstance/qsingleinstance.h"
+#include "vars.hpp"
 #include <QApplication>
 #include <QDebug>
 #include <QMessageLogger>
-
-#include "gui/dialogs/wizard.hpp"
-#include "gui/mwindow.hpp"
-#include "vars.hpp"
 
 bool showwizard(vars* jag, mwindow* mw);
 
@@ -35,9 +35,20 @@ int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("Babousoft");
     QCoreApplication::setApplicationName("ocelot");
+    QSingleInstance instance;
+    instance.setGlobal(true);
+
+    if(!instance.process()) {
+        std::cout << ("[WARNING] Ocelot is already running! Stepping down.\n"
+                      "Any arguments will be delivered to the master instance!\n");
+        return EXIT_SUCCESS;
+    }
 
     vars* jag = new vars();
     mwindow* mw = new mwindow(jag);
+
+    QObject::connect(&instance, &QSingleInstance::instanceMessage, mw, &mwindow::newinstance_act);
+
     if(!showwizard(jag, mw))
         mw->show();
 
