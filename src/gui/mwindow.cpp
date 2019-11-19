@@ -201,11 +201,7 @@ void mwindow::loadstate() {
 
 void mwindow::volslider_moved(int x) {
     QPoint p = this->vol->mapToGlobal(this->vol->pos());
-
-    if(this->vol->orientation() == Qt::Horizontal)
-        p.setX(QCursor::pos().rx());
-    else
-        p.setY(QCursor::pos().ry());
+    (this->vol->orientation() == Qt::Horizontal) ? p.setX(QCursor::pos().rx()) : p.setY(QCursor::pos().ry());
     QToolTip::showText(p, QString::number(x), this->vol);
 
     emit player_setvol(uint(x));

@@ -208,12 +208,11 @@ void vars::initdb() {
 }
 
 void vars::setdbdata(const char* var, QVariant val) {
-    QSqlQuery* x = new QSqlQuery(*this->DB_REF);
-    x->prepare("UPDATE data SET val = :val WHERE var LIKE :var");
-    x->bindValue(":var", var);
-    x->bindValue(":val", val);
-    x->exec();
-    x->~QSqlQuery();
+    QSqlQuery q(*this->DB_REF);
+    q.prepare("UPDATE data SET val = :val WHERE var LIKE :var");
+    q.bindValue(":var", var);
+    q.bindValue(":val", val);
+    q.exec();
 }
 
 QVariant vars::fetchdbdata(const char* var) {
@@ -258,10 +257,10 @@ void vars::initdata() {
 
     /* INPUT VALUES */
     this->DB_REF->exec("INSERT INTO data VALUES(\
-        'general_doubleclick',\
+        'libtree_doubleclick',\
         '1')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
-        'general_middleclick',\
+        'libtree_middleclick',\
         '0')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_playlistappend',\

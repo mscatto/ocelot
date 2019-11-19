@@ -71,12 +71,12 @@ toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, va
     conf->addAction(new QAction("About"));
     conf->addAction(new QAction("Exit"));
 
-    this->addAction(new QAction(QIcon(":/ui/play"), "Resume media playback"));
-    this->addAction(new QAction(QIcon(":/ui/pause"), "Pause media playback"));
-    this->addAction(new QAction(QIcon(":/ui/stop"), "Stop media playback"));
-    this->addAction(new QAction(QIcon(":/ui/prev"), "Previous on playlist"));
-    this->addAction(new QAction(QIcon(":/ui/next"), "Next on playlist"));
-    this->addAction(new QAction(QIcon(":/ui/gear"), "Tweak settings"));
+    this->addAction(new QAction(QIcon::fromTheme("media-playback-start"), "Resume media playback"));
+    this->addAction(new QAction(QIcon::fromTheme("media-playback-pause"), "Pause media playback"));
+    this->addAction(new QAction(QIcon::fromTheme("media-playback-stop"), "Stop media playback"));
+    this->addAction(new QAction(QIcon::fromTheme("media-skip-backward"), "Previous on playlist"));
+    this->addAction(new QAction(QIcon::fromTheme("media-skip-forward"), "Next on playlist"));
+    this->addAction(new QAction(QIcon::fromTheme("adjustlevels"), "Tweak settings"));
 
     QList<QAction*> act = this->actions();
     connect(act.at(0), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_play);

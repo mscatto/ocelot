@@ -185,7 +185,7 @@ void player::setVolume(ushort v) {
         QGst::StreamVolumePtr svp = m_pipeline.dynamicCast<QGst::StreamVolume>();
 
         if(svp) {
-            svp->setVolume(v / 100.0, QGst::StreamVolumeFormatCubic);
+            svp->setVolume(v/8.192, QGst::StreamVolumeFormatLinear);
         }
     }
 }

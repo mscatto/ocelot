@@ -134,6 +134,9 @@ private slots:
     void progslider_sync(QTime pos);
     void progslider_set(QTime length);
 signals:
+    void libtree_refreshconfig();
+    void playlist_refreshconfig();
+
     /* these go directly to gstreamer. will also act as a proxy
      * for workbench's children to indirectly manipulate the player */
     void player_play();

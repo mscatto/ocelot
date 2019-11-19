@@ -38,21 +38,35 @@
 class libtree : public QWidget {
     Q_OBJECT
 private:
+    enum CLICKBEHAVIOUR {
+        REPLACE,
+        REPLACE_AND_PLAY,
+        APPEND_CUR,
+        APPEND_AND_PLAY,
+        APPEND_OTHER,
+        SEND_TRANSC,
+        EDIT_TAGS,
+    };
+
     mwindow* win;
     workbench* wb;
-    QDialog* config;
     QMenu* ctx;
-    void showctx(const QPoint& pos);
     QTreeWidget* tree;
-    void recurtree(QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db);
-    QStringList extract(QString vars);
+    vars *jag;
 
+    CLICKBEHAVIOUR mclick;
+    CLICKBEHAVIOUR dclick;
+
+    void showctx(const QPoint& pos);
+    void recurtree(QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db);
     void listchildren(QTreeWidgetItem *item, QStringList *children);
+    QStringList extract(QString vars);
 private slots:
     void transc_append(bool discard = false);
     void transc_replace();
-    void media_dispatch(QTreeWidgetItem* item);
-    void config_show();
+    void refresh_config();
+    void doubleclick(QTreeWidgetItem* item);
+    void middleclick(QTreeWidgetItem* item);
 public slots:
     void populate(QSqlDatabase* db);
     void gatherselected();

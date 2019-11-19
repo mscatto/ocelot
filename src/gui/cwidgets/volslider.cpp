@@ -33,10 +33,9 @@ volslider::volslider(vars *jag) : QSlider() {
     this->pctx = jag->pctx;
     this->setObjectName("volume_widget");
     this->setTracking(true);
-    this->setMaximum(100);
     this->setMinimumWidth(32);
-    this->setRange(0, 100);
-    this->setToolTip("Playback volume");
+    this->setRange(0, 10);
+    this->setToolTip("Volume");
     this->setInvertedControls(false);
     connect(this, &volslider::valueChanged, this, &volslider::start_save);
     connect(&this->savetimer, &QTimer::timeout, this, &volslider::save_vol);

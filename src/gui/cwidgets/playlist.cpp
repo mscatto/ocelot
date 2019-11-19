@@ -122,11 +122,11 @@ void playlist::rebuild_columns() {
     c->~QStringList();
 }
 
-bool playlist::contains(QString path) {
-    /*foreach(QString s, this->pl) {
-        if(s == path)
+bool playlist::contains(QString *path) {
+    foreach(QTreeWidgetItem *i, this->pl) {
+        if(i->data(0, Qt::UserRole).toString() == *path)
             return true;
-    }*/
+    }
 
     return false;
 }
@@ -144,24 +144,30 @@ void playlist::replace(const QStringList files) {
 }
 
 void playlist::append(QStringList files) {
-    QTreeWidgetItem *ni = this->gen_treeitem(files.front().toUtf8());
-
+    this->setSortingEnabled(false);
+    QTreeWidgetItem *ni;
     if(this->pl.length()!=0){
         this->pl.at(this->playing-1)->setData(0,Qt::EditRole,this->queuechar);
     }
 
-    this->setSortingEnabled(false);
-    this->insertTopLevelItem(0, ni);
-    this->pl.append(ni);
-    this->playing = this->pl.length();
-    this->pl.at(this->playing-1)->setData(0,Qt::EditRole,this->playchar);
-    files.pop_front();
+    if(this->contains(&files.front())){
+
+    }else{
+        ni = this->gen_treeitem(files.front().toUtf8());
+        this->insertTopLevelItem(0, ni);
+        this->pl.append(ni);
+        this->playing = this->pl.length();
+        this->pl.at(this->playing-1)->setData(0,Qt::EditRole,this->playchar);
+        files.pop_front();
+    }
 
     if(files.length()!=0)
         foreach(QString s, files) {
-            ni = this->gen_treeitem(s.toUtf8());
-            this->insertTopLevelItem(0, ni);
-            this->pl.append(ni);
+            if(!this->contains(&s)){
+                ni = this->gen_treeitem(s.toUtf8());
+                this->insertTopLevelItem(0, ni);
+                this->pl.append(ni);
+            }
         }
 
     this->setSortingEnabled(true);
@@ -209,10 +215,12 @@ QTreeWidgetItem* playlist::gen_treeitem(const char* const file) {
 }
 
 void playlist::next() {
-    if(this->playing - 1 >= this->pl.length() - 1) { /* case the end of playlist */
-        //emit this->win->toolbar_stop();
-        return;
-    }
+    if(this->pl.length()==0)
+            return QToolTip::showText(QCursor::pos(), "Playlist empty");
+
+    if(this->playing - 1 >= this->pl.length() - 1) /* case the end of playlist */
+        return QToolTip::showText(QCursor::pos(), "End of playlist");
+
 
     this->pl.at(this->playing-1)->setData(0,Qt::EditRole,this->queuechar);
     this->playing++;
@@ -221,10 +229,11 @@ void playlist::next() {
 }
 
 void playlist::prev() {
-    if(this->playing - 1 <= 0){ // case the first of playlist
-        //emit this->win->toolbar_stop();
-        return;
-    }
+    if(this->pl.length()==0)
+        return QToolTip::showText(QCursor::pos(), "Playlist empty");
+
+    if(this->playing - 1 <= 0) /* case the beginning of playlist */
+        return QToolTip::showText(QCursor::pos(), "Beginning of playlist");
 
     this->pl.at(this->playing-1)->setData(0,Qt::EditRole,this->queuechar);
     this->playing--;

@@ -29,7 +29,7 @@ progslider::progslider(Qt::Orientation o, player* p) : QSlider(o) {
     // this->setmi
     this->pctx = p;
     this->setObjectName("prog_widget");
-    this->setToolTip("Playback progress");
+    this->setToolTip("Progress");
     this->setEnabled(false);
     this->setTracking(true);
     this->setInvertedControls(false);

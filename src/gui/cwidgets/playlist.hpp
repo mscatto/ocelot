@@ -47,7 +47,7 @@ private:
 
     QList<QTreeWidgetItem*> pl;
 
-    bool contains(QString path);
+    bool contains(QString *path);
     void dump(QString* path);
     void media_dispatch(QTreeWidgetItem* item);
     void showctx(const QPoint& pos, bool is_header);

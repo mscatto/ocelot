@@ -54,13 +54,14 @@ settings::settings(QWidget* win, vars* jag) : QDialog(win) {
     l->addWidget(bb);
 
     tab->addTab(this->spawn_maintab(win), "General");
-    tab->addTab(this->spawn_libtab(win), "Library");
+    tab->addTab(this->spawn_dirtab(win), "Directories");
+    tab->addTab(this->spawn_libtreetab(win), "Tree Library");
     tab->addTab(this->spawn_advanced(win), "Advanced");
     connect(bb, &QDialogButtonBox::accepted, this, &settings::accept);
     connect(bb, &QDialogButtonBox::rejected, this, &settings::reject);
 
     this->setWindowTitle(QString("Settings Dialog :: OCELOT v") + jag->VERSION);
-    this->setFixedSize(960, 540);
+    this->setFixedSize(980, 560);
     this->setLayout(l);
 }
 
@@ -70,38 +71,6 @@ settings::~settings() {
 QWidget* settings::spawn_maintab(QWidget* win) {
     QWidget* w = new QWidget(win);
     QGridLayout* grid = new QGridLayout();
-
-    /* mouse behaviour groupbox */
-    QGroupBox* mgbox = new QGroupBox("Mouse Behaviour");
-    QFormLayout* mform = new QFormLayout();
-    mform->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
-    QComboBox* dclick = new QComboBox();
-    dclick->insertItems(0, QStringList() << "Append to current playlist"
-                                         << "Replace current playlist"
-                                         << "Do nothing");
-    mform->addRow(new QLabel("Double Click:", dclick), dclick);
-
-    QComboBox* mclick = new QComboBox();
-    mclick->insertItems(0, QStringList() << "Append to current playlist"
-                                         << "Replace current playlist"
-                                         << "Do nothing");
-    mform->addRow(new QLabel("Middle Click:", mclick), mclick);
-
-    QComboBox* append = new QComboBox();
-    append->insertItems(0, QStringList() << "Start playing right away"
-                                         << "Play if there's nothing playing"
-                                         << "Just append");
-    mform->addRow(new QLabel("When appending:"), append);
-
-    /* set selection from db */
-    dclick->setCurrentIndex(this->jag->fetchdbdata("general_doubleclick").toInt());
-    mclick->setCurrentIndex(this->jag->fetchdbdata("general_middleclick").toInt());
-    append->setCurrentIndex(this->jag->fetchdbdata("general_appendbehaviour").toInt());
-
-    connect(dclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mdclick);
-    connect(mclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mmclick);
-    connect(append, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::gen_mappend);
-    mgbox->setLayout(mform);
 
     /* UI */
     QGroupBox* uibox = new QGroupBox("UI and Colors");
@@ -130,100 +99,51 @@ QWidget* settings::spawn_maintab(QWidget* win) {
     kbbox->setMaximumWidth(420);
 
     /* entangle everything */
-    grid->addWidget(mgbox, 0, 0, 1, 1);
     grid->addWidget(uibox, 0, 1, 2, 1);
     grid->addWidget(kbbox, 1, 0, 1, 1);
     w->setLayout(grid);
 
     return w;
-    /*QFormLayout *main_layout = new QFormLayout;
-
-    QGroupBox *pl = new QGroupBox("Mouse Behaviour");
-    QFormLayout *form = new QFormLayout;
-
-    QGroupBox *plbox = new QGroupBox("on playlist");
-    plbox->setAutoFillBackground(true);
-    QFormLayout *plform = new QFormLayout;
-    //plform->set
-
-    QComboBox *dclick = new QComboBox();
-    dclick->insertItems(0,QStringList()<<"Append to current playlist"
-        <<"Append to new playlist"<<"Replace current playlist");
-    plform->addRow(new QLabel("Double Click", dclick), dclick);
-
-    QComboBox *mclick = new QComboBox();
-    mclick->insertItems(0,QStringList()<<"Append to current playlist"
-                       <<"Append to new playlist"<<"Replace current playlist");
-    plform->addRow(new QLabel("Middle Click", mclick), mclick);
-
-    QCheckBox *ck = new QCheckBox("Play on append");
-    plform->addRow(ck);
-
-    pl->setLayout(form);
-    plbox->setLayout(plform);
-    form->addWidget(plbox);
-    main_layout->addWidget(pl);
-
-    QComboBox *main_selbehaviour = new QComboBox(w);
-    main_selbehaviour->insertItems(0, QStringList()<<"current selection"<<"current media playback");
-    main_layout->addRow(new QLabel("UI contents follow:", w), main_selbehaviour);
-    w->setLayout(main_layout);
-
-    return w;*/
 }
 
-QWidget* settings::spawn_libtab(QWidget* win) {
+QWidget *settings::spawn_libtreetab(QWidget *win){
     QWidget* w = new QWidget(win);
-    QGroupBox* fbox = new QGroupBox("Directories");
-    fbox->setLayout(new QGridLayout);
+    QGridLayout* grid = new QGridLayout();
+
+    QGroupBox* mgbox = new QGroupBox("Click Behaviour");
+    mgbox->setFixedWidth(440);
+    QFormLayout* mform = new QFormLayout();
+    mform->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+
+    QStringList opts = QStringList() << "Replace current playlist"
+    << "Replace current playlist and play"
+    << "Append to current playlist"
+    << "Append to current playlist and play"
+    << "Append to another playlist"
+    << "Send to transcoder queue"
+    << "Edit tags";
+
+    QComboBox* dclick = new QComboBox();
+    dclick->insertItems(0, opts);
+    mform->addRow(new QLabel("Double-click:", dclick), dclick);
+
+    QComboBox* mclick = new QComboBox();
+    mclick->insertItems(0, opts);
+    mform->addRow(new QLabel("Middle-click:", mclick), mclick);
+
+    /* set selection from db */
+    dclick->setCurrentIndex(this->jag->fetchdbdata("libtree_doubleclick").toInt());
+    mclick->setCurrentIndex(this->jag->fetchdbdata("libtree_middleclick").toInt());
+
+    connect(dclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::libtree_dclick);
+    connect(mclick, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &settings::libtree_mclick);
+    mgbox->setLayout(mform);
+
+    /* sorting scheme */
     QGroupBox* sbox = new QGroupBox("Sorting Scheme");
     sbox->setLayout(new QGridLayout);
     sbox->setMinimumWidth(420); // nice
 
-    /* setting up the directories group */
-    QFrame* tframe = new QFrame();
-    tframe->setLayout(new QGridLayout);
-    tframe->setFrameStyle(QFrame::StyledPanel);
-    tframe->setFrameShadow(QFrame::Shadow::Sunken);
-    tframe->setContentsMargins(1, 1, 1, 1);
-    tframe->setAutoFillBackground(true);
-
-    QCheckBox* ch1 = new QCheckBox("Watch for directory changes");
-    ch1->setCheckState(Qt::CheckState::Checked);
-    QCheckBox* ch2 = new QCheckBox("Scan subdirectories");
-    ch2->setCheckState(Qt::CheckState::Checked);
-    QTreeWidget* tree = new QTreeWidget();
-    tree->setColumnCount(3);
-    tree->setHeaderLabels(QStringList() << "Path"
-                                        << "Track#"
-                                        << "Total Filesize");
-    tree->setColumnWidth(0, 200);
-    libstree = tree;
-    lib_treerefresh();
-
-    QPushButton* fpicker = new QPushButton();
-    fpicker->setText("Add new...");
-    fpicker->setMaximumWidth(120);
-    connect(fpicker, &QPushButton::clicked, this, &settings::lib_dirpicker);
-
-    QPushButton* rembtn = new QPushButton();
-    rembtn->setText("Remove selected");
-    rembtn->setMaximumWidth(120);
-    connect(rembtn, &QPushButton::clicked, this, &settings::lib_remdir);
-
-    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(tree, 0, 0, 1, 3);
-    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(fpicker, 1, 0, 1, 1);
-    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(rembtn, 1, 1, 1, 1);
-
-    qobject_cast<QGridLayout*>(fbox->layout())->addWidget(ch1, 0, 0, 1, 1);
-    qobject_cast<QGridLayout*>(fbox->layout())->addWidget(ch2, 0, 1, 1, 1);
-    qobject_cast<QGridLayout*>(fbox->layout())->addWidget(tframe, 1, 0, 1, 4);
-
-    qobject_cast<QGridLayout*>(fbox->layout())->setHorizontalSpacing(2);
-    qobject_cast<QGridLayout*>(fbox->layout())->setVerticalSpacing(4);
-
-    /* then the sorting group */
-    /* starting by the frame */
     QFrame* control = new QFrame();
     control->setLayout(new QGridLayout);
     control->setFrameStyle(QFrame::StyledPanel);
@@ -266,9 +186,65 @@ QWidget* settings::spawn_libtab(QWidget* win) {
                                                                     << "#artist#/[#year#] #album#/#track#. #title#"));
     qobject_cast<QGridLayout*>(sbox->layout())->addWidget(stree, 2, 0, 1, 2);
 
-    w->setLayout(new QBoxLayout(QBoxLayout::LeftToRight));
-    w->layout()->addWidget(fbox);
-    w->layout()->addWidget(sbox);
+    grid->addWidget(mgbox, 0, 0, 1, 1);
+    grid->addWidget(sbox, 0, 1, 1, 1);
+
+    w->setLayout(grid);
+
+    return w;
+}
+
+QWidget* settings::spawn_dirtab(QWidget* win) {
+    QWidget* w = new QWidget(win);
+    QGridLayout* l = new QGridLayout;
+
+    /* setting up the directories group */
+    QFrame* tframe = new QFrame();
+    tframe->setLayout(new QGridLayout);
+    tframe->setFrameStyle(QFrame::StyledPanel);
+    tframe->setFrameShadow(QFrame::Shadow::Sunken);
+    tframe->setContentsMargins(1, 1, 1, 1);
+    tframe->setAutoFillBackground(true);
+
+    QCheckBox* ch1 = new QCheckBox("Watch for directory changes");
+    ch1->setCheckState(Qt::CheckState::Checked);
+    QCheckBox* ch2 = new QCheckBox("Scan subdirectories");
+    ch2->setCheckState(Qt::CheckState::Checked);
+    QTreeWidget* tree = new QTreeWidget();
+    tree->setColumnCount(3);
+
+    tree->setHeaderLabels(QStringList() << "Path"
+                                        << "Track#"
+                                        << "Total Filesize");
+
+    libstree = tree;
+    lib_treerefresh();
+    tree->header()->setStretchLastSection(false);
+    tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+
+    QPushButton* fpicker = new QPushButton();
+    fpicker->setText("Add new...");
+    fpicker->setMaximumWidth(160);
+    connect(fpicker, &QPushButton::clicked, this, &settings::lib_dirpicker);
+
+    QPushButton* rembtn = new QPushButton();
+    rembtn->setText("Remove selected");
+    rembtn->setMaximumWidth(160);
+    connect(rembtn, &QPushButton::clicked, this, &settings::lib_remdir);
+
+    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(tree, 0, 0, 1, 3);
+    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(fpicker, 1, 0, 1, 1);
+    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(rembtn, 1, 1, 1, 1);
+
+    l->addWidget(ch1, 0, 0, 1, 1);
+    l->addWidget(ch2, 0, 1, 1, 1);
+    l->addWidget(tframe, 1, 0, 1, 4);
+
+    l->setHorizontalSpacing(2);
+    l->setVerticalSpacing(4);
+
+    w->setLayout(l);
 
     return w;
 }
@@ -321,24 +297,26 @@ void settings::lib_dirpicker() {
     QThread* t = new QThread();
     library* l = new library(&dir, this->jag->DB_REF, this->jag->dumppaths());
     l->moveToThread(t);
-    // connect(l, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-    connect(t, SIGNAL(started()), l, SLOT(process()));
-    connect(l, SIGNAL(finished()), t, SLOT(quit()));
-    connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
-    connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
-    connect(t, &QThread::finished, this, &settings::thread_libscan);
-    // connect(t, &QThread::finished, this, &settings::lib_treerefresh);
+
     connect(l, &library::added, this, &settings::thread_newlib);
+    connect(t, &QThread::started, l, &library::process);
+    connect(l, &library::finished, t, &QThread::quit);
+    connect(l, &library::finished, l, &library::deleteLater);
+    connect(t, &QThread::finished, t, &QThread::deleteLater);
+    connect(t, &QThread::finished, this, &settings::thread_libscan);
+
     t->start();
+
+    this->libstree->addTopLevelItem(new QTreeWidgetItem(QStringList()<<"Working..."));
 }
 
 void settings::lib_treerefresh() {
-    libstree->clear();
+    this->libstree->clear();
     QStringList libs = this->jag->dumplibinfo();
     foreach(QString s, libs) {
         QStringList l = s.split(";");
         l.last().append(" MiB");
-        libstree->addTopLevelItem(new QTreeWidgetItem(libstree, l));
+        this->libstree->addTopLevelItem(new QTreeWidgetItem(libstree, l));
     }
 
     qobject_cast<mwindow*>(this->win)->libchanged(this->jag->DB_REF);
@@ -356,33 +334,17 @@ void settings::lib_remdir() {
 }
 
 /* combobox about double click behaviour */
-void settings::gen_mdclick(int index) {
-    if(static_cast<uint>(index) == this->APPEND) {
+void settings::libtree_mclick(int index) {
+    this->jag->setdbdata("libtree_middleclick", index);
 
-    } else if(static_cast<uint>(index) == this->REPLACE) {
-
-    } else { /* do nothing */
-    }
+    emit static_cast<mwindow*>(this->win)->libtree_refreshconfig();
 }
 
 /* combobox about middle click behaviour */
-void settings::gen_mmclick(int index) {
-    if(static_cast<uint>(index) == this->APPEND) {
+void settings::libtree_dclick(int index) {
+    this->jag->setdbdata("libtree_doubleclick", index);
 
-    } else if(static_cast<uint>(index) == this->REPLACE) {
-
-    } else { /* do nothing */
-    }
-}
-
-/* combobox about append behaviour */
-void settings::gen_mappend(int index) {
-    if(static_cast<uint>(index) == this->PLAY) {
-
-    } else if(static_cast<uint>(index) == this->IFIDLE) {
-
-    } else { /* don't play */
-    }
+    emit static_cast<mwindow*>(this->win)->libtree_refreshconfig();
 }
 
 void settings::thread_libscan() {

@@ -38,17 +38,24 @@
 
 libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     this->win = win;
+    this->wb = wb;
+    this->ctx = new QMenu();
+    this->tree = new QTreeWidget(this);
+    this->jag = jag;
+    this->refresh_config();
+
     this->setObjectName("libtree");
+    this->setMinimumWidth(250);
+
     QGridLayout* grid = new QGridLayout(this);
     QLineEdit* filterbox = new QLineEdit(this);
     QPushButton* help = new QPushButton("?", this);
     QLabel* label = new QLabel("Filter:", this);
-    this->wb = wb;
-    tree = new QTreeWidget(this);
-    tree->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    this->tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
     /* init context menu */
-    this->ctx = new QMenu();
+
     const QIcon c = QIcon::fromTheme("gtk-convert");
     const QIcon t = QIcon::fromTheme("tag-symbolic");
     QAction* tagger = new QAction(QIcon::fromTheme("amarok_playlist"), "Mass Tagger");
@@ -82,8 +89,8 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     // this->setFrameShadow(QFrame::Sunken);
     this->layout()->setContentsMargins(1, 1, 1, 1);
     this->layout()->setSpacing(1);
-    this->setMinimumWidth(250);
-    tree->setHeaderHidden(true);
+
+    this->tree->setHeaderHidden(true);
     help->setMaximumWidth(20);
     label->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
     label->setFixedWidth(50);
@@ -105,8 +112,9 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     this->setLayout(grid);
     // parent->window()->
     connect(tree, &QTreeWidget::customContextMenuRequested, this, &libtree::showctx);
-    connect(tree, &QTreeWidget::itemDoubleClicked, this, &libtree::media_dispatch);
+    connect(tree, &QTreeWidget::itemDoubleClicked, this, &libtree::doubleclick);
     connect(tree, &QTreeWidget::itemClicked, win, &mwindow::select);
+    connect(win, &mwindow::libtree_refreshconfig, this, &libtree::refresh_config);
     connect(win, &mwindow::libchanged, this, &libtree::populate);
 }
 
@@ -183,21 +191,93 @@ void libtree::transc_replace() {
     this->transc_append(true);
 }
 
-void libtree::media_dispatch(QTreeWidgetItem* item) {
-    QStringList files;
+void libtree::refresh_config(){
+    this->dclick = CLICKBEHAVIOUR(this->jag->fetchdbdata("libtree_doubleclick").toInt());
+    this->mclick = CLICKBEHAVIOUR(this->jag->fetchdbdata("libtree_middleclick").toInt());
+}
 
+void libtree::doubleclick(QTreeWidgetItem* item) {
+    QStringList files;
     this->listchildren(item, &files);
     files.removeAll(QString(""));
 
-    emit this->win->player_stop();
-    emit this->win->player_set(files.front());
-    emit this->win->player_play();
+    switch(this->dclick){
+        case CLICKBEHAVIOUR::REPLACE:
+            emit this->win->playlist_replace(files);
+        break;
 
-    emit this->win->playlist_enqueue(files);
+        case CLICKBEHAVIOUR::REPLACE_AND_PLAY:
+            emit this->win->player_stop(); // TODO GAPLESS
+            emit this->win->player_set(files.front());
+            emit this->win->player_play();
+            emit this->win->playlist_replace(files);
+        break;
+
+        case CLICKBEHAVIOUR::APPEND_CUR:
+            emit this->win->playlist_enqueue(files);
+        break;
+
+        case CLICKBEHAVIOUR::APPEND_AND_PLAY:
+            emit this->win->player_stop(); // TODO GAPLESS
+            emit this->win->player_set(files.front());
+            emit this->win->player_play();
+            emit this->win->playlist_enqueue(files);
+        break;
+
+        case CLICKBEHAVIOUR::APPEND_OTHER:
+
+        break;
+
+        case CLICKBEHAVIOUR::SEND_TRANSC:
+
+        break;
+
+        case CLICKBEHAVIOUR::EDIT_TAGS:
+
+        break;
+    }
 }
 
-void libtree::config_show(){
-    this->config->show();
+void libtree::middleclick(QTreeWidgetItem* item) {
+    QStringList files;
+    this->listchildren(item, &files);
+    files.removeAll(QString(""));
+
+    switch(this->mclick){
+        case CLICKBEHAVIOUR::REPLACE:
+            emit this->win->playlist_replace(files);
+        break;
+
+        case CLICKBEHAVIOUR::REPLACE_AND_PLAY:
+            emit this->win->player_stop(); // TODO GAPLESS
+            emit this->win->player_set(files.front());
+            emit this->win->player_play();
+            emit this->win->playlist_replace(files);
+        break;
+
+        case CLICKBEHAVIOUR::APPEND_CUR:
+            emit this->win->playlist_enqueue(files);
+        break;
+
+        case CLICKBEHAVIOUR::APPEND_AND_PLAY:
+            emit this->win->player_stop(); // TODO GAPLESS
+            emit this->win->player_set(files.front());
+            emit this->win->player_play();
+            emit this->win->playlist_enqueue(files);
+        break;
+
+        case CLICKBEHAVIOUR::APPEND_OTHER:
+
+        break;
+
+        case CLICKBEHAVIOUR::SEND_TRANSC:
+
+        break;
+
+        case CLICKBEHAVIOUR::EDIT_TAGS:
+
+        break;
+    }
 }
 
 void libtree::showctx(const QPoint& pos) {

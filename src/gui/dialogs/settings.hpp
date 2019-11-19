@@ -32,29 +32,21 @@
 class settings : public QDialog
 {
 private:
-    const uint APPEND=0;
-    const uint REPLACE=1;
-    //const uint NOTHING=2;
-
-    const uint PLAY=0;
-    const uint IFIDLE=1;
-    //const uint DONTPLAY=2;
-
     vars *jag;
     QWidget *win;
     QTreeWidget *libstree;
     QWidget *spawn_maintab(QWidget *win);
-    QWidget *spawn_libtab(QWidget *win);
+    QWidget *spawn_dirtab(QWidget *win);
     QWidget *spawn_advanced(QWidget *win);
+    QWidget *spawn_libtreetab(QWidget *win);
 
 private slots:
     void lib_dirpicker();
     void lib_treerefresh();
     void lib_remdir();
 
-    void gen_mdclick(int index);
-    void gen_mmclick(int index);
-    void gen_mappend(int index);
+    void libtree_dclick(int index);
+    void libtree_mclick(int index);
 
     void thread_libscan();
     void thread_newlib(QString lib);
