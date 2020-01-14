@@ -24,13 +24,15 @@
 #define WIZARD_H
 
 #include <QDialog>
-#include "../../vars.hpp"
+#include "src/vars.hpp"
+#include "src/gui/mwindow.hpp"
 
 class wizard : public QDialog
 {
     Q_OBJECT
 private:
     vars *jag;
+	mwindow *win;
     void closeEvent(QCloseEvent *event);
     QVBoxLayout *l;
     QWidget *gen_start();
@@ -38,7 +40,7 @@ private:
     QWidget *gen_ui();
     QWidget *current;
 public:
-    wizard(vars *jag);
+	wizard(mwindow* win, vars *jag);
     ~wizard();
 private slots:
     //void on_close();

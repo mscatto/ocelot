@@ -50,7 +50,7 @@ private:
     /* the workbench layout */
     QGridLayout* ml;
 
-    /* mwindow pointer, in QWidget form to avoi circular dependencies */
+	/* mwindow pointer, in QWidget form to avoid circular dependencies */
     QWidget* win;
 
     /* last right-click position, stored to keep track to where to inject new widgets */
@@ -86,6 +86,7 @@ private:
     QWidget* _coverview();
     QWidget* _tagview();
 
+	//const QPoint &
 public:
     workbench(vars* jag, QWidget* win);
     bool islocked();
@@ -120,6 +121,7 @@ public slots:
     void clear();
 
 private slots:
+	void lock_widget();
 };
 
 #endif // WORKBENCH_HPP

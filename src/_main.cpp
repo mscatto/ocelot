@@ -22,14 +22,13 @@
  */
 
 #include "gui/dialogs/wizard.hpp"
+#include "src/gui/dialogs/settings.hpp"
 #include "gui/mwindow.hpp"
 #include "src/libs/QSingleInstance/qsingleinstance.h"
 #include "vars.hpp"
 #include <QApplication>
 #include <QDebug>
 #include <QMessageLogger>
-
-bool showwizard(vars* jag, mwindow* mw);
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
@@ -46,23 +45,18 @@ int main(int argc, char* argv[]) {
 
     vars* jag = new vars();
     mwindow* mw = new mwindow(jag);
+    bool firstrun = (jag->fetchdbdata("general_runwizard") == 1);
+    QObject::connect(&instance, &QSingleInstance::instanceMessage, mw, &mwindow::args_act);
 
-    QObject::connect(&instance, &QSingleInstance::instanceMessage, mw, &mwindow::newinstance_act);
+    if(argc > 1 && !firstrun) // so it won't start playing whenever there is no database
+        mw->args_act(a.arguments());
 
-    if(!showwizard(jag, mw))
+    if(firstrun){
+		wizard* w = new wizard(mw, jag);
+        QObject::connect(w, &wizard::show_mwindow, mw, &mwindow::show);
+        w->show();
+    }else
         mw->show();
 
     return a.exec();
-}
-
-bool showwizard(vars* jag, mwindow* mw) {
-    if(jag->fetchdbdata("general_runwizard") == 1) { /* first run */
-        wizard* w = new wizard(jag);
-        QObject::connect(w, &wizard::show_mwindow, mw, &mwindow::show);
-        w->show();
-
-        return true;
-    }
-
-    return false;
 }

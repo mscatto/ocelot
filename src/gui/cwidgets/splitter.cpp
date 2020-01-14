@@ -1,10 +1,10 @@
 #include "splitter.hpp"
-#include "src/gui/mwindow.hpp"
-#include <QDebug>
-splitter::splitter(Qt::Orientation o, mwindow* win) : QSplitter(o) {
+
+splitter::splitter(Qt::Orientation o, mwindow* win, workbench* wb) : QSplitter(o) {
     (o == Qt::Horizontal) ? this->setObjectName("hsplitter") : this->setObjectName("vsplitter");
     this->setChildrenCollapsible(false);
     this->winptr = win;
+	this->wb = wb;
 }
 
 QSplitterHandle* splitter::createHandle() {
@@ -17,4 +17,12 @@ handle::handle(Qt::Orientation o, QSplitter* parent, mwindow* win) : QSplitterHa
 
 void handle::mouseReleaseEvent(QMouseEvent* e) {
     emit this->savestate();
+	e->accept();
+}
+
+void splitter::showctx(QPoint pos){
+	if(!this->wb->islocked()){
+		this->wb->setlastctx(this);
+		this->wb->ctx_req(this->mapTo(this->wb, pos));
+	}
 }

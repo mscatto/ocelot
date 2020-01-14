@@ -57,6 +57,7 @@ public:
     ~mwindow() {
     }
     workbench* wb;
+	settings* sdiag;
 
 protected:
     void closeEvent(QCloseEvent* event);
@@ -76,7 +77,6 @@ private:
     QMenu* configmenu;
     QThread* playert;
     toolbar* bar;
-    settings* sdiag;
     transcoder* transcdiag;
     tageditor* tagdiag;
     about* adiag;
@@ -90,9 +90,9 @@ private:
     // void restore_state();
     // void restorewinsize();
     // void dumpwinsize();
-    void update_proglabel(uint pos, uint len);
+	void update_proglabel();
 public slots:
-    void newinstance_act(const QStringList args);
+    void args_act(const QStringList args);
     /* responsible for handling the toolbar buttons actions */
     void toolbar_pause();
     void toolbar_play();
@@ -127,12 +127,13 @@ private slots:
     void uilock_respond();
     void notify(bool playing, QString summary, QString body);
 
-    /* these will come back from the player instance */
-    void on_player_set(QString file);
-    void on_player_EOM();
+	// called when the player change tracks
+	void on_player_load(const QString &filepath);
 
-    void progslider_sync(QTime pos);
-    void progslider_set(QTime length);
+	void on_playlist_end();
+
+	void progslider_sync(qint64 pos);
+	void progslider_set(qint64 length);
 signals:
     void libtree_refreshconfig();
     void playlist_refreshconfig();
@@ -140,11 +141,11 @@ signals:
     /* these go directly to gstreamer. will also act as a proxy
      * for workbench's children to indirectly manipulate the player */
     void player_play();
-    void player_set(QString file);
+	void player_load(const QString &filepath);
     void player_stop();
     void player_pause();
     void player_setvol(uint vol);
-    void player_seek(short sec);
+	void player_seek(qint64 sec);
 
     void playlist_append(const QStringList files, const int playlist = -1);
     void playlist_replace(const QStringList files, const int playlist = -1);

@@ -31,17 +31,60 @@
 toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, vars* jag) : QToolBar(win) {
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->setObjectName("toolbar");
-    this->progvol = new splitter(Qt::Horizontal, static_cast<mwindow*>(win));
+	this->progvol = new splitter(Qt::Horizontal, static_cast<mwindow*>(win), static_cast<mwindow*>(win)->wb);
     this->progvol->setObjectName("progvol_splitter");
     this->progvol->setChildrenCollapsible(false);
+    this->progvol->setContentsMargins(0,0,0,0);
     this->vol = vol;
     this->prog = prog;
     this->jag = jag;
+	this->DSPSEP = " | ";
+	this->dspmode = PROGDSP(this->jag->fetchdbdata("toolbar_dspmode").toInt());
+	this->progdsp = new QLabel();
+	this->progdsp->setMinimumWidth(88);
+	this->lmenu = new QMenu("Progress Viewer");
+
+	QActionGroup *inf = new QActionGroup(this);
+	QAction *x;
+	x = new QAction("Time remaining");
+	x->setCheckable(true);
+	x->setData(PROGDSP::REMAINING);
+	inf->addAction(x);
+
+	x = new QAction("Time elapsed");
+	x->setCheckable(true);
+	x->setData(PROGDSP::ELAPSED);
+	inf->addAction(x);
+
+	x = new QAction("Time remaining out of total");
+	x->setCheckable(true);
+	x->setData(PROGDSP::REMTOTAL);
+	inf->addAction(x);
+
+	x = new QAction("Time elapsed out of total");
+	x->setCheckable(true);
+	x->setData(PROGDSP::ELAPTOTAL);
+	inf->addAction(x);
+
+	inf->actions().at(this->dspmode)->setChecked(true);
+	connect(this->lmenu, &QMenu::triggered, this, &toolbar::update_dspmode);
+
+	inf->setExclusive(true);
+	this->lmenu->addSection("Information shown");
+	this->lmenu->addActions(inf->actions());
+	this->lmenu->addSeparator();
+	this->lmenu->addAction("Hide from toolbar");
+	this->lmenu->actions().last()->setData(4);
+
+	this->progdsp->setMargin(1);
+	this->progdsp->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	this->progdsp->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+	connect(this->progdsp, &QLabel::customContextMenuRequested, this, &toolbar::show_labelmenu);
 
     QWidget* volw = new QWidget;
-    QGridLayout* voll = new QGridLayout;
+	QGridLayout* voll = new QGridLayout;
     voll->setSpacing(0);
-    voll->setContentsMargins(0, 0, 0, 0);
+    voll->setContentsMargins(6, 1, 6, 1);
     voll->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
     voll->addWidget(this->vol);
     volw->setLayout(voll);
@@ -50,7 +93,7 @@ toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, va
     QWidget* progw = new QWidget;
     QGridLayout* progl = new QGridLayout;
     progl->setSpacing(0);
-    progl->setContentsMargins(0, 0, 0, 0);
+    progl->setContentsMargins(6, 1, 6, 1);
     progl->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
     progl->addWidget(this->prog);
     progw->setLayout(progl);
@@ -71,12 +114,12 @@ toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, va
     conf->addAction(new QAction("About"));
     conf->addAction(new QAction("Exit"));
 
-    this->addAction(new QAction(QIcon::fromTheme("media-playback-start"), "Resume media playback"));
-    this->addAction(new QAction(QIcon::fromTheme("media-playback-pause"), "Pause media playback"));
-    this->addAction(new QAction(QIcon::fromTheme("media-playback-stop"), "Stop media playback"));
-    this->addAction(new QAction(QIcon::fromTheme("media-skip-backward"), "Previous on playlist"));
-    this->addAction(new QAction(QIcon::fromTheme("media-skip-forward"), "Next on playlist"));
-    this->addAction(new QAction(QIcon::fromTheme("adjustlevels"), "Tweak settings"));
+    this->addAction(new QAction(QIcon(":/ui/start"), "Resume media playback"));
+    this->addAction(new QAction(QIcon(":/ui/pause"), "Pause media playback"));
+    this->addAction(new QAction(QIcon(":/ui/stop"), "Stop media playback"));
+    this->addAction(new QAction(QIcon(":/ui/prev"), "Previous on playlist"));
+    this->addAction(new QAction(QIcon(":/ui/next"), "Next on playlist"));
+    this->addAction(new QAction(QIcon(":/ui/cog"), "Tweak settings"));
 
     QList<QAction*> act = this->actions();
     connect(act.at(0), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::toolbar_play);
@@ -97,9 +140,14 @@ toolbar::toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, va
     connect(conf->actions().at(8), &QAction::triggered, qobject_cast<mwindow*>(win), &mwindow::about_spawn);
     connect(this, &toolbar::orientationChanged, this, &toolbar::rotate);
     connect(this->progvol, &QSplitter::splitterMoved, this, &toolbar::on_progvol_resize);
+	connect(this->prog, &QSlider::valueChanged, this, &toolbar::update_progdsp);
+
     // btn->setAutoRaise(true);
     this->addSeparator();
     this->addWidget(this->progvol);
+	this->addWidget(this->progdsp);
+
+	emit this->prog->valueChanged(0);
 }
 
 toolbar::~toolbar() {
@@ -114,9 +162,50 @@ void toolbar::restore_splitterstate(QByteArray ba) {
 }
 
 void toolbar::rotate(Qt::Orientation o) {
+	if(o==Qt::Horizontal){
+		this->DSPSEP=" | ";
+		this->progdsp->setMinimumWidth(88);
+	}else{
+		this->DSPSEP="<br>-<br>";
+		this->progdsp->setMinimumWidth(38);
+	}
     this->prog->rotate(o);
     this->vol->rotate(o);
-    this->progvol->setOrientation(o);
+	this->progvol->setOrientation(o);
+	this->update_progdsp(this->prog->value());
+}
+
+void toolbar::update_progdsp(int position){
+	switch(dspmode){
+		case PROGDSP::REMAINING:
+			this->progdsp->setText(QDateTime::fromTime_t(this->prog->maximum()-position).toString("<b>mm:ss</b>"));
+		break;
+		case PROGDSP::ELAPSED:
+			this->progdsp->setText(QDateTime::fromTime_t(position).toString("<b>mm:ss</b>"));
+		break;
+		case PROGDSP::REMTOTAL:
+			this->progdsp->setText(QDateTime::fromTime_t(this->prog->maximum()-position).toString("<b>mm:ss</b>")+this->DSPSEP+QDateTime::fromTime_t(this->prog->maximum()).toString("<b>mm:ss</b>"));
+		break;
+		case PROGDSP::ELAPTOTAL:
+			this->progdsp->setText(QDateTime::fromTime_t(position).toString("<b>mm:ss</b>")+this->DSPSEP+QDateTime::fromTime_t(this->prog->maximum()).toString("<b>mm:ss</b>"));
+		break;
+		default:
+			this->jag->PANIC("at 'toolbar::update_progdsp': arg out of index");
+		break;
+	}
+}
+
+void toolbar::update_dspmode(QAction* act){
+	if(act->data().toInt()==4) // the hide option
+		return;
+
+	this->dspmode = PROGDSP(act->data().toInt());
+	this->update_progdsp(this->prog->value());
+	this->jag->setdbdata("toolbar_dspmode", this->dspmode);
+}
+
+void toolbar::show_labelmenu(){
+	this->lmenu->exec(QPoint(QCursor::pos().x(), QCursor::pos().y()+10));
 }
 
 void toolbar::on_progvol_resize() {

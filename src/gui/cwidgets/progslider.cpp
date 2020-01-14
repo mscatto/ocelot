@@ -25,7 +25,7 @@
 #include <qdebug.h>
 
 progslider::progslider(Qt::Orientation o, player* p) : QSlider(o) {
-    this->setRange(0, 100);
+	this->setMaximum(0);
     // this->setmi
     this->pctx = p;
     this->setObjectName("prog_widget");
@@ -50,6 +50,63 @@ progslider::progslider(Qt::Orientation o, player* p) : QSlider(o) {
 }
 
 progslider::~progslider() {
+}
+
+void progslider::mousePressEvent(QMouseEvent* event) {
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
+    QRect sr = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
+    if(event->button() == Qt::LeftButton && !sr.contains(event->pos())) {
+        int val;
+        if(orientation() == Qt::Vertical) {
+            double hhandle_h = (0.5 * sr.height()) + 0.5;
+            int posy = height() - event->y();
+            if(posy < hhandle_h)
+                posy = int(hhandle_h);
+            if(posy > height() - hhandle_h)
+                posy = int(height() - hhandle_h);
+            double nh = (height() - hhandle_h) - hhandle_h;
+            double npos = (posy - hhandle_h) / nh;
+
+            val = int(minimum() + (maximum() - minimum()) * npos);
+        } else {
+            double hhandle_w = (0.5 * sr.width()) + 0.5;
+            int posx = event->x();
+            if(posx < hhandle_w)
+                posx = int(hhandle_w);
+            if(posx > width() - hhandle_w)
+                posx = int(width() - hhandle_w);
+            double nw = (width() - hhandle_w) - hhandle_w;
+            double npos = (posx - hhandle_w) / nw;
+
+            val = int(minimum() + ((maximum() - minimum()) * npos));
+        }
+
+        // case it ever goes out of bounds
+        if(val > this->maximum() || val < 0)
+            return;
+
+        if(this->invertedAppearance())
+            this->setValue(this->maximum() - val);
+        else
+            this->setValue(val);
+
+		emit this->pctx->seek(val);
+		emit this->sliderMoved(val);
+
+        emit event->accept();
+        QSlider::mousePressEvent(event);
+
+        // spawns a tooltip with playback position
+        /*QPoint* p = new QPoint(this->mapToGlobal(this->pos()));
+        p->setX(QCursor::pos().rx());
+        QToolTip::showText(*p, QDateTime::fromTime_t(unsigned(val)).toString("mm : ss"), this);
+        p->~QPoint();*/
+    } else {
+        emit event->accept();
+        QSlider::mousePressEvent(event);
+    }
+    // emit onClick(this->value());
 }
 
 void progslider::rotate(Qt::Orientation o) {

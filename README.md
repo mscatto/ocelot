@@ -9,7 +9,7 @@ It is built using Qt Widgets, while also relying on TagLib for tag management, l
 Ocelot requires Qt Frameworks version 5.10+
 
 On Arch, you might need to install the following packages:
-`qt-gstreamer qt5-base taglib`
+`qt-gstreamer qt5-base taglib boost`
 
 Then you can build and run with:
 `qmake . && make && ./ocelot`

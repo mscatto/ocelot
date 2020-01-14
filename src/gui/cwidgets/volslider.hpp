@@ -43,71 +43,23 @@ public slots:
 private:
     vars* jag;
     player* pctx;
+    QTimer savetimer;
     const uint MINSIZE = 64;
     const int SAVEDELAY = 1000;
-    QTimer savetimer;
+    const QString VSTYLESHEET = "";
+    const QString HSTYLESHEET = "\
+        QSlider::handle:horizontal{\
+            border: 2px solid #8c8c8c;\
+            background: solid #3c3c3c;\
+            height: 16px;\
+            width: 8px;\
+            margin: -8px 8px;\
+            }";
 private slots:
     void start_save();
     void save_vol();
 protected:
-    void mousePressEvent(QMouseEvent* event) {
-        QStyleOptionSlider opt;
-        initStyleOption(&opt);
-        QRect sr = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
-        if(event->button() == Qt::LeftButton && !sr.contains(event->pos())) {
-            int val;
-            if(orientation() == Qt::Vertical) {
-                double hhandle_h = (0.5 * sr.height()) + 0.5;
-                int posy = height() - event->y();
-                if(posy < hhandle_h)
-                    posy = int(hhandle_h);
-                if(posy > height() - hhandle_h)
-                    posy = int(height() - hhandle_h);
-                double nh = (height() - hhandle_h) - hhandle_h;
-                double npos = (posy - hhandle_h) / nh;
-
-                val = int(minimum() + (maximum() - minimum()) * npos);
-            } else {
-                double hhandle_w = (0.5 * sr.width()) + 0.5;
-                int posx = event->x();
-                if(posx < hhandle_w)
-                    posx = int(hhandle_w);
-                if(posx > width() - hhandle_w)
-                    posx = int(width() - hhandle_w);
-                double nw = (width() - hhandle_w) - hhandle_w;
-                double npos = (posx - hhandle_w) / nw;
-
-                val = int(minimum() + ((maximum() - minimum()) * npos));
-            }
-
-            if(val > this->maximum() || val < 0)
-                return;
-
-            if(this->invertedAppearance())
-                this->setValue(this->maximum() - val);
-            else
-                this->setValue(val);
-
-            emit this->pctx->setVolume(ushort(val));
-            emit this->sliderMoved(ushort(val));
-            emit event->accept();
-            QSlider::mousePressEvent(event);
-
-            // spawns a tooltip with volume number
-            /*QPoint* p = new QPoint(this->mapToGlobal(this->pos()));
-
-            if(this->orientation() == Qt::Horizontal)
-                p->setY(QCursor::pos().ry());
-            else
-                p->setX(QCursor::pos().rx() * 2);
-            QToolTip::showText(*p, QString::number(this->value()), this);
-            p->~QPoint();*/
-        } else {
-            emit event->accept();
-            QSlider::mousePressEvent(event);
-        }
-        // emit onClick(this->value());
-    }
+    void paintEvent(QPaintEvent *ev);
+    void mousePressEvent(QMouseEvent* event);
 };
-
 #endif // volslider_HPP

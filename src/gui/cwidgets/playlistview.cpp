@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * Copyright (c) 2018 Matheus Scattolin Anselmo
  *
@@ -23,7 +23,7 @@
 #include "playlistview.hpp"
 #include "../mwindow.hpp"
 #include "playlist.hpp"
-#include "renamepbtn.hpp"
+#include "tabbutton.hpp"
 
 #include <QDialogButtonBox>
 #include <QFocusEvent>
@@ -44,34 +44,39 @@
 #include <taglib/tpropertymap.h>
 
 playlistview::playlistview(vars* jag, mwindow* win, workbench* wb) : QTabWidget() {
+	// passthru pointers
     this->jag = jag;
     this->win = win;
     this->wb = wb;
+
     this->setContentsMargins(0, 0, 0, 0);
-    this->renamer = new QDialog(this);
-    this->renamer->setFixedSize(480, 48);
-    this->renamer->setModal(true);
-    this->setObjectName("playlistview");
-    QGridLayout* grid = new QGridLayout();
-    QDialogButtonBox* bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Close);
-    this->namebox = new QLineEdit();
-    namebox->setPlaceholderText("Enter a new name here");
+	this->setTabsClosable(true);
+	//this->setStyleSheet("QTabBar::tab { width: 10px }");
+	this->setObjectName("playlistview");
+	this->setMovable(true);
+	this->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	// renamer dialog
+	this->renamer = new QDialog(this);
+	this->namebox = new QLineEdit();
+	QGridLayout* grid = new QGridLayout();
+	QDialogButtonBox* bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Close);
+
+	this->renamer->setLayout(grid);
+	this->renamer->setFixedSize(480, 48);
+	this->renamer->setModal(true);
+	this->namebox->setPlaceholderText("Enter a new name here");
     grid->addWidget(namebox, 0, 0, 1, 1);
     grid->addWidget(bb, 0, 1, 1, 1);
-    this->renamer->setLayout(grid);
 
     connect(bb, &QDialogButtonBox::accepted, this, &playlistview::renamer_ok);
     connect(bb, &QDialogButtonBox::rejected, this, &playlistview::renamer_cancel);
 
-    /* fetches order from database */
-    QSqlQuery* q = new QSqlQuery();
-    q->exec("SELECT val FROM data WHERE var='playlist_columnorder'");
-    q->next();
+	// fetches order from database
     this->order.clear();
-    this->order.append(q->record().value(0).toString());
-    q->~QSqlQuery();
+    this->order.append(jag->fetchdbdata("playlist_columnorder").toString());
 
-    /* the tab context */
+	// the tab context menu
     this->ctx = new QMenu();
 
     ctx->addAction("Rename playlist...");
@@ -83,40 +88,46 @@ playlistview::playlistview(vars* jag, mwindow* win, workbench* wb) : QTabWidget(
     ctx->addAction(new QAction(QString("Export playlist")));
     connect(ctx->actions().last(), &QAction::triggered, this, &playlistview::exportpl);
 
-    /* then sets up header' context menu */
-    QList<QAction*>* ctx = new QList<QAction*>();
+	// then the header's
+	this->headermenu = new QMenu();
+	QList<QAction*> hact;
 
-    ctx->append(new QAction("#"));
-    ctx->last()->setCheckable(true);
+	hact.append(new QAction("#"));
+	hact.last()->setCheckable(true);
     if(this->order.contains("#INDEX#"))
-        ctx->last()->toggle();
-    connect(ctx->last(), &QAction::toggled, this, &playlistview::toggler);
+		hact.last()->toggle();
+	connect(hact.last(), &QAction::toggled, this, &playlistview::toggler);
 
     foreach(QString s, this->jag->dumpkeys()) {
-        ctx->append(new QAction(this->jag->translate_key(s)));
-        ctx->last()->setCheckable(true);
-        if(this->order.contains(s))
-            ctx->last()->toggle();
-        connect(ctx->last(), &QAction::toggled, this, &playlistview::toggler);
+		hact.append(new QAction(this->jag->translate_key(s)));
+		hact.last()->setCheckable(true);
+		if(this->order.contains(s))
+			hact.last()->toggle();
+		connect(hact.last(), &QAction::toggled, this, &playlistview::toggler);
     }
 
-    this->headermenu = new QMenu();
-    headermenu->addActions(*ctx);
-    ctx->~QList();
+	headermenu->addActions(hact);
 
-    this->setContextMenuPolicy(Qt::CustomContextMenu);
-    /* insert default playlist*/
-    this->newplaylist();
+	// insert newtab tab
+	this->insertTab(this->count(), new QWidget, QIcon::fromTheme("list-add"), "");
+	this->tabBar()->tabButton(0, QTabBar::RightSide)->resize(0,0);
+	this->tabBar()->tabButton(0, QTabBar::RightSide)->hide();
+
+	// insert default empty playlist
+	this->newplaylist();
+	this->plactive = pl.first();
+	this->setCurrentIndex(0);
+
+	//this->tabBar()->setExpanding(false);
+	//this->tabBar()->setShape(QTabBar::Shape::TriangularNorth);
+	//QIcon(":/ui/cog").pixmap(QSize(256,256)).da
 
     /* set up new tab button*/
-    this->addbtn = new QToolButton();
-    this->addbtn->setText("+");
-    this->addbtn->setFixedSize(28, 28);
-    connect(this->addbtn, &QToolButton::clicked, this, &playlistview::newplaylist);
-    this->setCornerWidget(this->addbtn, Qt::Corner::TopRightCorner);
-
-    this->setMovable(true);
-    this->setTabsClosable(true);
+	//this->addbtn = new QToolButton();
+	//this->addbtn->setText("+");
+	//this->addbtn->setFixedSize(28, 28);
+	//connect(this->addbtn, &QToolButton::clicked, this, &playlistview::newplaylist);
+	//this->setCornerWidget(this->addbtn, Qt::Corner::TopRightCorner);
 
     connect(this, &QTabWidget::tabCloseRequested, this, &playlistview::tab_close);
     connect(this, &QTabWidget::customContextMenuRequested, this, &playlistview::showctx);
@@ -145,22 +156,22 @@ void playlistview::newplaylist() {
         i++;
     }
     QString name = "New Playlist " + QString::number(i);
-    renamepbtn* ren = new renamepbtn(QIcon::fromTheme("edit-rename"), name);
+
+	tabbutton* ren = new tabbutton(QIcon::fromTheme("edit-rename"), name);
 
     ren->setMaximumSize(18, 18);
-    ren->setFlat(true); // setStyleSheet("QPushButton { border : none }");
+	ren->setFlat(true);
     ren->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 
-    connect(ren, &renamepbtn::idclicked, this, &playlistview::tab_rename);
+	connect(ren, &tabbutton::idclicked, this, &playlistview::tabbutton_rename);
 
     pl.insert(name, new playlist(&this->order, this->headermenu, jag, win, this));
     connect(this, &playlistview::exportpl, pl.value(name), &playlist::exportpl);
     connect(this, &playlistview::clearsel, pl.value(name), &playlist::clearSelection);
     connect(this, &playlistview::clearpl, pl.value(name), &playlist::clearchildren);
-    this->plactive = pl.value(name);
-    this->insertTab(this->count(), pl.value(name), name);
-    this->setCurrentIndex(this->count() - 1);
-    this->tabBar()->setTabButton(this->currentIndex(), QTabBar::ButtonPosition::LeftSide, ren);
+
+	this->insertTab(this->count()-1, pl.value(name), name);
+	this->tabBar()->setTabButton(this->count()-2, QTabBar::ButtonPosition::LeftSide, ren);
 }
 
 
@@ -224,22 +235,28 @@ void playlistview::toggler(bool checked) {
 }
 
 void playlistview::tab_close(int index) {
-    if(this->count() <= 1)
+	if(this->count() <= 2)
         return;
     if(index == 0)
-        this->tab_switch(1);
+		this->plactive = this->pl.value(this->tabText(index).remove("&"));
     else
-        this->tab_switch(index - 1);
+		this->plactive = this->pl.value(this->tabText(index-1).remove("&"));
 
+	this->setCurrentIndex(this->count() - 3); // minus offset, newtab tab and current to-be-removed tab
     this->pl.remove(this->tabText(index).remove("&"));
     this->removeTab(index);
+
 }
 
 void playlistview::tab_switch(int index) {
-    this->plactive = this->pl.value(this->tabText(index).remove("&"));
+	if(index==this->count()-1){
+		this->newplaylist();
+		this->setCurrentIndex(this->count() - 2);
+	}
+	this->plactive = this->pl.value(this->tabText(index).remove("&"));
 }
 
-void playlistview::tab_rename(QString key) {
+void playlistview::tabbutton_rename(QString key) {
     this->renamer->setWindowTitle("Renaming '" + key + "'");
     this->renamer->show();
     tmpkey = key;
@@ -253,7 +270,7 @@ void playlistview::renamer_ok() {
     for(int i = 0; i < this->tabBar()->count(); i++)
         if(this->tabBar()->tabText(i).remove("&") == tmpkey) {
             this->tabBar()->setTabText(i, this->namebox->text());
-            qobject_cast<renamepbtn*>(this->tabBar()->tabButton(i, QTabBar::ButtonPosition::LeftSide))
+			qobject_cast<tabbutton*>(this->tabBar()->tabButton(i, QTabBar::ButtonPosition::LeftSide))
             ->set_key(this->namebox->text());
         }
 
@@ -280,3 +297,15 @@ void playlistview::playlist_replace(const QStringList files, const int playlist)
         this->plactive->replace(files);
 }
 
+// tab bar override
+//void tabbar::paintEvent(QPaintEvent* event){
+	//QStylePainter painter(this);
+	//event->accept();
+
+	/*QStyleOptionTab option;
+	initStyleOption(&option, 0);
+	//printf("tab text: %s\n", option.text.toLatin1().data());
+	//painter.drawControl(QStyle::CE_TabBarTab, option);
+	painter.drawItemPixmap(option.rect, 0, QIcon::fromTheme("list-add").pixmap(42,42));
+	//painter.drawItemText(option.rect, 0, palette(), 1, option.text);*/
+//}

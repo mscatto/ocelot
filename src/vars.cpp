@@ -148,6 +148,9 @@ void vars::initdb() {
         this->DB_REF->exec("CREATE TABLE data(\
             var TEXT NOT NULL, val TEXT NOT NULL\
         )");
+        this->DB_REF->exec("CREATE TABLE treeschemes(\
+            var TEXT NOT NULL, val TEXT NOT NULL\
+        )");
         this->DB_REF->exec("CREATE TABLE splitterstate(\
             val BLOB NOT NULL\
         )");
@@ -178,6 +181,10 @@ void vars::initdb() {
 
         /* initialize default values */
         initdata();
+        /* init default tree scheme */
+        this->DB_REF->exec("INSERT INTO treeschemes VALUES(\
+            'Default',\
+            '#artist#/[#year#] #album#/#track#. #title#')");
 
         qInfo("  -> new database placed under %s", qPrintable(this->DATA_PATH));
     } else {
@@ -230,38 +237,39 @@ void vars::initlibs() {
     qInfo() << "[INFO] Scanning libraries...";
     this->libs = new QStringList();
 
-    QSqlQuery q = this->DB_REF->exec("SELECT path FROM libs");
     QThread* t;
-    q.next();
-    if(q.isValid()) {
-        do {
-            this->libs->append(q.value(0).toString());
-            t = new QThread();
-            library* l = new library(new QString(q.value(0).toString()), this->DB_REF, this->dumppaths());
-            l->moveToThread(t);
-            connect(t, SIGNAL(started()), l, SLOT(process()));
-            connect(l, SIGNAL(finished()), t, SLOT(quit()));
-            connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
-            connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
-            // connect(t, &QThread::finished, this, );
-            t->start();
-        } while(q.next());
+    QSqlQuery q("SELECT path FROM libs", *this->DB_REF);
+    q.exec();
+
+    while(q.next()){
+        this->libs->append(q.value(0).toString());
+        t = new QThread();
+        library* l = new library(new QString(q.value(0).toString()), this->DB_REF, this->dumppaths());
+        l->moveToThread(t);
+        connect(t, SIGNAL(started()), l, SLOT(process()));
+        connect(l, SIGNAL(finished()), t, SLOT(quit()));
+        connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
+        connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
+        // connect(t, &QThread::finished, this, );
+        t->start();
     }
-    // qInfo() << "[INFO] Done.";
 }
 
 void vars::initdata() {
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'playlist_columnorder',\
-        '#PLAY#;#INDEX#;TRACKNUMBER;TITLE;ARTIST;ALBUM;YEAR')");
+        '#PLAY#;#INDEX#;TRACKNUMBER;TITLE;ARTIST;ALBUM;DATE')");
 
     /* INPUT VALUES */
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'libtree_doubleclick',\
         '1')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
-        'libtree_middleclick',\
+        'libtree_activescheme',\
         '0')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'toolbar_dspmode',\
+		'3')");
     this->DB_REF->exec("INSERT INTO data VALUES(\
         'general_playlistappend',\
         '0')");

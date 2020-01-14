@@ -21,7 +21,6 @@
  * Software.
  */
 
-#include "libtree.hpp"
 #include <QFrame>
 #include <QGridLayout>
 #include <QLabel>
@@ -33,14 +32,16 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
+#include "src/gui/cwidgets/libtree.hpp"
 #include "src/gui/mwindow.hpp"
 #include "src/vars.hpp"
 
-libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
+libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QFrame() {
     this->win = win;
     this->wb = wb;
     this->ctx = new QMenu();
     this->tree = new QTreeWidget(this);
+	this->tagedit = new tageditor(jag, this);
     this->jag = jag;
     this->refresh_config();
 
@@ -73,7 +74,7 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     conv->addAction(QIcon::fromTheme("quickopen"), "FakeMP3");
     QAction* prop = new QAction(t, "Edit Tag");
 
-    connect(prop, &QAction::triggered, this, &libtree::gatherselected);
+	connect(prop, &QAction::triggered, this, &libtree::tageditor_spawn);
     connect(append, &QAction::triggered, this, &libtree::transc_append);
     connect(rep, &QAction::triggered, this, &libtree::transc_replace);
     connect(this, &libtree::transc_dispatch, win, &mwindow::transcoder_spawn);
@@ -84,23 +85,32 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QWidget() {
     ctx->addSeparator();
     ctx->addAction(prop);
 
-    // this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
-    // this->setFrameShape(QFrame::StyledPanel);
-    // this->setFrameShadow(QFrame::Sunken);
-    this->layout()->setContentsMargins(1, 1, 1, 1);
+	this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
+	this->setFrameShape(QFrame::StyledPanel);
+	this->setFrameShadow(QFrame::Raised);
+	this->layout()->setContentsMargins(1, 1, 1, 1);
     this->layout()->setSpacing(1);
 
     this->tree->setHeaderHidden(true);
     help->setMaximumWidth(20);
     label->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
     label->setFixedWidth(50);
-    filterbox->setPlaceholderText("Type in any tag data: album, year, genre, etc.");
+	filterbox->setPlaceholderText("Type anything to begin");
 
     QComboBox *scheme = new QComboBox;
     QLabel *treelabel = new QLabel("Layout:");
     treelabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
     treelabel->setFixedWidth(50);
-    scheme->insertItem(0,"DEFAULT: artist/year album/track title");
+
+    // populating with data from database
+    QSqlQuery q(*this->jag->DB_REF);
+    q.exec("SELECT * FROM treeschemes");
+    //int active = this->jag->fetchdbdata("libtree_activescheme").toInt();
+
+    while(q.next()){
+        scheme->insertItem(scheme->count()+1, q.value(0).toString());
+    }
+    //q.seek(this->jag->fetchdbdata("libtree_activescheme").toInt());
 
     grid->addWidget(tree, 0, 0, 1, 5);
     grid->addWidget(label, 1, 0, 1, 1);
@@ -141,10 +151,14 @@ void libtree::recurtree(QTreeWidgetItem* parent, QStringList levels, QString con
 
         /* then running the query itself */
         QStringList act;
+        act.clear();
         QTreeWidgetItem* child = new QTreeWidgetItem(parent, QStringList(name));
         QSqlQuery qpath;
-        qpath.prepare("SELECT DISTINCT path FROM songs WHERE " + sroot.join(" AND ") + " ORDER BY track");
-        qpath.exec();
+        qpath.exec("SELECT DISTINCT path FROM songs WHERE "
+                   + sroot.join(" AND ") + " AND "
+                   + conditions
+                   + " ORDER BY track"
+        );
 
         /* filling in the data */
         while(qpath.next())
@@ -167,7 +181,17 @@ QStringList libtree::extract(QString vars) {
     while(reg.hasNext())
         out.append(reg.next().captured(1));
 
-    return out;
+	return out;
+}
+
+void libtree::tageditor_spawn(){
+	QStringList files;
+	QTreeWidgetItem* item = this->tree->selectedItems().first();
+	this->listchildren(item, &files);
+	files.removeAll(QString(""));
+
+	this->tagedit->setup(files);
+	this->tagedit->show();
 }
 
 void libtree::listchildren(QTreeWidgetItem *item, QStringList *children){
@@ -200,15 +224,14 @@ void libtree::doubleclick(QTreeWidgetItem* item) {
     QStringList files;
     this->listchildren(item, &files);
     files.removeAll(QString(""));
-
     switch(this->dclick){
         case CLICKBEHAVIOUR::REPLACE:
             emit this->win->playlist_replace(files);
         break;
 
         case CLICKBEHAVIOUR::REPLACE_AND_PLAY:
-            emit this->win->player_stop(); // TODO GAPLESS
-            emit this->win->player_set(files.front());
+			emit this->win->player_stop(); // TODO GAPLESS
+			emit this->win->player_load(files.front());
             emit this->win->player_play();
             emit this->win->playlist_replace(files);
         break;
@@ -219,7 +242,7 @@ void libtree::doubleclick(QTreeWidgetItem* item) {
 
         case CLICKBEHAVIOUR::APPEND_AND_PLAY:
             emit this->win->player_stop(); // TODO GAPLESS
-            emit this->win->player_set(files.front());
+			emit this->win->player_load(files.front());
             emit this->win->player_play();
             emit this->win->playlist_enqueue(files);
         break;
@@ -250,7 +273,7 @@ void libtree::middleclick(QTreeWidgetItem* item) {
 
         case CLICKBEHAVIOUR::REPLACE_AND_PLAY:
             emit this->win->player_stop(); // TODO GAPLESS
-            emit this->win->player_set(files.front());
+			emit this->win->player_load(files.front().toUtf8());
             emit this->win->player_play();
             emit this->win->playlist_replace(files);
         break;
@@ -261,7 +284,7 @@ void libtree::middleclick(QTreeWidgetItem* item) {
 
         case CLICKBEHAVIOUR::APPEND_AND_PLAY:
             emit this->win->player_stop(); // TODO GAPLESS
-            emit this->win->player_set(files.front());
+			emit this->win->player_load(files.front().toUtf8());
             emit this->win->player_play();
             emit this->win->playlist_enqueue(files);
         break;
@@ -338,9 +361,6 @@ void libtree::populate(QSqlDatabase* db) {
     this->tree->topLevelItem(0)->addChildren(items);
     this->tree->topLevelItem(0)->setText(0, "All Media (" + QString::number(this->tree->topLevelItem(0)->childCount()) + ")");
     this->tree->expandItem(this->tree->topLevelItem(0));
-}
-
-void libtree::gatherselected() {
 }
 
 libtree::~libtree() {

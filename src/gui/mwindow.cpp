@@ -61,14 +61,17 @@ mwindow::mwindow(vars* jag) : QMainWindow() {
     this->bar = new toolbar(this, this->configmenu, this->prog, this->vol, jag);
     this->sdiag = new settings(this, jag);
     this->adiag = new about(this, jag);
-    this->tagdiag = new tageditor(this, jag);
+	//this->tagdiag = new tageditor(this, jag);
     this->transcdiag = new transcoder(jag, this);
     this->setStatusBar(new QStatusBar());
     this->wb = new workbench(jag, this);
 
+	this->proglabel.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	this->proglabel.setFixedWidth(90);
+
     this->addToolBar(this->bar);
-    this->setCentralWidget(this->wb);
-    this->statusBar()->addWidget(&this->status);
+	this->setCentralWidget(this->wb);
+	this->statusBar()->addWidget(&this->status);
     this->statusBar()->addPermanentWidget(&this->proglabel);
 
     this->setWindowIcon(QIcon(":/internals/caticon"));
@@ -80,26 +83,26 @@ mwindow::mwindow(vars* jag) : QMainWindow() {
     this->status.setText("<b>IDLE</b>");
 
 
-    this->update_proglabel(0, 0);
+	this->update_proglabel();
 
     /* connect the required signals */
     connect(this, &mwindow::uilock_flip, this, &mwindow::uilock_respond);
 
     connect(this, &mwindow::player_play, this->jag->pctx, &player::play);
-    connect(this, &mwindow::player_set, this, &mwindow::on_player_set);
-    connect(this, &mwindow::player_set, this->jag->pctx, &player::set);
+	connect(this, &mwindow::player_load, this, &mwindow::on_player_load);
+	connect(this, &mwindow::player_load, this->jag->pctx, &player::load);
     connect(this, &mwindow::player_stop, this->jag->pctx, &player::stop);
     connect(this, &mwindow::player_pause, this->jag->pctx, &player::pause);
     connect(this, &mwindow::player_seek, this->jag->pctx, &player::seek);
     connect(this, &mwindow::player_setvol, this->jag->pctx, &player::setVolume);
 
-    connect(this->jag->pctx, &player::position_changed, this, &mwindow::progslider_sync);
+	connect(this->jag->pctx, &player::position_changed, this, &mwindow::progslider_sync);
     connect(this->jag->pctx, &player::length_changed, this, &mwindow::progslider_set);
-    connect(this->jag->pctx, &player::EOM, this, &mwindow::on_player_EOM);
 
     connect(this->prog, &progslider::sliderMoved, this, &mwindow::progslider_moved);
 
     connect(this->vol, &volslider::sliderMoved, this, &mwindow::volslider_moved);
+	connect(this->vol, &volslider::sliderMoved, this, &mwindow::update_proglabel);
 
     /* restore the previous saved UI state */
     this->loadstate();
@@ -108,18 +111,24 @@ mwindow::mwindow(vars* jag) : QMainWindow() {
     qInfo() << "[INFO] Ocelot initialized successfully!\n::";
 }
 
-void mwindow::update_proglabel(uint pos, uint len) {
-    // qInfo() << pos << len;
-    this->proglabel.setText("<b>" + QDateTime::fromTime_t(pos).toString("mm:ss") + " / "
-                            + QDateTime::fromTime_t(len).toString("mm:ss") + "</b>");
+void mwindow::update_proglabel() {
+	QString s = "<b>Volume:</b> %v";
+
+	(this->vol->sliderPosition()==this->vol->maximum())?
+	s.replace("%v", "MAX"):s.replace("%v", QString::number(this->vol->sliderPosition()));
+
+	//s.replace("%c", QDateTime::fromTime_t(pos).toString("mm:ss")); // current position
+	//s.replace("%t", QDateTime::fromTime_t(len).toString("mm:ss")); // total duration
+
+	this->proglabel.setText(s);
 }
 
-void mwindow::newinstance_act(const QStringList args) {
+void mwindow::args_act(const QStringList args) {
     if(args.length() <= 1)
         return; // simply discards the message. maybe bring window to the front?
     if(QMimeDatabase().mimeTypeForFile(args.at(1)).name() == "audio/flac") {
         emit this->player_stop();
-        emit this->player_set(args.at(1));
+		emit this->player_load(args.at(1).toUtf8());
         emit this->player_play();
     }
     // check for multiple files and a less shitty format check
@@ -146,7 +155,6 @@ void mwindow::moveEvent(QMoveEvent* event) {
 }
 
 void mwindow::savestate() {
-    qInfo() << "[DEBUG] mwindow::savestate";
     this->jag->setdbdata("ui_geometry", this->saveGeometry());
     this->jag->setdbdata("ui_state", this->saveState());
     this->jag->setdbdata("ui_maximized", QString::number(this->isMaximized()));
@@ -234,9 +242,9 @@ void mwindow::tageditor_spawn(QStringList* l) {
 }
 
 /* will be called every time the player changes position, which will be x */
-void mwindow::progslider_sync(QTime pos) {
-    this->prog->setValue(QTime(0, 0).secsTo(pos));
-    this->update_proglabel(QTime(0, 0).secsTo(pos), this->prog->maximum());
+void mwindow::progslider_sync(qint64 pos) {
+	this->prog->setValue(pos/1000);
+	//this->update_proglabel(QTime(0, 0).secsTo(pos), this->prog->maximum());
 }
 
 void mwindow::progslider_moved(int x) {
@@ -247,7 +255,7 @@ void mwindow::progslider_moved(int x) {
         p.setY(QCursor::pos().ry());
     QToolTip::showText(p, QDateTime::fromTime_t(unsigned(x)).toString("mm : ss"), this->prog);
 
-    emit this->player_seek(static_cast<short>(x));
+	emit this->player_seek(static_cast<short>(x));
 }
 
 void mwindow::uilock_respond() {
@@ -264,66 +272,63 @@ void mwindow::uilock_respond() {
 
 void mwindow::notify(bool playing, QString summary, QString body) {
     Notification notify(summary);
-    playing ? notify.init("NOW PLAYING :: OCELOT") : notify.init("OCELOT");
+    playing ? notify.init("OCELOT") : notify.init("OCELOT");
 
     notify.setBody(body);
-    // QImage img = QImage(":/icons/caticon.png");
-    // notify.setIconFromByteArray(QByteArray::fromRawData((const char*)img.bits(), img.byteCount()));
     notify.setIconName("caticon");
     notify.setCategory("playback");
-    notify.setTimeout(4000);
+    notify.setTimeout(2000);
     notify.setUrgency(NOTIFICATION_URGENCY_LOW);
 
-    notify.show();
+	notify.show();
 }
 
-void mwindow::on_player_set(QString file) {
-    if(this->track != nullptr)
-        this->track->~trackdata();
-    this->track = new trackdata(file.toUtf8());
-    this->state = pstate::PLAYING;
+void mwindow::on_player_load(const QString& filepath){
+	if(this->track != nullptr)
+		this->track->~trackdata();
+	this->track = new trackdata(filepath.toUtf8());
+	this->state = pstate::PLAYING;
 
-    this->prog->setEnabled(true);
-    this->cover_set(this->track->cover());
-    emit this->player_setvol(static_cast<uint>(this->vol->value()));
+	this->prog->setEnabled(true);
+	this->cover_set(this->track->cover());
+	emit this->player_setvol(static_cast<uint>(this->vol->value()));
 
-    this->setWindowTitle(QString("OCELOT v") + this->jag->VERSION);
-    this->setWindowTitle(this->track->artist() + ": " + this->track->title() + " :: " + this->windowTitle());
+	this->setWindowTitle(QString("OCELOT v") + this->jag->VERSION);
+	this->setWindowTitle(this->track->artist() + ": " + this->track->title() + " :: " + this->windowTitle());
+	this->status.setText("<b>PLAYING:</b> " + this->track->title()
+						 + " :: " + QMimeDatabase().mimeTypeForFile(filepath).name().remove(0, 6).toUpper().append(" ")
+						 + QString::number(this->track->bitrate()) + "kb/s @" + QString::number(this->track->samples()) + "Hz");
 
-    this->status.setText("<b>PLAYING:</b> " + this->track->title()
-                         + " :: " + QMimeDatabase().mimeTypeForFile(file).name().remove(0, 6).toUpper().append(" ")
-                         + QString::number(this->track->bitrate()) + "kb/s @" + QString::number(this->track->samples()) + "Hz");
+	QString summary = "$t ($d)\n$a";
+	summary.replace("$t", this->track->title());
+	summary.replace("$d", QDateTime::fromTime_t(this->track->length_sec()).toString("mm:ss"));
+	summary.replace("$a", this->track->artist());
 
-    QString summary = "$t ($d)\n$a";
-    summary.replace("$t", this->track->title());
-    summary.replace("$d", QDateTime::fromTime_t(this->track->length_sec()).toString("mm:ss"));
-    summary.replace("$a", this->track->artist());
+	QString body = "$a ($y)";
+	body.replace("$a", this->track->album());
+	body.replace("$y", QString::number(this->track->year()));
 
-    QString body = "$a ($y)";
-    body.replace("$a", this->track->album());
-    body.replace("$y", QString::number(this->track->year()));
-
-    this->notify(true, summary, body);
+	this->notify(true, summary, body);
 }
 
-
-void mwindow::on_player_EOM() {
+void mwindow::on_playlist_end() {
     this->prog->setEnabled(false);
     this->prog->setValue(0);
     this->prog->setRange(0, 0);
     this->status.setText("<b>IDLE</b>");
     this->setWindowTitle(QString("OCELOT v") + jag->VERSION);
-    this->update_proglabel(0, 0);
-    this->cover_set(QPixmap());
+	//this->update_proglabel(0, 0);
+	this->cover_set(QPixmap());
 }
 
-void mwindow::progslider_set(QTime length) {
-    if(QTime(0, 0).secsTo(length) == this->prog->maximum())
+void mwindow::progslider_set(qint64 length) {
+	if(length/1000 == this->prog->maximum())
         return;
 
     this->prog->setEnabled(true);
-    this->prog->setRange(0, QTime(0, 0).secsTo(length));
+	this->prog->setRange(0, length/1000);
     this->prog->setValue(0);
+	emit this->prog->valueChanged(0);
 }
 
 void mwindow::toolbar_pause() {
@@ -351,7 +356,7 @@ void mwindow::toolbar_stop() {
         emit this->player_stop();
         this->state = pstate::IDLE;
 
-        this->on_player_EOM();
+		this->on_playlist_end();
     }
 }
 

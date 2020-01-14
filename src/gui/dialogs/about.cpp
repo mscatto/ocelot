@@ -76,7 +76,7 @@ QWidget *about::mktab_ocelot(){
     QVBoxLayout *lp_l = new QVBoxLayout();
     lp_l->setSpacing(0);
     lp_l->setContentsMargins(0,0,0,0);
-    QLabel *lp_tlbl = new QLabel("<h4>Ocelot makes use of</h4>");
+	QLabel *lp_tlbl = new QLabel("<h4>Ocelot depends on</h4>");
     lp_tlbl->sizePolicy().setVerticalPolicy(QSizePolicy::Minimum);
     lp_tlbl->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
     QFontMetrics fm(lp_tlbl->fontMetrics());
@@ -89,7 +89,7 @@ QWidget *about::mktab_ocelot(){
     QFormLayout *lp_il = new QFormLayout();
     lp_il->setAlignment(Qt::AlignTop | Qt::AlignCenter);
     lp_il->addRow("TagLib", new QLabel("<a href=\"https://taglib.org/\">Website</a>"));
-    lp_il->addRow("ProjectM", new QLabel("<a href=\"https://github.com/projectM-visualizer/projectm\">Github Repository</a>"));
+	lp_il->addRow("ProjectM", new QLabel("<a href=\"https://github.com/projectM-visualizer/projectm\">Website</a>"));
 
     lp_iw->setLayout(lp_il);
 

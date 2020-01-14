@@ -35,6 +35,8 @@ private:
     const char* queuechar = "·";
 
     vars* jag;
+    QHeaderView* customheader;
+    QStringList* headerlabels;
     mwindow* win;
     QString* order;
     QTabWidget *view;
@@ -69,6 +71,7 @@ public slots:
     void doubleclick(QTreeWidgetItem* item);
     void exportpl();
     void clearchildren();
+	void EOM();
 signals:
     void changesel(TagLib::FileRef* f);
     void play(QTreeWidgetItem*);

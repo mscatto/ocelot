@@ -179,12 +179,26 @@ QWidget *settings::spawn_libtreetab(QWidget *win){
     QTreeWidget* stree = new QTreeWidget();
     stree->setColumnCount(2);
     stree->setHeaderLabels(QStringList() << "Name"
-                                         << "Expression");
+                                         << "Scheme");
     stree->setColumnWidth(0, 128);
     stree->setAlternatingRowColors(true);
-    stree->addTopLevelItem(new QTreeWidgetItem(stree, QStringList() << "Default"
-                                                                    << "#artist#/[#year#] #album#/#track#. #title#"));
+
+    QSqlQuery q(*this->jag->DB_REF);
+    q.exec("SELECT * FROM treeschemes");
+    while(q.next()){
+        stree->addTopLevelItem(new QTreeWidgetItem(stree, QStringList()<< q.value(0).toString() << q.value(1).toString()));
+    }
+    stree->topLevelItem(stree->topLevelItemCount()-1)->setSelected(true);
+
+    QPushButton *edit = new QPushButton("Edit");
+    QPushButton *erase = new QPushButton("Erase");
+
+    if(stree->topLevelItemCount()==1)
+        erase->setEnabled(false);
+
     qobject_cast<QGridLayout*>(sbox->layout())->addWidget(stree, 2, 0, 1, 2);
+    qobject_cast<QGridLayout*>(sbox->layout())->addWidget(edit, 3, 0, 1, 1);
+    qobject_cast<QGridLayout*>(sbox->layout())->addWidget(erase, 3, 1, 1, 1);
 
     grid->addWidget(mgbox, 0, 0, 1, 1);
     grid->addWidget(sbox, 0, 1, 1, 1);
@@ -197,22 +211,8 @@ QWidget *settings::spawn_libtreetab(QWidget *win){
 QWidget* settings::spawn_dirtab(QWidget* win) {
     QWidget* w = new QWidget(win);
     QGridLayout* l = new QGridLayout;
-
-    /* setting up the directories group */
-    QFrame* tframe = new QFrame();
-    tframe->setLayout(new QGridLayout);
-    tframe->setFrameStyle(QFrame::StyledPanel);
-    tframe->setFrameShadow(QFrame::Shadow::Sunken);
-    tframe->setContentsMargins(1, 1, 1, 1);
-    tframe->setAutoFillBackground(true);
-
-    QCheckBox* ch1 = new QCheckBox("Watch for directory changes");
-    ch1->setCheckState(Qt::CheckState::Checked);
-    QCheckBox* ch2 = new QCheckBox("Scan subdirectories");
-    ch2->setCheckState(Qt::CheckState::Checked);
     QTreeWidget* tree = new QTreeWidget();
     tree->setColumnCount(3);
-
     tree->setHeaderLabels(QStringList() << "Path"
                                         << "Track#"
                                         << "Total Filesize");
@@ -233,13 +233,13 @@ QWidget* settings::spawn_dirtab(QWidget* win) {
     rembtn->setMaximumWidth(160);
     connect(rembtn, &QPushButton::clicked, this, &settings::lib_remdir);
 
-    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(tree, 0, 0, 1, 3);
-    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(fpicker, 1, 0, 1, 1);
-    qobject_cast<QGridLayout*>(tframe->layout())->addWidget(rembtn, 1, 1, 1, 1);
+    //qobject_cast<QGridLayout*>(tframe->layout())->addWidget(tree, 0, 0, 1, 3);
+    //qobject_cast<QGridLayout*>(tframe->layout())->addWidget(fpicker, 1, 0, 1, 1);
+    //qobject_cast<QGridLayout*>(tframe->layout())->addWidget(rembtn, 1, 1, 1, 1);
 
-    l->addWidget(ch1, 0, 0, 1, 1);
-    l->addWidget(ch2, 0, 1, 1, 1);
-    l->addWidget(tframe, 1, 0, 1, 4);
+    l->addWidget(tree, 0, 0, 1, 4);
+    l->addWidget(fpicker, 4, 0, 1, 1);
+    l->addWidget(rembtn, 4, 1, 1, 1);
 
     l->setHorizontalSpacing(2);
     l->setVerticalSpacing(4);
@@ -313,6 +313,7 @@ void settings::lib_dirpicker() {
 void settings::lib_treerefresh() {
     this->libstree->clear();
     QStringList libs = this->jag->dumplibinfo();
+
     foreach(QString s, libs) {
         QStringList l = s.split(";");
         l.last().append(" MiB");

@@ -1,0 +1,89 @@
+\hypertarget{class_org_freedesktop_notifications_interface}{}\doxysection{Org\+Freedesktop\+Notifications\+Interface Class Reference}
+\label{class_org_freedesktop_notifications_interface}\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+
+
+{\ttfamily \#include $<$Org\+Freedesktop\+Notifications\+Interface.\+h$>$}
+
+Inheritance diagram for Org\+Freedesktop\+Notifications\+Interface\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_org_freedesktop_notifications_interface}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Slots}
+\begin{DoxyCompactItemize}
+\item 
+Q\+D\+Bus\+Pending\+Reply$<$ Q\+String\+List $>$ \mbox{\hyperlink{class_org_freedesktop_notifications_interface_a7482a08534663687d8928242712e431d}{get\+Capabilities}} ()
+\item 
+Q\+D\+Bus\+Pending\+Reply$<$ quint32 $>$ \mbox{\hyperlink{class_org_freedesktop_notifications_interface_a9f4260d2563221fe74643a4d9acf7fce}{notify}} (const Q\+String \&app\+Name, quint32 replaces\+Id, const Q\+String \&app\+Icon, const Q\+String \&summary, const Q\+String \&body, const Q\+String\+List \&actions, const Q\+Variant\+Map \&hints, qint32 timeout)
+\item 
+Q\+D\+Bus\+Pending\+Reply \mbox{\hyperlink{class_org_freedesktop_notifications_interface_a66242bbcf9356220168f8409b2a3d49f}{close\+Notification}} (quint32 id)
+\item 
+Q\+D\+Bus\+Pending\+Reply$<$ Q\+String, Q\+String, Q\+String $>$ \mbox{\hyperlink{class_org_freedesktop_notifications_interface_a7fa4f801d831a89d15334fbe8d4126e3}{get\+Server\+Information}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_org_freedesktop_notifications_interface_a802340a85e7735936e20d5aaa5851162}{Org\+Freedesktop\+Notifications\+Interface}} (const Q\+String \&service, const Q\+String \&path, const Q\+D\+Bus\+Connection \&connection, Q\+Object $\ast$parent=0)
+\item 
+\mbox{\hyperlink{class_org_freedesktop_notifications_interface_a85542bfb2f640118862d21563a38137e}{$\sim$\+Org\+Freedesktop\+Notifications\+Interface}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static const char $\ast$ \mbox{\hyperlink{class_org_freedesktop_notifications_interface_a8451dd1e2477f03600ce03e4f263a8aa}{static\+Interface\+Name}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_org_freedesktop_notifications_interface_a802340a85e7735936e20d5aaa5851162}\label{class_org_freedesktop_notifications_interface_a802340a85e7735936e20d5aaa5851162}} 
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\doxysubsubsection{\texorpdfstring{OrgFreedesktopNotificationsInterface()}{OrgFreedesktopNotificationsInterface()}}
+{\footnotesize\ttfamily Org\+Freedesktop\+Notifications\+Interface\+::\+Org\+Freedesktop\+Notifications\+Interface (\begin{DoxyParamCaption}\item[{const Q\+String \&}]{service,  }\item[{const Q\+String \&}]{path,  }\item[{const Q\+D\+Bus\+Connection \&}]{connection,  }\item[{Q\+Object $\ast$}]{parent = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_org_freedesktop_notifications_interface_a85542bfb2f640118862d21563a38137e}\label{class_org_freedesktop_notifications_interface_a85542bfb2f640118862d21563a38137e}} 
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!````~OrgFreedesktopNotificationsInterface@{$\sim$OrgFreedesktopNotificationsInterface}}
+\index{````~OrgFreedesktopNotificationsInterface@{$\sim$OrgFreedesktopNotificationsInterface}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\doxysubsubsection{\texorpdfstring{$\sim$OrgFreedesktopNotificationsInterface()}{~OrgFreedesktopNotificationsInterface()}}
+{\footnotesize\ttfamily Org\+Freedesktop\+Notifications\+Interface\+::$\sim$\+Org\+Freedesktop\+Notifications\+Interface (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_org_freedesktop_notifications_interface_a66242bbcf9356220168f8409b2a3d49f}\label{class_org_freedesktop_notifications_interface_a66242bbcf9356220168f8409b2a3d49f}} 
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!closeNotification@{closeNotification}}
+\index{closeNotification@{closeNotification}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\doxysubsubsection{\texorpdfstring{closeNotification}{closeNotification}}
+{\footnotesize\ttfamily Q\+D\+Bus\+Pending\+Reply Org\+Freedesktop\+Notifications\+Interface\+::close\+Notification (\begin{DoxyParamCaption}\item[{quint32}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+
+\mbox{\Hypertarget{class_org_freedesktop_notifications_interface_a7482a08534663687d8928242712e431d}\label{class_org_freedesktop_notifications_interface_a7482a08534663687d8928242712e431d}} 
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!getCapabilities@{getCapabilities}}
+\index{getCapabilities@{getCapabilities}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\doxysubsubsection{\texorpdfstring{getCapabilities}{getCapabilities}}
+{\footnotesize\ttfamily Q\+D\+Bus\+Pending\+Reply$<$ Q\+String\+List $>$ Org\+Freedesktop\+Notifications\+Interface\+::get\+Capabilities (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+
+\mbox{\Hypertarget{class_org_freedesktop_notifications_interface_a7fa4f801d831a89d15334fbe8d4126e3}\label{class_org_freedesktop_notifications_interface_a7fa4f801d831a89d15334fbe8d4126e3}} 
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!getServerInformation@{getServerInformation}}
+\index{getServerInformation@{getServerInformation}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\doxysubsubsection{\texorpdfstring{getServerInformation}{getServerInformation}}
+{\footnotesize\ttfamily Q\+D\+Bus\+Pending\+Reply$<$ Q\+String, Q\+String, Q\+String $>$ Org\+Freedesktop\+Notifications\+Interface\+::get\+Server\+Information (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+
+\mbox{\Hypertarget{class_org_freedesktop_notifications_interface_a9f4260d2563221fe74643a4d9acf7fce}\label{class_org_freedesktop_notifications_interface_a9f4260d2563221fe74643a4d9acf7fce}} 
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!notify@{notify}}
+\index{notify@{notify}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\doxysubsubsection{\texorpdfstring{notify}{notify}}
+{\footnotesize\ttfamily Q\+D\+Bus\+Pending\+Reply$<$ quint32 $>$ Org\+Freedesktop\+Notifications\+Interface\+::notify (\begin{DoxyParamCaption}\item[{const Q\+String \&}]{app\+Name,  }\item[{quint32}]{replaces\+Id,  }\item[{const Q\+String \&}]{app\+Icon,  }\item[{const Q\+String \&}]{summary,  }\item[{const Q\+String \&}]{body,  }\item[{const Q\+String\+List \&}]{actions,  }\item[{const Q\+Variant\+Map \&}]{hints,  }\item[{qint32}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+
+\mbox{\Hypertarget{class_org_freedesktop_notifications_interface_a8451dd1e2477f03600ce03e4f263a8aa}\label{class_org_freedesktop_notifications_interface_a8451dd1e2477f03600ce03e4f263a8aa}} 
+\index{OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}!staticInterfaceName@{staticInterfaceName}}
+\index{staticInterfaceName@{staticInterfaceName}!OrgFreedesktopNotificationsInterface@{OrgFreedesktopNotificationsInterface}}
+\doxysubsubsection{\texorpdfstring{staticInterfaceName()}{staticInterfaceName()}}
+{\footnotesize\ttfamily static const char$\ast$ Org\+Freedesktop\+Notifications\+Interface\+::static\+Interface\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/libs/libnotify-\/qt/\mbox{\hyperlink{_org_freedesktop_notifications_interface_8h}{Org\+Freedesktop\+Notifications\+Interface.\+h}}\item 
+src/libs/libnotify-\/qt/\mbox{\hyperlink{_org_freedesktop_notifications_interface_8cpp}{Org\+Freedesktop\+Notifications\+Interface.\+cpp}}\end{DoxyCompactItemize}

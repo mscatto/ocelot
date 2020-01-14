@@ -168,9 +168,9 @@ void workbench::setlayout(QString* l) {
         } else {
             splitter* ns;
             if(l->front() == "-")
-                ns = new splitter(Qt::Vertical, static_cast<mwindow*>(this->win));
+				ns = new splitter(Qt::Vertical, static_cast<mwindow*>(this->win), static_cast<mwindow*>(win)->wb);
             else
-                ns = new splitter(Qt::Horizontal, static_cast<mwindow*>(this->win));
+				ns = new splitter(Qt::Horizontal, static_cast<mwindow*>(this->win), static_cast<mwindow*>(win)->wb);
 
             // connect(ns, &QSplitter::splitterMoved, qobject_cast<mwindow*>(win), &mwindow::child_resized);
 
@@ -261,7 +261,8 @@ void workbench::ctx_req(QPoint p) {
     } else
         s = new QString("emptiness");
 
-    // ctx.addSeparator();
+
+
     ctx.addMenu(this->ctx_replace);
 
     QAction* remobj = new QAction();
@@ -273,8 +274,24 @@ void workbench::ctx_req(QPoint p) {
         remobj->setText("Remove " + *s);
     }
     connect(remobj, &QAction::triggered, this, &workbench::remove_widget);
+	ctx.addSeparator();
 
-    if(this->childAt(p)->parent()->metaObject()->className() == QString("splitter")) {
+	if(strcmp(this->lastctx->parentWidget()->metaObject()->className(), "splitter") == 0) {
+		QAction* lock = new QAction();
+		connect(lock, &QAction::triggered, this, &workbench::lock_widget);
+		if(static_cast<splitter*>(this->lastctx->parentWidget())->orientation()==Qt::Horizontal){
+			if(this->lastctx->maximumWidth()<5000) // meaning a maximum size has been set. very ugly way to do it
+				lock->setText("Unlock horizontal size");
+			else
+				lock->setText("Lock horizontal size");
+		}else{
+			if(this->lastctx->maximumHeight()<5000) // meaning a maximum size has been set. very ugly way to do it
+				lock->setText("Unlock vertical size");
+			else
+				lock->setText("Lock vertical size");
+		}
+		ctx.addAction(lock);
+
         QAction* rempar = new QAction();
         rempar->setText("Remove underlying splitter");
         connect(rempar, &QAction::triggered, this, &workbench::remove_parentwidget);
@@ -326,7 +343,25 @@ void workbench::clear() {
     this->root->~QWidget();
     this->root = new dummywidget(this);
     this->ml->addWidget(this->root);
-    workbench::refreshdb();
+	workbench::refreshdb();
+}
+
+void workbench::lock_widget(){
+	if(strcmp(this->lastctx->parentWidget()->metaObject()->className(), "splitter") != 0)
+		return qDebug("[DEBUG] unexpected parent for widget to be locked");
+
+	if(static_cast<splitter*>(this->lastctx->parentWidget())->orientation()==Qt::Horizontal){
+		if(this->lastctx->maximumWidth()<5000) // meaning a maximum size has been set. very ugly way to do it
+			this->lastctx->setFixedWidth(QWIDGETSIZE_MAX);
+		else
+			this->lastctx->setFixedWidth(this->lastctx->width());
+	}else{
+		if(this->lastctx->maximumHeight()<5000) // meaning a maximum size has been set. very ugly way to do it
+			this->lastctx->setFixedHeight(QWIDGETSIZE_MAX);
+		else
+			this->lastctx->setFixedHeight(this->lastctx->height());
+	}
+
 }
 
 
@@ -366,7 +401,7 @@ void workbench::remove_widget() {
  * ALLOCATORS
  * ***********/
 QWidget* workbench::_vsplitter(bool filled) {
-    splitter* ns = new splitter(Qt::Vertical, static_cast<mwindow*>(this->win));
+	splitter* ns = new splitter(Qt::Vertical, static_cast<mwindow*>(this->win), static_cast<mwindow*>(win)->wb);
     // ns->setObjectName("wbsplitter");
     // connect(ns->handle(), &QSplitterHandle::, qobject_cast<mwindow*>(win), &mwindow::child_resized);
     if(filled) {
@@ -378,7 +413,7 @@ QWidget* workbench::_vsplitter(bool filled) {
 }
 
 QWidget* workbench::_hsplitter(bool filled) {
-    splitter* ns = new splitter(Qt::Horizontal, static_cast<mwindow*>(this->win));
+	splitter* ns = new splitter(Qt::Horizontal, static_cast<mwindow*>(this->win), static_cast<mwindow*>(win)->wb);
     // ns->setObjectName("wbsplitter");
 
     // connect(ns, &splitter::splitterMoved, qobject_cast<mwindow*>(win), &mwindow::child_resized);

@@ -23,7 +23,7 @@
 #ifndef DUMMYWIDGET_H
 #define DUMMYWIDGET_H
 
-#include "../workbench.hpp"
+#include "src/gui/workbench.hpp"
 #include <QLabel>
 
 class dummywidget : public QLabel {

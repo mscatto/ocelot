@@ -4,15 +4,17 @@
 #
 #-------------------------------------------------
 
-QT += core gui sql widgets dbus network
+QT += core gui sql widgets dbus network multimedia
 
 TARGET = ocelot
-DESTDIR = bin
-OBJECTS_DIR = obj
-MOC_DIR = obj
+#DESTDIR = bin
+#OBJECTS_DIR = /tmp/ocelotbuild
+#MOC_DIR = /tmp/ocelotbuild
 TEMPLATE = app
 CONFIG += link_pkgconfig
-PKGCONFIG += taglib Qt5GStreamer-1.0
+#LIBS += -L/usr/lib/libprojectM -lprojectM -L/usr/lib/libtag -ltag -L/usr/lib/libQt5GStreamer-1.0 -lQt5GStreamer-1.0
+#LIBS += -L/usr/lib/libQt5GLib-2.0 -lQt5GLib-2.0
+PKGCONFIG += taglib
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -40,8 +42,8 @@ HEADERS += \
 	src/gui/cwidgets/playlist.hpp \
 	src/gui/cwidgets/playlistview.hpp \
 	src/gui/cwidgets/progslider.hpp \
-	src/gui/cwidgets/renamepbtn.hpp \
 	src/gui/cwidgets/splitter.hpp \
+	src/gui/cwidgets/tabbutton.hpp \
 	src/gui/cwidgets/tagview.hpp \
 	src/gui/cwidgets/toolbar.hpp \
 	src/gui/cwidgets/visualizer.hpp \
@@ -76,8 +78,8 @@ SOURCES += \
 	src/gui/cwidgets/playlist.cpp \
 	src/gui/cwidgets/playlistview.cpp \
 	src/gui/cwidgets/progslider.cpp \
-	src/gui/cwidgets/renamepbtn.cpp \
 	src/gui/cwidgets/splitter.cpp \
+	src/gui/cwidgets/tabbutton.cpp \
 	src/gui/cwidgets/tagview.cpp \
 	src/gui/cwidgets/toolbar.cpp \
 	src/gui/cwidgets/visualizer.cpp \

@@ -32,10 +32,11 @@
 
 #include "src/gui/mwindow.hpp"
 #include "src/gui/workbench.hpp"
+#include "src/gui/dialogs/tageditor.hpp"
 #include "src/library.hpp"
 #include "src/vars.hpp"
 
-class libtree : public QWidget {
+class libtree : public QFrame {
     Q_OBJECT
 private:
     enum CLICKBEHAVIOUR {
@@ -48,6 +49,7 @@ private:
         EDIT_TAGS,
     };
 
+	tageditor* tagedit;
     mwindow* win;
     workbench* wb;
     QMenu* ctx;
@@ -62,6 +64,7 @@ private:
     void listchildren(QTreeWidgetItem *item, QStringList *children);
     QStringList extract(QString vars);
 private slots:
+	void tageditor_spawn();
     void transc_append(bool discard = false);
     void transc_replace();
     void refresh_config();
@@ -69,7 +72,6 @@ private slots:
     void middleclick(QTreeWidgetItem* item);
 public slots:
     void populate(QSqlDatabase* db);
-    void gatherselected();
 signals:
     void dispatch(QStringList* l);
     void transc_dispatch(QStringList* l, bool discard);

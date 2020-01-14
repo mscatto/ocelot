@@ -33,12 +33,17 @@
 class toolbar : public QToolBar {
     Q_OBJECT
 private:
+	enum PROGDSP {REMAINING, ELAPSED, REMTOTAL, ELAPTOTAL};
+	QString DSPSEP;
     QMenu* conf;
     QList<QWidget*> docked;
     QSplitter* progvol;
     progslider* prog;
     volslider* vol;
     vars* jag;
+	QLabel* progdsp;
+	PROGDSP dspmode = PROGDSP::ELAPTOTAL;
+	QMenu* lmenu;
     QList<QAction*> *acts;
 public:
     toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, vars* jag);
@@ -48,6 +53,9 @@ public:
 public slots:
     void rotate(Qt::Orientation o);
 private slots:
+	void update_progdsp(int position);
+	void update_dspmode(QAction *act);
+	void show_labelmenu();
     void on_progvol_resize();
     void store_volsize();
     void menu_show();

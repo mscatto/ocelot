@@ -36,44 +36,33 @@
 class vars : QObject {
     Q_OBJECT
 public:
-    /* ocelot version */
+	// this should be moved to a dedicated file
     const char* VERSION = "0.3c";
-    /* data root path */
     const QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    /* DB file path */
-    const QString DB_PATH = DATA_PATH + "/ocelot.database";
-
-    /* shared DB instance */
+    const QString DB_PATH = DATA_PATH + "/ocelot.db";
     QSqlDatabase* DB_REF = new QSqlDatabase();
-    /* player instance */
     player* pctx;
 
     QDBusInterface* bus;
+	QStringList* libs; // this is bad
 
-    //*// THESE DEAL WITH THE PROPERTY MAP TRANSLATION FROM INTERNAL TAGLIB TAG
-    // PROPERTIES
-    // TO A MORE READABLE FORM. ie var "ALBUMARTIST" to val "Album Artist".
-    //
-    /* returns the corresponding value according to key from property table */
-    QString translate_key(QString key);
-    /* fetches the key from a given value from pmap*/
-    QString translate_val(QString val);
-    /* dumps values from property table pmap*/
-    QStringList dumpval();
-    /* dump pmap keys */
-    QStringList dumpkeys();
-    //*//---
 
-    /* remove lib indicated by path */
+	// -- FUNCTIONS --
     void remlibs(QString path);
-    /* set var on DB data table to var */
     void setdbdata(const char* var, QVariant val);
-    /* fetch var's val from DB data table */
     QVariant fetchdbdata(const char* var);
+	QStringList dumppaths();
+	QStringList dumplibinfo();
 
-    QStringList dumppaths();
-    QStringList dumplibinfo();
-    QStringList* libs; // this is bad
+	// DEBUG HELPERS
+	void TODO(const char *msg){qInfo("[TODO] %s", msg);};
+	void PANIC(const char *msg){qWarning("[PANIC] %s", msg);};
+
+	// TAG-RELATED FUNCTIONS
+	QString translate_key(QString key);
+	QString translate_val(QString val);
+	QStringList dumpval();
+	QStringList dumpkeys();
 
     vars();
     ~vars() {

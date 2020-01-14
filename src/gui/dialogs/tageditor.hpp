@@ -31,11 +31,11 @@
 class tageditor : public QDialog
 {
 private:
-    QStringList *queue;
+	//QStringList *queue;
 public:
-    void init(QStringList *l);
-    tageditor(QWidget *parent, vars *jag);
-    ~tageditor();
+	void setup(const QStringList &files);
+	tageditor(vars* jag, QWidget *parent);
+	~tageditor(){};
 };
 
 #endif // TAGEDITOR_HPP

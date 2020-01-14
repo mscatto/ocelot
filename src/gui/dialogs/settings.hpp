@@ -36,23 +36,24 @@ private:
     QWidget *win;
     QTreeWidget *libstree;
     QWidget *spawn_maintab(QWidget *win);
-    QWidget *spawn_dirtab(QWidget *win);
     QWidget *spawn_advanced(QWidget *win);
     QWidget *spawn_libtreetab(QWidget *win);
-
+    
 private slots:
-    void lib_dirpicker();
-    void lib_treerefresh();
-    void lib_remdir();
-
     void libtree_dclick(int index);
     void libtree_mclick(int index);
-
+    
     void thread_libscan();
     void thread_newlib(QString lib);
+public slots:
+	void lib_dirpicker();
+	void lib_treerefresh();
+	void lib_remdir();
 public:
     settings(QWidget *parent, vars *jag);
     ~settings();
+
+	QWidget *spawn_dirtab(QWidget *win); // this is used as it by the wizard
 };
 
 #endif // SETTINGS_HPP

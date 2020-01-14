@@ -71,15 +71,27 @@ public slots:
     void swapitem(QTreeWidgetItem* item);
 private slots:
     void toggler(bool checked);
-    void tab_close(int index);
+	void tab_close(int index);
+	void renamer_ok();
+	void renamer_cancel();
+	void tabbutton_rename(QString key);
     void tab_switch(int index);
-    void tab_rename(QString key);
-    void renamer_ok();
-    void renamer_cancel();
 signals:
     void clearsel();
     void clearpl();
     void exportpl();
 };
+
+/*class tabbar : public QTabBar
+{
+	Q_OBJECT
+	public:
+		tabbar(){};
+		virtual ~tabbar() {}
+
+	protected:
+	   //QSize tabSizeHint (int) const {  return QSize(70,17);}
+	   void paintEvent(QPaintEvent *event);
+};*/
 
 #endif // PLAYLISTVIEW_HPP

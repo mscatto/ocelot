@@ -21,7 +21,7 @@
  */
 
 #include "coverview.hpp"
-#include "../mwindow.hpp"
+#include "src/gui/mwindow.hpp"
 #include <QFrame>
 #include <QLabel>
 #include <QMainWindow>
@@ -30,7 +30,8 @@
 coverview::coverview(mwindow* win, workbench* wb) : QLabel(win) {
     this->setMinimumSize(200, 200);
     this->setAutoFillBackground(true);
-    this->setScaledContents(true);
+    //this->setScaledContents(true);
+    this->cover = QPixmap();
     this->setParent(win);
     this->setObjectName("coverview");
     // this->setFixedSize(this->size());
@@ -66,7 +67,8 @@ void coverview::showctx(QPoint pos) {
 }
 
 void coverview::set(QPixmap cover) {
-    this->setPixmap(cover);
+    this->cover = cover;
+    this->setPixmap(this->cover.scaled(this->width(),this->height(),Qt::KeepAspectRatio));
 }
 
 void coverview::clear() {
@@ -75,3 +77,22 @@ void coverview::clear() {
 
 coverview::~coverview() {
 }
+
+void coverview::resizeEvent(QResizeEvent *event){
+    event->accept();
+    if(this->cover.isNull())
+        return;
+    this->setPixmap(this->cover.scaled(this->width(),this->height(),Qt::KeepAspectRatio));
+
+}
+
+/*void coverview::paintEvent(QPaintEvent* event){
+	event->accept();
+	//QPainter painter;
+	//painter.begin(this);
+	//painter.fillRect(event->rect(), Qt::black);
+	//QWidget::paintEvent(event);
+	//painter.fillRect(this->rect(), {80, 80, 255, 50});
+	//painter.end();
+
+}*/
