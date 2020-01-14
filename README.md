@@ -33,4 +33,4 @@ Then you can build and run with:
 * Layout editor
 
 >### <b>SCREENSHOTS</b>
-![alt text](https://raw.githubusercontent.com/mscatto/ocelot/master/ss.png)
+![alt text](https://raw.githubusercontent.com/mscatto/ocelot/master/screenshot.png)
