@@ -1,5 +1,5 @@
 ## Ocelot Media Manager v0.3c
-Ocelot is an audio player and eventually a library manager.
+Ocelot is an audio player and library manager.
 It is built using Qt Widgets, while also relying on TagLib for tag management, libProjectM for visualizations and QtMultimedia for audio playback.
 
 >Ocelot is released under the MIT license, you can read more about it inside the supplied LICENSE file.
@@ -8,7 +8,7 @@ It is built using Qt Widgets, while also relying on TagLib for tag management, l
 >### <b>BUILDING</b>
 Ocelot requires Qt Frameworks version 5.10+
 
-On Arch, you might need to install the following packages:
+On Arch you might need to install the following packages:
 `qt5-multimedia qt5-base taglib`
 
 Then you can build and run with:
