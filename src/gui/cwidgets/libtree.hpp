@@ -59,6 +59,7 @@ private:
     CLICKBEHAVIOUR mclick;
     CLICKBEHAVIOUR dclick;
 
+	void init();
     void showctx(const QPoint& pos);
     void recurtree(QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db);
     void listchildren(QTreeWidgetItem *item, QStringList *children);

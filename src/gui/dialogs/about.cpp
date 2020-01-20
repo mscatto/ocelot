@@ -57,7 +57,7 @@ QWidget *about::mktab_ocelot(){
           this->jag->VERSION+
           "</h1>A music player and library manager written in C++ using the Qt Widgets framework<br><br>"+
           "<a href=\"https://github.com/mscatto/ocelot\">https://github.com/mscatto/ocelot</a><br><br>"+
-          "2018, 2019 Matheus Scattolin Anselmo");
+		  "2018 - 2020 Matheus Scattolin Anselmo");
     info->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
     info->setOpenExternalLinks(true);
     info->setTextInteractionFlags(Qt::TextBrowserInteraction);

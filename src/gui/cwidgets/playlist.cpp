@@ -41,39 +41,43 @@ playlist::playlist(QString* order, QMenu* headerctx, vars* jag, mwindow* win, QW
     this->bodyctx = new QMenu();
     this->emptyctx = new QMenu();
 
+	this->setSortingEnabled(true);
+	this->setRootIsDecorated(false);
+	this->setContextMenuPolicy(Qt::CustomContextMenu);
+	this->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
+	//this->setAlternatingRowColors(true);
+
     this->rebuild_columns();
-    this->customheader->setSortIndicator(1, Qt::SortOrder::AscendingOrder);
-    this->customheader->setContextMenuPolicy(Qt::CustomContextMenu);
-    this->customheader->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-    this->customheader->setStretchLastSection(false);
-    this->customheader->setFirstSectionMovable(false);
-    this->customheader->setSectionsMovable(true);
+	this->init();
+}
 
-    this->customheader->resizeSection(0, 42);
-    this->customheader->resizeSection(1, 42);
+void playlist::init(){
+	this->customheader->setSortIndicator(1, Qt::SortOrder::AscendingOrder);
+	this->customheader->setContextMenuPolicy(Qt::CustomContextMenu);
+	this->customheader->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+	this->customheader->setStretchLastSection(false);
+	this->customheader->setFirstSectionMovable(false);
+	this->customheader->setSectionsMovable(true);
 
-    QList<QAction*> al;
-    al.append(new QAction(QString("Clear playlist")));
-    connect(al.back(), &QAction::triggered, this, &playlist::clearchildren);
-    al.append(new QAction(QString("Clear Selection")));
-    connect(al.back(), &QAction::triggered, this, &QTreeWidget::clearSelection);
-    al.append(new QAction(QString("Export playlist")));
-    connect(al.back(), &QAction::triggered, this, &playlist::exportpl);
-    this->emptyctx->addActions(al);
+	this->customheader->resizeSection(0, 42);
+	this->customheader->resizeSection(1, 42);
 
-    //this->setAlternatingRowColors(true);
-    this->setSortingEnabled(true);
-    this->setRootIsDecorated(false);
-    this->setContextMenuPolicy(Qt::CustomContextMenu);
-    this->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
+	QList<QAction*> al;
+	al.append(new QAction(QString("Clear playlist")));
+	connect(al.back(), &QAction::triggered, this, &playlist::clearchildren);
+	al.append(new QAction(QString("Clear Selection")));
+	connect(al.back(), &QAction::triggered, this, &QTreeWidget::clearSelection);
+	al.append(new QAction(QString("Export playlist")));
+	connect(al.back(), &QAction::triggered, this, &playlist::exportpl);
+	this->emptyctx->addActions(al);
 
-    connect(this->customheader, &QHeaderView::customContextMenuRequested, this, &playlist::show_headerctx);
-    connect(this, &playlist::play, qobject_cast<playlistview*>(parent), &playlistview::swapitem);
-    connect(this, &playlist::customContextMenuRequested, this, &playlist::show_bodyctx);
-    connect(this, &QTreeWidget::itemDoubleClicked, this, &playlist::doubleclick);
-    connect(this, &playlist::play, win, &mwindow::toolbar_play);
-    connect(this, &playlist::EOP, win, &mwindow::toolbar_stop);
-    connect(this, &QTreeWidget::itemClicked, win, &mwindow::select);
+	connect(this->customheader, &QHeaderView::customContextMenuRequested, this, &playlist::show_headerctx);
+	connect(this, &playlist::play, qobject_cast<playlistview*>(this->view), &playlistview::swapitem);
+	connect(this, &playlist::customContextMenuRequested, this, &playlist::show_bodyctx);
+	connect(this, &QTreeWidget::itemDoubleClicked, this, &playlist::doubleclick);
+	connect(this, &playlist::play, win, &mwindow::toolbar_play);
+	connect(this, &playlist::EOP, win, &mwindow::toolbar_stop);
+	connect(this, &QTreeWidget::itemClicked, win, &mwindow::select);
 	connect(this->jag->pctx, &player::EOM, this, &playlist::EOM);
 }
 
@@ -92,9 +96,8 @@ void playlist::showctx(const QPoint& pos, bool is_header) {
     } else {
         this->win->wb->setlastctx(this);
         this->win->wb->ctx_req(this->mapTo(this->win->wb, pos));
-    }
+	}
 }
-
 
 /* shows the context menu for the wiget's header bar */
 void playlist::show_headerctx(const QPoint& pos) {

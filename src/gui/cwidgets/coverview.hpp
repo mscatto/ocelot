@@ -30,15 +30,16 @@
 class coverview : public QLabel {
     Q_OBJECT
 private:
+	void init();
+
     QPixmap cover;
-    QWidget* win;
+	mwindow* win;
     QPoint* lastpos;
     QMenu* ctx;
     QMenu* layoutctx;
     workbench* wb;
     // void customMenuRequested(QPoint pos);
     void showctx(QPoint pos);
-
 public:
     coverview(mwindow* win, workbench* wb);
     ~coverview();

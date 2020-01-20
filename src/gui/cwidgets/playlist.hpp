@@ -53,6 +53,7 @@ private:
     void dump(QString* path);
     void media_dispatch(QTreeWidgetItem* item);
     void showctx(const QPoint& pos, bool is_header);
+	void init();
     QTreeWidgetItem* gen_treeitem(const char* const file);
 
 public:

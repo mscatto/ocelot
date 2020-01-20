@@ -54,7 +54,7 @@ workbench::workbench(vars* jag, QWidget* win) : QWidget() {
     this->lastctx = this;
     this->ml = new QGridLayout();
 
-    /* setter galore */
+	/* setters */
     this->setObjectName("workbench");
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     this->setContentsMargins(0, 0, 0, 0);
@@ -237,7 +237,7 @@ QWidget* workbench::fetchwidget(const char* id) {
     else if(strcmp(id, "d") == 0)
         return workbench::_tagview();
     else {
-        qWarning() << "[WARNING] switcheroo can't handle a '" << id << "'!";
+		this->jag->PANIC("at fetchwidget: bad id");
         return new QWidget;
     }
 }
@@ -348,7 +348,7 @@ void workbench::clear() {
 
 void workbench::lock_widget(){
 	if(strcmp(this->lastctx->parentWidget()->metaObject()->className(), "splitter") != 0)
-		return qDebug("[DEBUG] unexpected parent for widget to be locked");
+		return this->jag->PANIC("at lock_widget: unexpected parent for widget to be locked");
 
 	if(static_cast<splitter*>(this->lastctx->parentWidget())->orientation()==Qt::Horizontal){
 		if(this->lastctx->maximumWidth()<5000) // meaning a maximum size has been set. very ugly way to do it
@@ -361,7 +361,6 @@ void workbench::lock_widget(){
 		else
 			this->lastctx->setFixedHeight(this->lastctx->height());
 	}
-
 }
 
 

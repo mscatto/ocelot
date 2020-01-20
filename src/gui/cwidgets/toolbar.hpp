@@ -34,20 +34,25 @@ class toolbar : public QToolBar {
     Q_OBJECT
 private:
 	enum PROGDSP {REMAINING, ELAPSED, REMTOTAL, ELAPTOTAL};
-	QString DSPSEP;
-    QMenu* conf;
-    QList<QWidget*> docked;
-    QSplitter* progvol;
-    progslider* prog;
-    volslider* vol;
-    vars* jag;
-	QLabel* progdsp;
-	PROGDSP dspmode = PROGDSP::ELAPTOTAL;
+	void init();
+
+	vars* jag;
+	QWidget *win;
+
+	QSplitter* progvol;
+	progslider* prog;
+	volslider* vol;
+	QMenu* conf;
 	QMenu* lmenu;
+	QLabel* progdsp;
+
+	QString DSPSEP;
+    QList<QWidget*> docked;
+	PROGDSP dspmode = PROGDSP::ELAPTOTAL;
     QList<QAction*> *acts;
 public:
     toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, vars* jag);
-    ~toolbar();
+	~toolbar(){};
     QByteArray splitterstate();
     void restore_splitterstate(QByteArray ba);
 public slots:

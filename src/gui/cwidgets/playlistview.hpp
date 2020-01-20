@@ -23,9 +23,10 @@
 #ifndef PLAYLISTVIEW_HPP
 #define PLAYLISTVIEW_HPP
 
-#include "../mwindow.hpp"
-#include "../workbench.hpp"
-#include "playlist.hpp"
+#include "src/gui/mwindow.hpp"
+#include "src/gui/workbench.hpp"
+#include "src/gui/cwidgets/playlist.hpp"
+
 #include <QObject>
 #include <QTabWidget>
 #include <QToolButton>
@@ -42,7 +43,7 @@ private:
     playlist* plactive;  /* the one on display */
     playlist* plplaying; /* from currently playing track */
     QString order;
-    QMenu* headermenu;
+	QMenu* headerctx;
     QMenu* ctx;
 
     QDialog* renamer;
@@ -51,47 +52,30 @@ private:
     QTreeWidgetItem* currentitem;
     QToolButton* addbtn;
 
-    void showctx(const QPoint& pos);
-    // void ctxmenu(const QPoint &pos);
+	void init();
     void newplaylist();
-    // QMap<QString, QAction*> menuctx;
 public:
     playlistview(vars* jag, mwindow* win, workbench* wb);
-    ~playlistview();
+	~playlistview(){};
 public slots:
     void playlist_append(const QStringList files, const int playlist);
     void playlist_replace(const QStringList files, const int playlist);
-
-    void context(QPoint p);
-    void playing(QString f);
     void refreshpl();
     void next();
     void prev();
-    void medistatus(int status);
     void swapitem(QTreeWidgetItem* item);
 private slots:
-    void toggler(bool checked);
 	void tab_close(int index);
+	void tab_switch(int index);
+	void tab_rename(QString key);
+	void ctx_show(const QPoint& pos);
 	void renamer_ok();
 	void renamer_cancel();
-	void tabbutton_rename(QString key);
-    void tab_switch(int index);
+	void toggler(bool checked);
 signals:
     void clearsel();
     void clearpl();
     void exportpl();
 };
-
-/*class tabbar : public QTabBar
-{
-	Q_OBJECT
-	public:
-		tabbar(){};
-		virtual ~tabbar() {}
-
-	protected:
-	   //QSize tabSizeHint (int) const {  return QSize(70,17);}
-	   void paintEvent(QPaintEvent *event);
-};*/
 
 #endif // PLAYLISTVIEW_HPP

@@ -45,90 +45,90 @@ libtree::libtree(mwindow* win, workbench* wb, vars* jag) : QFrame() {
     this->jag = jag;
     this->refresh_config();
 
-    this->setObjectName("libtree");
-    this->setMinimumWidth(250);
-
-    QGridLayout* grid = new QGridLayout(this);
-    QLineEdit* filterbox = new QLineEdit(this);
-    QPushButton* help = new QPushButton("?", this);
-    QLabel* label = new QLabel("Filter:", this);
-
-    this->tree->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    /* init context menu */
-
-    const QIcon c = QIcon::fromTheme("gtk-convert");
-    const QIcon t = QIcon::fromTheme("tag-symbolic");
-    QAction* tagger = new QAction(QIcon::fromTheme("amarok_playlist"), "Mass Tagger");
-    QMenu* conv = new QMenu(this->ctx);
-    conv->setIcon(c);
-    conv->setTitle("Transcoder");
-
-    QAction* append = new QAction(QIcon::fromTheme("document-new-from-template"), "Enqueue");
-    QAction* rep = new QAction(QIcon::fromTheme("document-new"), "Add to New Queue");
-
-    conv->addAction(append);
-    conv->addAction(rep);
-    conv->addSection("Quick Presets");
-    conv->addAction(QIcon::fromTheme("quickopen"), "FakeFLAC");
-    conv->addAction(QIcon::fromTheme("quickopen"), "FakeMP3");
-    QAction* prop = new QAction(t, "Edit Tag");
-
-	connect(prop, &QAction::triggered, this, &libtree::tageditor_spawn);
-    connect(append, &QAction::triggered, this, &libtree::transc_append);
-    connect(rep, &QAction::triggered, this, &libtree::transc_replace);
-    connect(this, &libtree::transc_dispatch, win, &mwindow::transcoder_spawn);
-    connect(this, &libtree::dispatch, win, &mwindow::tageditor_spawn);
-    connect(this, &libtree::playlist_set, win, &mwindow::playlist_enqueue);
-    ctx->addMenu(conv);
-    ctx->addAction(tagger);
-    ctx->addSeparator();
-    ctx->addAction(prop);
-
-	this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
+	this->setObjectName("libtree");
+	this->setMinimumWidth(250);
 	this->setFrameShape(QFrame::StyledPanel);
 	this->setFrameShadow(QFrame::Raised);
-	this->layout()->setContentsMargins(1, 1, 1, 1);
-    this->layout()->setSpacing(1);
 
-    this->tree->setHeaderHidden(true);
-    help->setMaximumWidth(20);
-    label->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
-    label->setFixedWidth(50);
-	filterbox->setPlaceholderText("Type anything to begin");
-
-    QComboBox *scheme = new QComboBox;
-    QLabel *treelabel = new QLabel("Layout:");
-    treelabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
-    treelabel->setFixedWidth(50);
-
-    // populating with data from database
-    QSqlQuery q(*this->jag->DB_REF);
-    q.exec("SELECT * FROM treeschemes");
-    //int active = this->jag->fetchdbdata("libtree_activescheme").toInt();
-
-    while(q.next()){
-        scheme->insertItem(scheme->count()+1, q.value(0).toString());
-    }
-    //q.seek(this->jag->fetchdbdata("libtree_activescheme").toInt());
-
-    grid->addWidget(tree, 0, 0, 1, 5);
-    grid->addWidget(label, 1, 0, 1, 1);
-    grid->addWidget(filterbox, 1, 1, 1, 3);
-    grid->addWidget(help, 1, 4, 1, 1);
-    grid->addWidget(treelabel, 2, 0, 1, 1);
-    grid->addWidget(scheme, 2, 1, 1, 4);
-
-    this->setLayout(grid);
-    // parent->window()->
-    connect(tree, &QTreeWidget::customContextMenuRequested, this, &libtree::showctx);
-    connect(tree, &QTreeWidget::itemDoubleClicked, this, &libtree::doubleclick);
-    connect(tree, &QTreeWidget::itemClicked, win, &mwindow::select);
-    connect(win, &mwindow::libtree_refreshconfig, this, &libtree::refresh_config);
-    connect(win, &mwindow::libchanged, this, &libtree::populate);
+	this->init();
 }
 
-/* take one and pass it ahead */
+void libtree::init(){
+	QGridLayout* grid = new QGridLayout(this);
+	QLineEdit* filterbox = new QLineEdit(this);
+	QPushButton* help = new QPushButton("?", this);
+	QLabel* label = new QLabel("Filter:", this);
+
+	this->tree->setContextMenuPolicy(Qt::CustomContextMenu);
+	this->tree->setHeaderHidden(true);
+
+	// the context menu
+	const QIcon c = QIcon::fromTheme("gtk-convert");
+	const QIcon t = QIcon::fromTheme("tag-symbolic");
+	QAction* tagger = new QAction(QIcon::fromTheme("amarok_playlist"), "Mass Tagger");
+	QMenu* conv = new QMenu(this->ctx);
+	conv->setIcon(c);
+	conv->setTitle("Transcoder");
+
+	QAction* append = new QAction(QIcon::fromTheme("document-new-from-template"), "Enqueue");
+	QAction* rep = new QAction(QIcon::fromTheme("document-new"), "Add to New Queue");
+
+	conv->addAction(append);
+	conv->addAction(rep);
+	conv->addSection("Quick Presets");
+	conv->addAction(QIcon::fromTheme("quickopen"), "FakeFLAC");
+	conv->addAction(QIcon::fromTheme("quickopen"), "FakeMP3");
+	QAction* prop = new QAction(t, "Edit Tag");
+
+	connect(prop, &QAction::triggered, this, &libtree::tageditor_spawn);
+	connect(append, &QAction::triggered, this, &libtree::transc_append);
+	connect(rep, &QAction::triggered, this, &libtree::transc_replace);
+	connect(this, &libtree::transc_dispatch, win, &mwindow::transcoder_spawn);
+	connect(this, &libtree::dispatch, win, &mwindow::tageditor_spawn);
+	connect(this, &libtree::playlist_set, win, &mwindow::playlist_enqueue);
+	ctx->addMenu(conv);
+	ctx->addAction(tagger);
+	ctx->addSeparator();
+	ctx->addAction(prop);
+
+	// the switches under the tree
+	help->setMaximumWidth(20);
+	label->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
+	label->setFixedWidth(50);
+	filterbox->setPlaceholderText("Type anything to begin");
+
+	QComboBox *scheme = new QComboBox;
+	QLabel *treelabel = new QLabel("Layout:");
+	treelabel->setAlignment(Qt::AlignTrailing | Qt::AlignVCenter);
+	treelabel->setFixedWidth(50);
+
+	QSqlQuery q(*this->jag->DB_REF); // user saved schemes
+	q.exec("SELECT * FROM treeschemes");
+	//int active = this->jag->fetchdbdata("libtree_activescheme").toInt();
+
+	while(q.next()){
+		scheme->insertItem(scheme->count()+1, q.value(0).toString());
+	}
+
+	// the main layout
+	this->setLayout(grid);
+	grid->setContentsMargins(1, 1, 1, 1);
+	grid->setSpacing(1);
+
+	grid->addWidget(tree, 0, 0, 1, 5);
+	grid->addWidget(label, 1, 0, 1, 1);
+	grid->addWidget(filterbox, 1, 1, 1, 3);
+	grid->addWidget(help, 1, 4, 1, 1);
+	grid->addWidget(treelabel, 2, 0, 1, 1);
+	grid->addWidget(scheme, 2, 1, 1, 4);
+
+	connect(tree, &QTreeWidget::customContextMenuRequested, this, &libtree::showctx);
+	connect(tree, &QTreeWidget::itemDoubleClicked, this, &libtree::doubleclick);
+	connect(tree, &QTreeWidget::itemClicked, win, &mwindow::select);
+	connect(win, &mwindow::libtree_refreshconfig, this, &libtree::refresh_config);
+	connect(win, &mwindow::libchanged, this, &libtree::populate);
+}
+
 /* this fills each node with the corresponding path and name */
 void libtree::recurtree(QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db) {
     QString root = levels.first();

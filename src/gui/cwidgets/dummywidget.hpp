@@ -33,10 +33,10 @@ private:
     void showctx(QPoint pos);
     QString deftext = "<b>:: PLACEHOLDER ::</b><br>Activate the <i>Layout Editor"
                       "</i> and right-click <br>to replace this with something useful!";
-
+	void init();
 public:
     dummywidget(workbench* wb, QString text = "");
-    ~dummywidget();
+	~dummywidget(){};
 };
 
 #endif // DUMMYWIDGET_H

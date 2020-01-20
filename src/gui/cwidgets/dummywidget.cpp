@@ -25,28 +25,30 @@
 #include <QLabel>
 
 dummywidget::dummywidget(workbench *wb, QString text) : QLabel(wb){
-    text.isEmpty() ? this->setText(this->deftext) : this->setText(text);
-
     this->wb = wb;
-    this->setFrameShadow(QFrame::Raised);
-    this->setFrameShape(QFrame::Shape::StyledPanel);
-
-    this->setObjectName("dummy");
-    this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    this->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    connect(this, &QLabel::customContextMenuRequested, this, &dummywidget::showctx);
+	this->init();
+	text.isEmpty() ? this->setText(this->deftext) : this->setText(text);
 }
 
-dummywidget::~dummywidget(){
+void dummywidget::init(){
+	this->setFrameShadow(QFrame::Raised);
+	this->setObjectName("dummy");
+	this->setFrameShape(QFrame::Shape::StyledPanel);
 
+
+	this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	this->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(this, &QLabel::customContextMenuRequested, this, &dummywidget::showctx);
 }
 
 void dummywidget::showctx(QPoint pos){
     if(!this->wb->islocked()){
         this->wb->setlastctx(this);
         this->wb->ctx_req(this->mapTo(this->wb, pos));
-    }
+	}
 }
+
+
 
 

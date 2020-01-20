@@ -28,33 +28,33 @@
 #include <QPainter>
 
 coverview::coverview(mwindow* win, workbench* wb) : QLabel(win) {
-    this->setMinimumSize(200, 200);
-    this->setAutoFillBackground(true);
-    //this->setScaledContents(true);
-    this->cover = QPixmap();
-    this->setParent(win);
-    this->setObjectName("coverview");
-    // this->setFixedSize(this->size());
-    this->setContextMenuPolicy(Qt::CustomContextMenu);
-    this->win = win;
-    this->wb = wb;
+	this->win = win;
+	this->wb = wb;
 
-    this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    this->setFrameStyle(QFrame::Sunken);
-    this->setFrameShape(QFrame::StyledPanel);
-    this->setFrameShadow(QFrame::Sunken);
+	this->init();
+}
 
-    this->setText("<b>[No Media]</b>");
+void coverview::init(){
+	this->setObjectName("coverview");
+	this->setText("<b>[No Media]</b>");
+	this->setMinimumSize(200, 200);
+	this->setAutoFillBackground(true);
+	this->setContextMenuPolicy(Qt::CustomContextMenu);
+	this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	this->setFrameStyle(QFrame::Sunken);
+	this->setFrameShape(QFrame::StyledPanel);
+	this->setFrameShadow(QFrame::Sunken);
 
-    this->ctx = new QMenu();
-    this->ctx->setTitle("Cover View");
-    this->ctx->addAction("Set cover...");
-    this->ctx->addAction("Keep cover ratio");
+	this->cover = QPixmap();
 
-    connect(this, &QLabel::customContextMenuRequested, this, &coverview::showctx);
-    // connect(this, &coverview::, this, &coverview::showctx);
-    connect(win, &mwindow::cover_set, this, &coverview::set);
-    // connect(win, &mwindow::clearcover, this, &coverview::clear);
+	this->ctx = new QMenu();
+	this->ctx->setTitle("Cover View");
+	this->ctx->addAction("Set cover...");
+	this->ctx->addAction("Keep cover ratio");
+
+	connect(this, &QLabel::customContextMenuRequested, this, &coverview::showctx);
+	connect(this->win, &mwindow::cover_set, this, &coverview::set);
+	// connect(win, &mwindow::clearcover, this, &coverview::clear);
 }
 
 void coverview::showctx(QPoint pos) {
@@ -85,14 +85,3 @@ void coverview::resizeEvent(QResizeEvent *event){
     this->setPixmap(this->cover.scaled(this->width(),this->height(),Qt::KeepAspectRatio));
 
 }
-
-/*void coverview::paintEvent(QPaintEvent* event){
-	event->accept();
-	//QPainter painter;
-	//painter.begin(this);
-	//painter.fillRect(event->rect(), Qt::black);
-	//QWidget::paintEvent(event);
-	//painter.fillRect(this->rect(), {80, 80, 255, 50});
-	//painter.end();
-
-}*/
