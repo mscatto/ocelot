@@ -6,13 +6,14 @@ It is built using Qt Widgets, while also relying on TagLib for tag management, l
 #
 
 >### <b>BUILDING</b>
-Ocelot requires Qt Frameworks version 5.10+
+Ocelot requires Qt Frameworks version 5.10+<br>
+_clang_ is the default compiler for Ocelot, but _gcc_ works as well. to change it, edit or comment out the _QMAKE_LINK_ and _QMAKE_CXX_ variables inside _ocelot.pro_
 
-On Arch you might need to install the following packages:
-`qt5-multimedia qt5-base taglib`
+On Arch you might need the following packages:
+`clang qt5-multimedia qt5-base taglib`
 
-Then you can build and run with:
-`qmake . && make && ./ocelot`
+Then compile with: `qmake .` and `make`<br>
+A binary will be placed inside `bin`
 
 >### <b>PLANNED</b>
 

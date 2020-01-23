@@ -6,8 +6,11 @@
 
 QT += core gui sql widgets dbus network multimedia
 
+QMAKE_LINK=clang++
+QMAKE_CXX=clang++
+
 TARGET = ocelot
-#DESTDIR = bin
+DESTDIR = bin
 #OBJECTS_DIR = /tmp/ocelotbuild
 #MOC_DIR = /tmp/ocelotbuild
 TEMPLATE = app

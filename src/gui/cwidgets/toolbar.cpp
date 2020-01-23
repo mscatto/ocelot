@@ -103,7 +103,7 @@ void toolbar::init(){
 	this->lmenu->actions().last()->setData(4);
 	connect(this->lmenu, &QMenu::triggered, this, &toolbar::update_dspmode);
 
-	// dummy widgets encapsulating the volslider and progslider for fitness onto the progvol splitter
+	// dummy widgets encapsulating the volslider and progslider for fitness onto progvol splitter
 	QWidget* volw = new QWidget;
 	QGridLayout* voll = new QGridLayout;
 	voll->setSpacing(0);
