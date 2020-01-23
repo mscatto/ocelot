@@ -58,8 +58,14 @@ void toolbar::init(){
 	// the progress label
 	this->dspmode = PROGDSP(this->jag->fetchdbdata("toolbar_dspmode").toInt());
 	this->progdsp = new QLabel();
-	this->progdsp->setMinimumWidth(92);
+
+	if(this->dspmode == PROGDSP::ELAPTOTAL || this->dspmode == PROGDSP::REMTOTAL)
+		this->progdsp->setMinimumWidth(96);
+	else
+		this->progdsp->setMinimumWidth(48);
+
 	this->progdsp->setContentsMargins(0,0,5,0);
+	this->progdsp->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
 	this->progdsp->setAlignment(Qt::AlignCenter);
 	this->progdsp->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 	connect(this->progdsp, &QLabel::customContextMenuRequested, this, &toolbar::show_labelmenu);
@@ -172,7 +178,10 @@ void toolbar::restore_splitterstate(QByteArray ba) {
 void toolbar::rotate(Qt::Orientation o) {
 	if(o==Qt::Horizontal){
 		this->DSPSEP=" | ";
-		this->progdsp->setMinimumWidth(92);
+		if(this->dspmode == PROGDSP::ELAPTOTAL || this->dspmode == PROGDSP::REMTOTAL)
+			this->progdsp->setMinimumWidth(96);
+		else
+			this->progdsp->setMinimumWidth(48);
 	}else{
 		this->DSPSEP="<br>-<br>";
 		this->progdsp->setMinimumWidth(38);
@@ -210,6 +219,11 @@ void toolbar::update_dspmode(QAction* act){
 	this->dspmode = PROGDSP(act->data().toInt());
 	this->update_progdsp(this->prog->value());
 	this->jag->setdbdata("toolbar_dspmode", this->dspmode);
+
+	if(this->dspmode == PROGDSP::ELAPTOTAL || this->dspmode == PROGDSP::REMTOTAL)
+		this->progdsp->setMinimumWidth(96);
+	else
+		this->progdsp->setMinimumWidth(48);
 }
 
 void toolbar::show_labelmenu(){

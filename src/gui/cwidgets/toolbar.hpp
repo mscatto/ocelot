@@ -56,7 +56,7 @@ public:
     QByteArray splitterstate();
     void restore_splitterstate(QByteArray ba);
 public slots:
-    void rotate(Qt::Orientation o);
+	void rotate(Qt::Orientation o);
 private slots:
 	void update_progdsp(int position);
 	void update_dspmode(QAction *act);
