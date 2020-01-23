@@ -179,12 +179,12 @@ void toolbar::rotate(Qt::Orientation o) {
 	if(o==Qt::Horizontal){
 		this->DSPSEP=" | ";
 		if(this->dspmode == PROGDSP::ELAPTOTAL || this->dspmode == PROGDSP::REMTOTAL)
-			this->progdsp->setMinimumWidth(96);
+			this->progdsp->setMinimumWidth(PROGDSP_MINWIDTH_HORIZ);
 		else
-			this->progdsp->setMinimumWidth(48);
+			this->progdsp->setMinimumWidth(PROGDSP_MINWIDTH);
 	}else{
 		this->DSPSEP="<br>-<br>";
-		this->progdsp->setMinimumWidth(38);
+		this->progdsp->setMinimumWidth(PROGDSP_MINWIDTH);
 	}
 	this->prog->rotate(o);
 	this->vol->rotate(o);
@@ -220,10 +220,12 @@ void toolbar::update_dspmode(QAction* act){
 	this->update_progdsp(this->prog->value());
 	this->jag->setdbdata("toolbar_dspmode", this->dspmode);
 
-	if(this->dspmode == PROGDSP::ELAPTOTAL || this->dspmode == PROGDSP::REMTOTAL)
-		this->progdsp->setMinimumWidth(96);
-	else
-		this->progdsp->setMinimumWidth(48);
+	if(this->dspmode == PROGDSP::ELAPTOTAL || this->dspmode == PROGDSP::REMTOTAL){
+		if(this->orientation()==Qt::Horizontal)
+			this->progdsp->setMinimumWidth(PROGDSP_MINWIDTH_HORIZ);
+		else
+			this->progdsp->setMinimumWidth(PROGDSP_MINWIDTH);
+	}
 }
 
 void toolbar::show_labelmenu(){

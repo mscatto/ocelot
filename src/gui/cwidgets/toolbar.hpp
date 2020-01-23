@@ -33,6 +33,8 @@
 class toolbar : public QToolBar {
     Q_OBJECT
 private:
+	const uint PROGDSP_MINWIDTH_HORIZ = 96;
+	const uint PROGDSP_MINWIDTH = 48;
 	enum PROGDSP {REMAINING, ELAPSED, REMTOTAL, ELAPTOTAL};
 	void init();
 
