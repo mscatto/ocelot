@@ -1,3 +1,4 @@
 obj/**
+bin/**
 ocelot.pro.user
 .gitignore
