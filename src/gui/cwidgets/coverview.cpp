@@ -37,13 +37,15 @@ coverview::coverview(mwindow* win, workbench* wb) : QLabel(win) {
 void coverview::init(){
 	this->setObjectName("coverview");
 	this->setText("<b>[No Media]</b>");
-	this->setMinimumSize(200, 200);
+	//this->setMinimumSize(200, 200);
 	this->setAutoFillBackground(true);
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	this->setFrameStyle(QFrame::Sunken);
 	this->setFrameShape(QFrame::StyledPanel);
 	this->setFrameShadow(QFrame::Sunken);
+	this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
+	this->sizePolicy().setVerticalPolicy(QSizePolicy::Minimum);
 
 	this->cover = QPixmap();
 
@@ -58,30 +60,30 @@ void coverview::init(){
 }
 
 void coverview::showctx(QPoint pos) {
-    if(this->wb->islocked()) {
-        this->ctx->exec(this->mapToGlobal(pos));
-    } else {
-        this->wb->setlastctx(this);
-        this->wb->ctx_req(this->mapTo(this->wb, pos));
-    }
+	if(this->wb->islocked()) {
+		this->ctx->exec(this->mapToGlobal(pos));
+	} else {
+		this->wb->setlastctx(this);
+		this->wb->ctx_req(this->mapTo(this->wb, pos));
+	}
 }
 
 void coverview::set(QPixmap cover) {
-    this->cover = cover;
-    this->setPixmap(this->cover.scaled(this->width(),this->height(),Qt::KeepAspectRatio));
+	this->cover = cover;
+	this->setPixmap(this->cover.scaled(this->width(),this->height(),Qt::KeepAspectRatio));
 }
 
 void coverview::clear() {
-    this->setText("<b>[No Media]</b>");
+	this->setText("<b>[No Media]</b>");
 }
 
 coverview::~coverview() {
 }
 
 void coverview::resizeEvent(QResizeEvent *event){
-    event->accept();
-    if(this->cover.isNull())
-        return;
-    this->setPixmap(this->cover.scaled(this->width(),this->height(),Qt::KeepAspectRatio));
+	event->accept();
+	if(this->cover.isNull())
+		return;
+	this->setPixmap(this->cover.scaled(this->width(),this->height(),Qt::KeepAspectRatio));
 
 }

@@ -35,7 +35,7 @@ player::player() : QObject() {
 	connect(this->instance, &QMediaPlayer::durationChanged, this, &player::length_changed);
 
 	//connect(&this->m_positionTimer, &QTimer::timeout, this, &player::position_proxy);
-    // connect(this, &player::position_proxy, this, &player::microdik);
+	// connect(this, &player::position_proxy, this, &player::microdik);
 }
 
 void player::track_preload(){
@@ -73,7 +73,7 @@ void player::status_changed(QMediaPlayer::MediaStatus status){
 		break;
 
 	}
-	qInfo()<<status;
+	//qInfo()<<status;
 }
 
 void player::play() {
@@ -102,67 +102,67 @@ void player::seek(short sec) {
 }
 
 /*QTime player::position() const {
-    if(m_pipeline) {
-        // here we query the pipeline about its position
-        // and we request that the result is returned in time format
-        QGst::PositionQueryPtr posquery = QGst::PositionQuery::create(QGst::FormatTime);
-        m_pipeline->query(posquery);
-        return QGst::ClockTime(posquery->position()).toTime();
-    } else {
-        return QTime(0, 0);
-    }
+	if(m_pipeline) {
+		// here we query the pipeline about its position
+		// and we request that the result is returned in time format
+		QGst::PositionQueryPtr posquery = QGst::PositionQuery::create(QGst::FormatTime);
+		m_pipeline->query(posquery);
+		return QGst::ClockTime(posquery->position()).toTime();
+	} else {
+		return QTime(0, 0);
+	}
 }*/
 
 /*void player::onBusMessage(const QGst::MessagePtr& message) {
-    switch(message->type()) {
-    case QGst::MessageEos: // End of stream. We reached the end of the file.
-        m_positionTimer.stop();
-        emit EOM();
-        break;
-    case QGst::MessageError: // Some error occurred.
-        qCritical() << message.staticCast<QGst::ErrorMessage>()->error();
-        stop();
-        break;
-    case QGst::MessageStateChanged: // The element in message->source() has
-                                    // changed state
-        if(message->source() == m_pipeline) {
-            handlePipelineStateChange(message.staticCast<QGst::StateChangedMessage>());
-        }
-        break;
-    case QGst::MessageInfo:
-        qInfo() << "lollery";
-    default:
-        break;
-    }
+	switch(message->type()) {
+	case QGst::MessageEos: // End of stream. We reached the end of the file.
+		m_positionTimer.stop();
+		emit EOM();
+		break;
+	case QGst::MessageError: // Some error occurred.
+		qCritical() << message.staticCast<QGst::ErrorMessage>()->error();
+		stop();
+		break;
+	case QGst::MessageStateChanged: // The element in message->source() has
+									// changed state
+		if(message->source() == m_pipeline) {
+			handlePipelineStateChange(message.staticCast<QGst::StateChangedMessage>());
+		}
+		break;
+	case QGst::MessageInfo:
+		qInfo() << "lollery";
+	default:
+		break;
+	}
 }*/
 
 /*void player::handlePipelineStateChange(const QGst::StateChangedMessagePtr& scm) {
-    switch(scm->newState()) {
-    case QGst::StatePlaying:
-        // if(scm->oldState() == QGst::StatePaused)
-        // emit paused(false);
-        // start the timer when the pipeline starts playing
-        m_positionTimer.start(100);
+	switch(scm->newState()) {
+	case QGst::StatePlaying:
+		// if(scm->oldState() == QGst::StatePaused)
+		// emit paused(false);
+		// start the timer when the pipeline starts playing
+		m_positionTimer.start(100);
 
-        if(this->length() != this->clen) {
-            this->clen = this->length();
-            emit length_changed(this->clen);
-        }
-        break;
-    case QGst::StatePaused:
-        // stop the timer when the pipeline pauses
-        if(scm->oldState() == QGst::StatePlaying) {
-            emit paused(true);
-            m_positionTimer.stop();
-        }
-        break;
-    case QGst::StateNull:
-        qInfo() << "statenull";
-        break;
+		if(this->length() != this->clen) {
+			this->clen = this->length();
+			emit length_changed(this->clen);
+		}
+		break;
+	case QGst::StatePaused:
+		// stop the timer when the pipeline pauses
+		if(scm->oldState() == QGst::StatePlaying) {
+			emit paused(true);
+			m_positionTimer.stop();
+		}
+		break;
+	case QGst::StateNull:
+		qInfo() << "statenull";
+		break;
 	//case QGst::state
-    default:
-        break;
-    }
+	default:
+		break;
+	}
 }*/
 
 

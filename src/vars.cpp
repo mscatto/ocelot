@@ -38,283 +38,286 @@
 #include <bits/stdc++.h>
 
 vars::vars() : QObject() {
-    qInfo("[INFO] Starting Ocelot Media Manager v%s", this->VERSION);
-    setlocale(LC_NUMERIC, "C");
+	qInfo("[INFO] Starting Ocelot Media Manager v%s", this->VERSION);
+	setlocale(LC_NUMERIC, "C");
 
-    if(!QDBusConnection::sessionBus().isConnected())
-        qWarning("%s", "[WARNING] DBus connection could not be stablished!");
-    this->bus = new QDBusInterface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "",
-                                   QDBusConnection::sessionBus());
+	if(!QDBusConnection::sessionBus().isConnected())
+		qWarning("%s", "[WARNING] DBus connection could not be stablished!");
+	this->bus = new QDBusInterface("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "",
+								   QDBusConnection::sessionBus());
 
-    initpmap();
-    initdb();
-    initlibs();
-    initaudio();
+	initpmap();
+	initdb();
+	initlibs();
+	initaudio();
 }
 
 void vars::initaudio() {
-    QThread* t = new QThread();
-    this->pctx = new player();
-    this->pctx->moveToThread(t);
-    t->start();
+	QThread* t = new QThread();
+	this->pctx = new player();
+	this->pctx->moveToThread(t);
+	t->start();
 }
 
 QString vars::translate_key(QString key) {
-    return this->pmap.value(key);
+	return this->pmap.value(key);
 }
 
 QString vars::translate_val(QString val) {
-    return this->pmap.key(val);
+	return this->pmap.key(val);
 }
 
 QStringList vars::dumpval() {
-    return this->pmap.values();
+	return this->pmap.values();
 }
 
 QStringList vars::dumpkeys() {
-    return this->pmap.keys();
+	return this->pmap.keys();
 }
 
 void vars::remlibs(QString path) {
-    this->libs->removeAll(path);
-    /*for(int i=this->libs->length()-1; i>=0; i--){
-        if(this->libs->at(i)->dumpinfo()->split(";").first() == path){
-            this->libs->removeAt(i);
-        }
-    }*/
+	this->libs->removeAll(path);
+	/*for(int i=this->libs->length()-1; i>=0; i--){
+		if(this->libs->at(i)->dumpinfo()->split(";").first() == path){
+			this->libs->removeAt(i);
+		}
+	}*/
 
-    this->DB_REF->exec("DELETE FROM songs WHERE lib='" + path + "'");
-    this->DB_REF->exec("DELETE FROM libs WHERE path='" + path + "'");
+	this->DB_REF->exec("DELETE FROM songs WHERE lib='" + path + "'");
+	this->DB_REF->exec("DELETE FROM libs WHERE path='" + path + "'");
 }
 
 QStringList vars::dumppaths() {
-    QSqlQuery x(this->DB_REF->exec("SELECT path FROM songs"));
-    QStringList out;
+	QSqlQuery x(this->DB_REF->exec("SELECT path FROM songs"));
+	QStringList out;
 
-    while(x.next())
-        out.append(x.value(0).toString());
+	while(x.next())
+		out.append(x.value(0).toString());
 
-    return out;
+	return out;
 }
 
 QStringList vars::dumplibinfo() {
-    QStringList out;
-    foreach(QString s, *this->libs) {
-        QFileInfo i;
-        uint count = 0;
-        qint64 size = 0;
-        QSqlQuery x = this->DB_REF->exec("SELECT path FROM songs WHERE lib='" + s + "'");
-        while(x.next()) {
-            count++;
-            i.setFile(x.value(0).toString());
-            size += i.size();
-        }
+	QStringList out;
+	foreach(QString s, *this->libs) {
+		QFileInfo i;
+		uint count = 0;
+		qint64 size = 0;
+		QSqlQuery x = this->DB_REF->exec("SELECT path FROM songs WHERE lib='" + s + "'");
+		while(x.next()) {
+			count++;
+			i.setFile(x.value(0).toString());
+			size += i.size();
+		}
 
-        s.append(";" + QString::number(count) + ";");
+		s.append(";" + QString::number(count) + ";");
 
-        if(size > 0)
-            s.append(QString::number(size / 1024 / 1024));
-        else
-            s.append(QString::number(0));
-        out.append(s);
-    }
-    return out;
+		if(size > 0)
+			s.append(QString::number(size / 1024 / 1024));
+		else
+			s.append(QString::number(0));
+		out.append(s);
+	}
+	return out;
 }
 
 void vars::initdb() {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    *this->DB_REF = QSqlDatabase::addDatabase("QSQLITE");
-    this->DB_REF->setDatabaseName(this->DB_PATH);
-    this->DB_REF->setHostName("BABOU");
+	QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	*this->DB_REF = QSqlDatabase::addDatabase("QSQLITE");
+	this->DB_REF->setDatabaseName(this->DB_PATH);
+	this->DB_REF->setHostName("BABOU");
 
-    QDir().mkdir(this->DATA_PATH);
-    if(!QDir(this->DATA_PATH).exists()) {
-        qFatal("[FATAL] Unable to create data directory in \"%s\"!", qPrintable(DATA_PATH));
-    }
+	QDir().mkdir(this->DATA_PATH);
+	if(!QDir(this->DATA_PATH).exists()) {
+		qFatal("[FATAL] Unable to create data directory in \"%s\"!", qPrintable(DATA_PATH));
+	}
 
-    if(!this->DB_REF->open()) {
-        qFatal("[FATAL] Could not open database: %s", qPrintable(this->DB_REF->lastError().driverText()));
-    }
+	if(!this->DB_REF->open()) {
+		qFatal("[FATAL] Could not open database: %s", qPrintable(this->DB_REF->lastError().driverText()));
+	}
 
-    QSqlQuery x("SELECT _rowid_ FROM data", *this->DB_REF);
-    x.exec();
-    x.last();
+	QSqlQuery x("SELECT _rowid_ FROM data", *this->DB_REF);
+	x.exec();
+	x.last();
 
-    if(x.isNull(0)) {
-        qInfo() << "[INFO] No valid database found! generating defaults...";
-        this->DB_REF->exec("CREATE TABLE libs(\
-            path TEXT NOT NULL, PRIMARY KEY('path')\
-        )");
-        this->DB_REF->exec("CREATE TABLE data(\
-            var TEXT NOT NULL, val TEXT NOT NULL\
-        )");
-        this->DB_REF->exec("CREATE TABLE treeschemes(\
-            var TEXT NOT NULL, val TEXT NOT NULL\
-        )");
-        this->DB_REF->exec("CREATE TABLE splitterstate(\
-            val BLOB NOT NULL\
-        )");
-        this->DB_REF->exec("CREATE TABLE songs (\
-            root TEXT,\
-            path TEXT,\
-            filename TEXT,\
-            title TEXT,\
-            artist TEXT,\
-            album TEXT,\
-            track INTEGER,\
-            year TEXT,\
-            genre TEXT,\
-            discNumber INTEGER,\
-            lib TEXT, FOREIGN KEY('lib') REFERENCES 'libs'('path')\
-        )");
-        /*this->DB_REF->exec("CREATE TABLE properties(\
-            song_id INTEGER,\
-            format TEXT,\
-            duration REAL,\
-            bitrate REAL,\
-            bits_per_sample INTEGER,\
-            sample_rate INTEGER,\
-            channels INTEGER,\
-            audio_sha256sum TEXT,\
-            FOREIGN KEY(song_id) REFERENCES songs(_rowid_) ON DELETE CASCADE\
-        )");*/
+	if(x.isNull(0)) {
+		qInfo() << "[INFO] No valid database found! generating defaults...";
+		this->DB_REF->exec("CREATE TABLE libs(\
+			path TEXT NOT NULL, PRIMARY KEY('path')\
+		)");
+		this->DB_REF->exec("CREATE TABLE data(\
+			var TEXT NOT NULL, val TEXT NOT NULL\
+		)");
+		this->DB_REF->exec("CREATE TABLE treeschemes(\
+			var TEXT NOT NULL, val TEXT NOT NULL\
+		)");
+		this->DB_REF->exec("CREATE TABLE splitterstate(\
+			val BLOB NOT NULL\
+		)");
+		this->DB_REF->exec("CREATE TABLE songs (\
+			root TEXT,\
+			path TEXT,\
+			filename TEXT,\
+			title TEXT,\
+			artist TEXT,\
+			album TEXT,\
+			track INTEGER,\
+			year TEXT,\
+			genre TEXT,\
+			discNumber INTEGER,\
+			lib TEXT, FOREIGN KEY('lib') REFERENCES 'libs'('path')\
+		)");
+		/*this->DB_REF->exec("CREATE TABLE properties(\
+			song_id INTEGER,\
+			format TEXT,\
+			duration REAL,\
+			bitrate REAL,\
+			bits_per_sample INTEGER,\
+			sample_rate INTEGER,\
+			channels INTEGER,\
+			audio_sha256sum TEXT,\
+			FOREIGN KEY(song_id) REFERENCES songs(_rowid_) ON DELETE CASCADE\
+		)");*/
 
-        /* initialize default values */
-        initdata();
-        /* init default tree scheme */
-        this->DB_REF->exec("INSERT INTO treeschemes VALUES(\
-            'Default',\
-            '#artist#/[#year#] #album#/#track#. #title#')");
+		/* initialize default values */
+		initdata();
+		/* init default tree scheme */
+		this->DB_REF->exec("INSERT INTO treeschemes VALUES(\
+			'Default',\
+			'#artist#/[#year#] #album#/#track#. #title#')");
 
-        qInfo("  -> new database placed under %s", qPrintable(this->DATA_PATH));
-    } else {
-        qInfo("[INFO] Database found at %s...", qPrintable(this->DB_REF->databaseName()));
+		qInfo("  -> new database placed under %s", qPrintable(this->DATA_PATH));
+	} else {
+		qInfo("[INFO] Database found at %s...", qPrintable(this->DB_REF->databaseName()));
 
-        x.exec("SELECT path FROM songs");
-        x.last();
+		x.exec("SELECT path FROM songs");
+		x.last();
 
-        if(x.isNull(0))
-            qInfo("  -> 0 tracks on record.");
-        else
-            qInfo("  -> %d tracks on record", x.at() + 1);
+		if(x.isNull(0))
+			qInfo("  -> 0 tracks on record.");
+		else
+			qInfo("  -> %d tracks on record", x.at() + 1);
 
-        qInfo() << "[INFO] Running sanity check...";
+		qInfo() << "[INFO] Running sanity check...";
 
-        x.seek(0);
-        QFile dummy;
-        uint inv = 0;
-        while(x.next()) {
-            dummy.setFileName(x.value(0).toString());
-            if(!dummy.exists()) {
-                inv++;
-                this->DB_REF->exec("DELETE FROM songs WHERE path='" + x.value(0).toString() + "'");
-            }
-        }
-        qInfo("  -> %d entries were removed.", inv);
-    }
+		x.seek(0);
+		QFile dummy;
+		uint inv = 0;
+		while(x.next()) {
+			dummy.setFileName(x.value(0).toString());
+			if(!dummy.exists()) {
+				inv++;
+				this->DB_REF->exec("DELETE FROM songs WHERE path='" + x.value(0).toString() + "'");
+			}
+		}
+		qInfo("  -> %d entries were removed.", inv);
+	}
 }
 
 void vars::setdbdata(const char* var, QVariant val) {
-    QSqlQuery q(*this->DB_REF);
-    q.prepare("UPDATE data SET val = :val WHERE var LIKE :var");
-    q.bindValue(":var", var);
-    q.bindValue(":val", val);
-    q.exec();
+	QSqlQuery q(*this->DB_REF);
+	q.prepare("UPDATE data SET val = :val WHERE var LIKE :var");
+	q.bindValue(":var", var);
+	q.bindValue(":val", val);
+	q.exec();
 }
 
 QVariant vars::fetchdbdata(const char* var) {
-    QSqlQuery q(*this->DB_REF);
-    q.prepare("SELECT val FROM data WHERE var = :var");
-    q.bindValue(":var", var);
-    q.exec();
-    if(!q.next())
-        return "";
-    else
-        return q.value(0);
+	QSqlQuery q(*this->DB_REF);
+	q.prepare("SELECT val FROM data WHERE var = :var");
+	q.bindValue(":var", var);
+	q.exec();
+	if(!q.next())
+		return "";
+	else
+		return q.value(0);
 }
 
 void vars::initlibs() {
-    qInfo() << "[INFO] Scanning libraries...";
-    this->libs = new QStringList();
+	qInfo() << "[INFO] Scanning libraries...";
+	this->libs = new QStringList();
 
-    QThread* t;
-    QSqlQuery q("SELECT path FROM libs", *this->DB_REF);
-    q.exec();
+	QThread* t;
+	QSqlQuery q("SELECT path FROM libs", *this->DB_REF);
+	q.exec();
 
-    while(q.next()){
-        this->libs->append(q.value(0).toString());
-        t = new QThread();
-        library* l = new library(new QString(q.value(0).toString()), this->DB_REF, this->dumppaths());
-        l->moveToThread(t);
-        connect(t, SIGNAL(started()), l, SLOT(process()));
-        connect(l, SIGNAL(finished()), t, SLOT(quit()));
-        connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
-        connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
-        // connect(t, &QThread::finished, this, );
-        t->start();
-    }
+	while(q.next()){
+		this->libs->append(q.value(0).toString());
+		t = new QThread();
+		library* l = new library(new QString(q.value(0).toString()), this->DB_REF, this->dumppaths());
+		l->moveToThread(t);
+		connect(t, SIGNAL(started()), l, SLOT(process()));
+		connect(l, SIGNAL(finished()), t, SLOT(quit()));
+		connect(l, SIGNAL(finished()), l, SLOT(deleteLater()));
+		connect(t, SIGNAL(finished()), t, SLOT(deleteLater()));
+		// connect(t, &QThread::finished, this, );
+		t->start();
+	}
 }
 
 void vars::initdata() {
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'playlist_columnorder',\
-        '#PLAY#;#INDEX#;TRACKNUMBER;TITLE;ARTIST;ALBUM;DATE')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'playlist_columnorder',\
+		'#PLAY#;#INDEX#;TRACKNUMBER;TITLE;ARTIST;ALBUM;DATE')");
 
-    /* INPUT VALUES */
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'libtree_doubleclick',\
-        '1')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'libtree_activescheme',\
-        '0')");
+	/* INPUT VALUES */
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'libtree_doubleclick',\
+		'1')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'libtree_activescheme',\
+		'0')");
 	this->DB_REF->exec("INSERT INTO data VALUES(\
 		'toolbar_dspmode',\
 		'3')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'general_playlistappend',\
-        '0')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'general_runwizard',\
-        '1')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'general_volume',\
-        '50')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'general_playlistappend',\
+		'0')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'general_runwizard',\
+		'1')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'general_volume',\
+		'50')");
 
-    /* UI DEFAULTS */
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_scheme',\
-        '0')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_state',\
-        '0')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_geometry',\
-        '300,200')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_maximized',\
-        '0')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_windowpos',\
-        '0,0')");
-    this->DB_REF->exec("INSERT INTO data VALUES(\
-        'ui_tbsplstate',\
-        '0')");
+	/* UI DEFAULTS */
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'ui_scheme',\
+		'0')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'ui_state',\
+		'0')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'ui_locks',\
+		'0')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'ui_geometry',\
+		'300,200')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'ui_maximized',\
+		'0')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'ui_windowpos',\
+		'0,0')");
+	this->DB_REF->exec("INSERT INTO data VALUES(\
+		'ui_tbsplstate',\
+		'0')");
 }
 
 void vars::initpmap() {
-    this->pmap.insert("TITLE", "Title");
-    this->pmap.insert("ALBUM", "Album");
-    this->pmap.insert("ARTIST", "Artist");
-    this->pmap.insert("ALBUMARTIST", "Album Artist");
-    this->pmap.insert("SUBTITLE", "Subtitle");
-    this->pmap.insert("TRACKNUMBER", "Track #");
-    this->pmap.insert("TRACKTOTAL", "Tracks Total");
-    this->pmap.insert("DISCNUMBER", "Disc #");
-    this->pmap.insert("DISCTOTAL", "Disc Count");
-    this->pmap.insert("DATE", "Year");
-    this->pmap.insert("ORIGINALDATE", "Original Year");
-    this->pmap.insert("GENRE", "Genre");
-    this->pmap.insert("COMMENT", "Comment");
-    this->pmap.insert("COMPOSER", "Composer");
-    this->pmap.insert("LYRICS", "Lyrics");
+	this->pmap.insert("TITLE", "Title");
+	this->pmap.insert("ALBUM", "Album");
+	this->pmap.insert("ARTIST", "Artist");
+	this->pmap.insert("ALBUMARTIST", "Album Artist");
+	this->pmap.insert("SUBTITLE", "Subtitle");
+	this->pmap.insert("TRACKNUMBER", "Track #");
+	this->pmap.insert("TRACKTOTAL", "Tracks Total");
+	this->pmap.insert("DISCNUMBER", "Disc #");
+	this->pmap.insert("DISCTOTAL", "Disc Count");
+	this->pmap.insert("DATE", "Year");
+	this->pmap.insert("ORIGINALDATE", "Original Year");
+	this->pmap.insert("GENRE", "Genre");
+	this->pmap.insert("COMMENT", "Comment");
+	this->pmap.insert("COMPOSER", "Composer");
+	this->pmap.insert("LYRICS", "Lyrics");
 }

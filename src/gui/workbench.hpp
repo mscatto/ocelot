@@ -31,94 +31,96 @@
 #include <taglib/fileref.h>
 
 class workbench : public QWidget {
-    enum defwidgets {
-        VSPLIT = '-',
-        HSPLIT = '+',
-        DUMMY = 'z',
-        TREELIB = 'a',
-        PANELLIB = 'b',
-        PLMGR = 'c',
-        TAGVIEW = 'd',
-        COVERVIEW = 'e',
-        VISUALIZER = 'f'
-    };
+	enum defwidgets {
+		VSPLIT = '-',
+		HSPLIT = '+',
+		DUMMY = 'z',
+		TREELIB = 'a',
+		PANELLIB = 'b',
+		PLMGR = 'c',
+		TAGVIEW = 'd',
+		COVERVIEW = 'e',
+		VISUALIZER = 'f'
+	};
 
 private:
-    /* this controls the layout editor toggler */
-    bool locked = true;
+	/* this controls the layout editor toggler */
+	bool locked = true;
 
-    /* the workbench layout */
-    QGridLayout* ml;
+	/* the workbench layout */
+	QGridLayout* ml;
 
 	/* mwindow pointer, in QWidget form to avoid circular dependencies */
-    QWidget* win;
+	QWidget* win;
 
-    /* last right-click position, stored to keep track to where to inject new widgets */
-    QWidget* lastctx;
+	/* last right-click position, stored to keep track to where to inject new widgets */
+	QWidget* lastctx;
 
-    /* menu shown when the user right-clicks on an existing widget */
-    QMenu* ctx_replace;
+	/* menu shown when the user right-clicks on an existing widget */
+	QMenu* ctx_replace;
 
-    /* this function inserts the widget *w on the position stored in ctx_lastpos; */
-    void inject(QWidget* w);
+	/* this function inserts the widget *w on the position stored in ctx_lastpos; */
+	void inject(QWidget* w);
 
-    /* refreshdb stores the current layout on the database */
-    void refreshdb();
+	/* refreshdb stores the current layout on the database */
+	void refreshdb();
 
-    /* this applies the layout *l to the workbench */
-    void setlayout(QString* l);
+	/* this applies the layout *l to the workbench */
+	void setlayout(QString* l);
 
-    /* responsible for fetching the objname layout letter code for database storage */
-    char fetchid(QString objname);
+	/* responsible for fetching the objname layout letter code for database storage */
+	char fetchid(QString objname);
 
-    /* returns a pointer a for newly created widget corresponding to the letter code *id */
-    QWidget* fetchwidget(const char* id);
+	/* returns a pointer a for newly created widget corresponding to the letter code *id */
+	QWidget* fetchwidget(const char* id);
 
-    /* globals */
-    vars* jag;
+	/* globals */
+	vars* jag;
 
 
-    /* these _functions are responsible for new allocating new widgets */
-    QWidget* _vsplitter(bool filled);
-    QWidget* _hsplitter(bool filled);
-    QWidget* _libtree();
-    QWidget* _playlistmgr();
-    QWidget* _coverview();
-    QWidget* _tagview();
+	/* these _functions are responsible for new allocating new widgets */
+	QWidget* _vsplitter(bool filled);
+	QWidget* _hsplitter(bool filled);
+	QWidget* _libtree();
+	QWidget* _playlistmgr();
+	QWidget* _coverview();
+	QWidget* _tagview();
 
 	//const QPoint &
 public:
-    workbench(vars* jag, QWidget* win);
-    bool islocked();
-    void setlastctx(QWidget* w);
-    QWidget* root = new QWidget();
+	workbench(vars* jag, QWidget* win);
+	bool islocked();
+	void setlastctx(QWidget* w);
+	QWidget* root = new QWidget();
 
-    /* recursively dumps the workbench layout string to the *out pointer */
-    void dumplayout(QWidget* n, QString* out, QList<QSplitter*>* spl);
+	/* recursively dumps the workbench layout string to the *out pointer */
+	void dumplayout(QWidget* n, QString* out, QString *locks);
+	void dumpsplitters(QWidget* n, QList<QSplitter*>* spl);
+	void refresh_locks(QWidget* n, QString* l);
 
-    ~workbench();
+	~workbench();
 public slots:
-    /* ctx_ slots are called by the context menu for the layout editor */
-    // void ctx_updlastpos(QPoint pos);
-    void ctx_req(QPoint p);
-    void ctx_vsplitter();
-    void ctx_hsplitter();
-    void ctx_libtree();
-    void ctx_playlistmgr();
-    void ctx_coverview();
-    void ctx_tagview();
+	/* ctx_ slots are called by the context menu for the layout editor */
+	// void ctx_updlastpos(QPoint pos);
+	void ctx_req(QPoint p);
+	void ctx_vsplitter();
+	void ctx_hsplitter();
+	void ctx_libtree();
+	void ctx_playlistmgr();
+	void ctx_coverview();
+	void ctx_tagview();
 
-    /* flips the layout editor lock */
-    void lock_flip();
+	/* flips the layout editor lock */
+	void lock_flip();
 
-    /* it removes the widget parent to the widget under ctx_lastpos */
-    void remove_parentwidget();
+	/* it removes the widget parent to the widget under ctx_lastpos */
+	void remove_parentwidget();
 
-    /* destroy the widget under ctx_lastpos */
-    void remove_widget();
+	/* destroy the widget under ctx_lastpos */
+	void remove_widget();
 
-    /* clears the current layout */
-    void clear();
+	/* clears the current layout */
+	void clear();
 
 private slots:
 	void lock_widget();

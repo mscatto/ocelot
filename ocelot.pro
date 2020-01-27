@@ -10,10 +10,13 @@ QMAKE_LINK=clang++
 QMAKE_CXX=clang++
 
 TARGET = ocelot
-DESTDIR = bin
-#OBJECTS_DIR = /tmp/ocelotbuild
-#MOC_DIR = /tmp/ocelotbuild
 TEMPLATE = app
+
+DESTDIR = bin
+OBJECTS_DIR = obj
+MOC_DIR = obj
+
+
 CONFIG += link_pkgconfig
 #LIBS += -L/usr/lib/libprojectM -lprojectM -L/usr/lib/libtag -ltag -L/usr/lib/libQt5GStreamer-1.0 -lQt5GStreamer-1.0
 #LIBS += -L/usr/lib/libQt5GLib-2.0 -lQt5GLib-2.0
