@@ -1,5 +1,4 @@
 ﻿---
-BasedOnStyle: Google
 AccessModifierOffset: '-2'
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: 'false'
