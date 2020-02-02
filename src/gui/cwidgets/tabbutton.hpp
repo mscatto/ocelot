@@ -25,19 +25,19 @@
 
 #include <QPushButton>
 
-class tabbutton : public QPushButton
-{
-    Q_OBJECT
-private:
-    QString mapkey;
-public:
-	tabbutton(const QIcon &icon, QString key);
-	~tabbutton() {};
-	void set_key(QString nkey);
-public slots:
-    void slot_clicked(bool checked = false);
-signals:
-    void idclicked(QString key);
+class tabbutton : public QPushButton {
+	Q_OBJECT
+  private:
+	QString mapkey;
+
+  public:
+	tabbutton (const QIcon &icon, QString key);
+	~tabbutton(){};
+	void set_key (QString nkey);
+  public slots:
+	void slot_clicked (bool checked = false);
+  signals:
+	void idclicked (QString key);
 };
 
-#endif // TABBUTTON_HPP
+#endif	// TABBUTTON_HPP

@@ -33,49 +33,50 @@
 #include <QWidget>
 
 class playlistview : public QTabWidget {
-    Q_OBJECT
-private:
-    vars* jag;
-    mwindow* win;
-    workbench* wb;
+	Q_OBJECT
+  private:
+	vars* jag;
+	mwindow* win;
+	workbench* wb;
 
-    QMap<QString, playlist*> pl;
-    playlist* plactive;  /* the one on display */
-    playlist* plplaying; /* from currently playing track */
-    QString order;
+	QMap<QString, playlist*> pl;
+	playlist* plactive; /* the one on display */
+	playlist* plplaying; /* from currently playing track */
+	QString order;
 	QMenu* headerctx;
-    QMenu* ctx;
+	QMenu* ctx;
 
-    QDialog* renamer;
-    QLineEdit* namebox;
-    QString tmpkey;
-    QTreeWidgetItem* currentitem;
-    QToolButton* addbtn;
+	QDialog* renamer;
+	QLineEdit* namebox;
+	QString tmpkey;
+	QTreeWidgetItem* currentitem;
+	QToolButton* addbtn;
 
 	void init();
-    void newplaylist();
-public:
-    playlistview(vars* jag, mwindow* win, workbench* wb);
+	void newplaylist();
+
+  public:
+	playlistview (vars* jag, mwindow* win, workbench* wb);
 	~playlistview(){};
-public slots:
-    void playlist_append(const QStringList files, const int playlist);
-    void playlist_replace(const QStringList files, const int playlist);
-    void refreshpl();
-    void next();
-    void prev();
-    void swapitem(QTreeWidgetItem* item);
-private slots:
-	void tab_close(int index);
-	void tab_switch(int index);
-	void tab_rename(QString key);
-	void ctx_show(const QPoint& pos);
+  public slots:
+	void playlist_append (const QStringList files, const int playlist);
+	void playlist_replace (const QStringList files, const int playlist);
+	void refreshpl();
+	void next();
+	void prev();
+	void swapitem (QTreeWidgetItem* item);
+  private slots:
+	void tab_close (int index);
+	void tab_switch (int index);
+	void tab_rename (QString key);
+	void ctx_show (const QPoint& pos);
 	void renamer_ok();
 	void renamer_cancel();
-	void toggler(bool checked);
-signals:
-    void clearsel();
-    void clearpl();
-    void exportpl();
+	void toggler (bool checked);
+  signals:
+	void clearsel();
+	void clearpl();
+	void exportpl();
 };
 
-#endif // PLAYLISTVIEW_HPP
+#endif	// PLAYLISTVIEW_HPP

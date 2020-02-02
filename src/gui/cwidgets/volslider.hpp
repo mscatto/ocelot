@@ -34,20 +34,21 @@
 #include <QToolTip>
 
 class volslider : public QSlider {
-    // Q_OBJECT
-public:
-    volslider(vars *jag);
-    ~volslider();
-public slots:
-    void rotate(Qt::Orientation o);
-private:
-    vars* jag;
-    player* pctx;
-    QTimer savetimer;
-    const uint MINSIZE = 64;
-    const int SAVEDELAY = 1000;
-    const QString VSTYLESHEET = "";
-    const QString HSTYLESHEET = "\
+	// Q_OBJECT
+  public:
+	volslider (vars* jag);
+	~volslider();
+  public slots:
+	void rotate (Qt::Orientation o);
+
+  private:
+	vars* jag;
+	player* pctx;
+	QTimer savetimer;
+	const uint MINSIZE = 64;
+	const int SAVEDELAY = 1000;
+	const QString VSTYLESHEET = "";
+	const QString HSTYLESHEET = "\
         QSlider::handle:horizontal{\
             border: 2px solid #8c8c8c;\
             background: solid #3c3c3c;\
@@ -55,11 +56,12 @@ private:
             width: 8px;\
             margin: -8px 8px;\
             }";
-private slots:
-    void start_save();
-    void save_vol();
-protected:
-    void paintEvent(QPaintEvent *ev);
-    void mousePressEvent(QMouseEvent* event);
+  private slots:
+	void start_save();
+	void save_vol();
+
+  protected:
+	void paintEvent (QPaintEvent* ev);
+	void mousePressEvent (QMouseEvent* event);
 };
-#endif // volslider_HPP
+#endif	// volslider_HPP

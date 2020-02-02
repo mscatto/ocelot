@@ -33,17 +33,19 @@
 #include <QToolTip>
 
 class progslider : public QSlider {
+  public slots:
+	void rotate (Qt::Orientation o);
 
-public slots:
-    void rotate(Qt::Orientation o);
-private:
-    player* pctx;
-    const uint MINSIZE = 128;
-protected:
-    void mousePressEvent(QMouseEvent* event);
-public:
-    progslider(Qt::Orientation o, player* p);
-    ~progslider();
+  private:
+	player* pctx;
+	const uint MINSIZE = 128;
+
+  protected:
+	void mousePressEvent (QMouseEvent* event);
+
+  public:
+	progslider (Qt::Orientation o, player* p);
+	~progslider();
 };
 
-#endif // PROGSLIDER_HPP
+#endif	// PROGSLIDER_HPP

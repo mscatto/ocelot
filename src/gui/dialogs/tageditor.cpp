@@ -31,43 +31,40 @@
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
 
-tageditor::tageditor(vars *jag, QWidget *parent) : QDialog(parent){
-	this->setWindowTitle(QString("Editing tags from ")+QString::number(0)+" items");
-    this->setFixedSize(400,500);
-    this->setModal(false);
-	//queue = new QStringList;
+tageditor::tageditor (vars *jag, QWidget *parent) : QDialog (parent) {
+	this->setWindowTitle (QString ("Editing tags from ") + QString::number (0) + " items");
+	this->setFixedSize (400, 500);
+	this->setModal (false);
+	// queue = new QStringList;
 
-    QGridLayout *ml = new QGridLayout();
-    QGridLayout *fl = new QGridLayout();
-    QFrame *frame = new QFrame();
-    frame->setLayout(fl);
-    fl->setContentsMargins(0,0,0,0);
+	QGridLayout *ml = new QGridLayout();
+	QGridLayout *fl = new QGridLayout();
+	QFrame *frame = new QFrame();
+	frame->setLayout (fl);
+	fl->setContentsMargins (0, 0, 0, 0);
 
-    QDialogButtonBox *bb = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Discard);
-    QTableWidget *tbl = new QTableWidget();
-    tbl->setRowCount(jag->dumpval().count());
-    tbl->setColumnCount(1);
-    tbl->setColumnWidth(0,264);
-    tbl->setHorizontalHeaderLabels(QStringList()<<"Tag Data");
-    tbl->setVerticalHeaderLabels(jag->dumpval());
-    for(int i=0;i<jag->dumpval().count();i++){
-        //qDebug() << tbl->verticalHeaderItem(i)->text();
-    }
+	QDialogButtonBox *bb = new QDialogButtonBox (QDialogButtonBox::Save | QDialogButtonBox::Discard);
+	QTableWidget *tbl = new QTableWidget();
+	tbl->setRowCount (jag->dumpval().count());
+	tbl->setColumnCount (1);
+	tbl->setColumnWidth (0, 264);
+	tbl->setHorizontalHeaderLabels (QStringList() << "Tag Data");
+	tbl->setVerticalHeaderLabels (jag->dumpval());
+	for (int i = 0; i < jag->dumpval().count(); i++) {
+		// qDebug() << tbl->verticalHeaderItem(i)->text();
+	}
 
-    tbl->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	tbl->verticalHeader()->setSectionResizeMode (QHeaderView::Fixed);
+	tbl->horizontalHeader()->setSectionResizeMode (QHeaderView::Fixed);
 
-    fl->addWidget(tbl);
+	fl->addWidget (tbl);
 
-    ml->addWidget(frame);
-    ml->addWidget(bb);
-    this->setLayout(ml);
+	ml->addWidget (frame);
+	ml->addWidget (bb);
+	this->setLayout (ml);
 }
 
-void tageditor::setup(const QStringList &files){
-	this->setWindowTitle(QString("Editing tags from ")+QString::number(files.length())+" items");
-	foreach(QString path, files){
-        qDebug() << path;
-    }
-
+void tageditor::setup (const QStringList &files) {
+	this->setWindowTitle (QString ("Editing tags from ") + QString::number (files.length()) + " items");
+	foreach (QString path, files) { qDebug() << path; }
 }

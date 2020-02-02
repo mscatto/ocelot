@@ -24,31 +24,26 @@
 #include <QGridLayout>
 #include <QLabel>
 
-dummywidget::dummywidget(workbench *wb, QString text) : QLabel(wb){
-    this->wb = wb;
+dummywidget::dummywidget (workbench *wb, QString text) : QLabel (wb) {
+	this->wb = wb;
 	this->init();
-	text.isEmpty() ? this->setText(this->deftext) : this->setText(text);
+	text.isEmpty() ? this->setText (this->deftext) : this->setText (text);
 }
 
-void dummywidget::init(){
-	this->setFrameShadow(QFrame::Raised);
-	this->setObjectName("dummy");
-	this->setFrameShape(QFrame::Shape::StyledPanel);
+void dummywidget::init() {
+	this->setFrameShadow (QFrame::Raised);
+	this->setObjectName ("dummy");
+	this->setFrameShape (QFrame::Shape::StyledPanel);
 
+	this->setAlignment (Qt::AlignHCenter | Qt::AlignVCenter);
+	this->setContextMenuPolicy (Qt::CustomContextMenu);
 
-	this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	this->setContextMenuPolicy(Qt::CustomContextMenu);
-
-	connect(this, &QLabel::customContextMenuRequested, this, &dummywidget::showctx);
+	connect (this, &QLabel::customContextMenuRequested, this, &dummywidget::showctx);
 }
 
-void dummywidget::showctx(QPoint pos){
-    if(!this->wb->islocked()){
-        this->wb->setlastctx(this);
-        this->wb->ctx_req(this->mapTo(this->wb, pos));
+void dummywidget::showctx (QPoint pos) {
+	if (!this->wb->islocked()) {
+		this->wb->setlastctx (this);
+		this->wb->ctx_req (this->mapTo (this->wb, pos));
 	}
 }
-
-
-
-

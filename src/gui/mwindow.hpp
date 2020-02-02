@@ -51,120 +51,118 @@
  * between its children, ensuring some modularity between each other.
  */
 class mwindow : public QMainWindow {
-    Q_OBJECT
-public:
-    mwindow(vars* jag);
-    ~mwindow() {
-    }
-    workbench* wb;
+	Q_OBJECT
+  public:
+	mwindow (vars* jag);
+	~mwindow() {}
+	workbench* wb;
 	settings* sdiag;
 
-protected:
-    void closeEvent(QCloseEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
-    void moveEvent(QMoveEvent* event);
+  protected:
+	void closeEvent (QCloseEvent* event);
+	void mouseReleaseEvent (QMouseEvent* event);
+	void moveEvent (QMoveEvent* event);
 
-private:
-    enum pstate { PLAYING, PAUSED, IDLE };
-    pstate state = pstate::IDLE;
-    // TagLib::FileRef* curtag;
-    vars* jag;
-    QLabel status;
-    QLabel proglabel;
-    volslider* vol;
-    progslider* prog;
+  private:
+	enum pstate { PLAYING, PAUSED, IDLE };
+	pstate state = pstate::IDLE;
+	// TagLib::FileRef* curtag;
+	vars* jag;
+	QLabel status;
+	QLabel proglabel;
+	volslider* vol;
+	progslider* prog;
 
-    QMenu* configmenu;
-    QThread* playert;
-    toolbar* bar;
-    transcoder* transcdiag;
-    tageditor* tagdiag;
-    about* adiag;
-    // QString playing;
+	QMenu* configmenu;
+	QThread* playert;
+	toolbar* bar;
+	transcoder* transcdiag;
+	tageditor* tagdiag;
+	about* adiag;
+	// QString playing;
 
-    trackdata* track = nullptr;
+	trackdata* track = nullptr;
 
-    void loadstate();
+	void loadstate();
 
-    void resizeEvent(QResizeEvent* event);
-    // void restore_state();
-    // void restorewinsize();
-    // void dumpwinsize();
+	void resizeEvent (QResizeEvent* event);
+	// void restore_state();
+	// void restorewinsize();
+	// void dumpwinsize();
 	void update_proglabel();
-public slots:
-    void args_act(const QStringList args);
-    /* responsible for handling the toolbar buttons actions */
-    void toolbar_pause();
-    void toolbar_play();
-    void toolbar_stop();
-    void toolbar_next();
-    void toolbar_prev();
-    void config_spawn();
-    void about_spawn();
+  public slots:
+	void args_act (const QStringList args);
+	/* responsible for handling the toolbar buttons actions */
+	void toolbar_pause();
+	void toolbar_play();
+	void toolbar_stop();
+	void toolbar_next();
+	void toolbar_prev();
+	void config_spawn();
+	void about_spawn();
 
-    void playlist_enqueue(const QStringList files);
+	void playlist_enqueue (const QStringList files);
 
-    /* spawns the transcoder window and contents */
-    void transcoder_spawn(QStringList* l, bool discard);
+	/* spawns the transcoder window and contents */
+	void transcoder_spawn (QStringList* l, bool discard);
 
-    /* spawns the tag editor window and children */
-    void tageditor_spawn(QStringList* l);
+	/* spawns the tag editor window and children */
+	void tageditor_spawn (QStringList* l);
 
-    /* stores the last clicked item */
-    void select(QTreeWidgetItem* item);
+	/* stores the last clicked item */
+	void select (QTreeWidgetItem* item);
 
+	void show();
+	void savestate();
+  private slots:
+	/* syncs the playback position to the progslider state */
 
-    void show();
-    void savestate();
-private slots:
-    /* syncs the playback position to the progslider state */
-
-    void progslider_moved(int x);
-    // void progslider_clicked();
-    // void progslider_changed(int x);
-    void volslider_moved(int x);
-    // void player_respond(int status);
-    void uilock_respond();
-    void notify(bool playing, QString summary, QString body);
+	void progslider_moved (int x);
+	// void progslider_clicked();
+	// void progslider_changed(int x);
+	void volslider_moved (int x);
+	// void player_respond(int status);
+	void uilock_respond();
+	void notify (bool playing, QString summary, QString body);
 
 	// called when the player change tracks
-	void on_player_load(const QString &filepath);
+	void on_player_load (const QString& filepath);
 
 	void on_playlist_end();
 
-	void progslider_sync(qint64 pos);
-	void progslider_set(qint64 length);
-signals:
-    void libtree_refreshconfig();
-    void playlist_refreshconfig();
+	void progslider_sync (qint64 pos);
+	void progslider_set (qint64 length);
+  signals:
+	void libtree_refreshconfig();
+	void playlist_refreshconfig();
 
-    /* these go directly to gstreamer. will also act as a proxy
-     * for workbench's children to indirectly manipulate the player */
-    void player_play();
-	void player_load(const QString &filepath);
-    void player_stop();
-    void player_pause();
-    void player_setvol(uint vol);
-	void player_seek(qint64 sec);
+	/* these go directly to gstreamer. will also act as a proxy
+	 * for workbench's children to indirectly manipulate the player */
+	void player_play();
+	void player_load (const QString& filepath);
+	void player_stop();
+	void player_pause();
+	void player_setvol (uint vol);
+	void player_seek (qint64 sec);
 
-    void playlist_append(const QStringList files, const int playlist = -1);
-    void playlist_replace(const QStringList files, const int playlist = -1);
-    void playlist_next();
-    void playlist_prev();
-    void cover_set(QPixmap cover);
+	void playlist_append (const QStringList files, const int playlist = -1);
+	void playlist_replace (const QStringList files, const int playlist = -1);
+	void playlist_next();
+	void playlist_prev();
+	void cover_set (QPixmap cover);
 
-    /* signals when the layout editor lock has changed */
-    void uilock_flip();
+	/* signals when the layout editor lock has changed */
+	void uilock_flip();
 
-    void clearcover();
-    void selectionchanged(QString item);
-    void coverchanged(QPixmap* cover);
-    void libchanged(QSqlDatabase* db);
-    // void plappend(QStringList l);
-    void convhandler(QStringList* files);
-    void mediastatus(int status);
-    void volumechanged(int vol);
-    // void progsliderchanged(int pos);
+	void clearcover();
+	void selectionchanged (QString item);
+	void coverchanged (QPixmap* cover);
+	void libchanged (QSqlDatabase* db);
+	// void plappend(QStringList l);
+	void convhandler (QStringList* files);
+	void mediastatus (int status);
+	void volumechanged (int vol);
+	// void progsliderchanged(int pos);
 };
 
-#endif // MWINDOW_HPP
+#endif	// MWINDOW_HPP

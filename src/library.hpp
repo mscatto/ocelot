@@ -30,26 +30,26 @@
 #include <QtWidgets>
 
 class library : public QObject {
-    Q_OBJECT
-private:
-    const QStringList formats = { "audio/mpeg", "audio/mp4", "audio/ogg", "audio/wav", "audio/flac" };
-    QString path;
-    QStringList pathlist;
-    QSqlDatabase db;
+	Q_OBJECT
+  private:
+	const QStringList formats = {"audio/mpeg", "audio/mp4", "audio/ogg", "audio/wav", "audio/flac"};
+	QString path;
+	QStringList pathlist;
+	QSqlDatabase db;
 
-    qint64 count = 0;
+	qint64 count = 0;
 
-    void insert(QString fpath);
-    void scan(QString dir);
+	void insert (QString fpath);
+	void scan (QString dir);
 
-public:
-    explicit library(QString* path, QSqlDatabase* db, QStringList pathlist);
-    ~library();
-public slots:
-    void process();
-signals:
-    void finished();
-    void added(QString lib);
+  public:
+	explicit library (QString* path, QSqlDatabase* db, QStringList pathlist);
+	~library();
+  public slots:
+	void process();
+  signals:
+	void finished();
+	void added (QString lib);
 };
 
-#endif // LIBRARY_HPP
+#endif	// LIBRARY_HPP

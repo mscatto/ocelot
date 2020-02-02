@@ -30,41 +30,40 @@
 #include "../../vars.hpp"
 #include "transchelper.hpp"
 
-class transcoder : public QDialog
-{
-    Q_OBJECT
-private:
-    bool qpreset = false;
-    QStringList *input;
-    QTreeWidget *inlist;
-    QTreeWidget *outlist;
-    QProgressBar *prog;
-    transchelper *helper;
+class transcoder : public QDialog {
+	Q_OBJECT
+  private:
+	bool qpreset = false;
+	QStringList *input;
+	QTreeWidget *inlist;
+	QTreeWidget *outlist;
+	QProgressBar *prog;
+	transchelper *helper;
 
-    QPushButton *preset_add;
-    QPushButton *preset_rem;
-    QPushButton *preset_adv;
-    QComboBox *preset_cbx;
-    QGroupBox *preset_gbx;
+	QPushButton *preset_add;
+	QPushButton *preset_rem;
+	QPushButton *preset_adv;
+	QComboBox *preset_cbx;
+	QGroupBox *preset_gbx;
 
-    QWidget *init_prev();
-    QWidget *init_input();
-    QWidget *init_enc();
-    QWidget *init_output();
-    QWidget *init_conf();
-private slots:
-    void flip_qpreset();
-    void refresh_output();
-public:
-    transcoder(vars *jag, QWidget *win);
-    ~transcoder();
-public slots:
-    void clear();
-    void append(QStringList *files);
-    void replace(QStringList *files);
-    void spawnhelper();
-signals:
+	QWidget *init_prev();
+	QWidget *init_input();
+	QWidget *init_enc();
+	QWidget *init_output();
+	QWidget *init_conf();
+  private slots:
+	void flip_qpreset();
+	void refresh_output();
 
+  public:
+	transcoder (vars *jag, QWidget *win);
+	~transcoder();
+  public slots:
+	void clear();
+	void append (QStringList *files);
+	void replace (QStringList *files);
+	void spawnhelper();
+  signals:
 };
 
-#endif // TRANSCODER_HPP
+#endif	// TRANSCODER_HPP

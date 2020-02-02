@@ -28,14 +28,13 @@
 
 #include "../../vars.hpp"
 
-class tageditor : public QDialog
-{
-private:
-	//QStringList *queue;
-public:
-	void setup(const QStringList &files);
-	tageditor(vars* jag, QWidget *parent);
+class tageditor : public QDialog {
+  private:
+	// QStringList *queue;
+  public:
+	void setup (const QStringList &files);
+	tageditor (vars *jag, QWidget *parent);
 	~tageditor(){};
 };
 
-#endif // TAGEDITOR_HPP
+#endif	// TAGEDITOR_HPP

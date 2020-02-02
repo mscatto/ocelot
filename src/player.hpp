@@ -32,28 +32,29 @@
 #include <QMediaPlayer>
 
 class player : public QObject {
-    Q_OBJECT
-private:
+	Q_OBJECT
+  private:
 	QMediaPlayer *instance;
-public:
-    player();
+
+  public:
+	player();
 	~player(){};
-private slots:
-	void status_changed(QMediaPlayer::MediaStatus status);
+  private slots:
+	void status_changed (QMediaPlayer::MediaStatus status);
 
 	void track_preload();
-public slots:
+  public slots:
 	void play();
-    void stop();
-    void pause();
-	void seek(short sec);
-	void load(const QString &filepath);
-    void setVolume(ushort v);
-signals:
-	void position_changed(qint64 pos);
-	void length_changed(qint64 len);
-    void paused(bool paused);
-    void EOM();
-    // void length_changed(QTime len);
+	void stop();
+	void pause();
+	void seek (short sec);
+	void load (const QString &filepath);
+	void setVolume (ushort v);
+  signals:
+	void position_changed (qint64 pos);
+	void length_changed (qint64 len);
+	void paused (bool paused);
+	void EOM();
+	// void length_changed(QTime len);
 };
-#endif // PLAYER_HPP
+#endif	// PLAYER_HPP

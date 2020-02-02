@@ -29,15 +29,15 @@
 
 #include "../../vars.hpp"
 
-class about : public QDialog
-{
-public:
-    about(QWidget *parent, vars *jag);
-    ~about();
-private:
-    vars *jag;
-    QWidget *mktab_ocelot();
-    QWidget *mktab_qt();
+class about : public QDialog {
+  public:
+	about (QWidget *parent, vars *jag);
+	~about();
+
+  private:
+	vars *jag;
+	QWidget *mktab_ocelot();
+	QWidget *mktab_qt();
 };
 
-#endif // ABOUT_HPP
+#endif	// ABOUT_HPP

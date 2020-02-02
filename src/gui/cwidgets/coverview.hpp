@@ -28,30 +28,31 @@
 #include <QLabel>
 
 class coverview : public QLabel {
-    Q_OBJECT
-private:
+	Q_OBJECT
+  private:
 	void init();
 
-    QPixmap cover;
+	QPixmap cover;
 	mwindow* win;
-    QPoint* lastpos;
-    QMenu* ctx;
-    QMenu* layoutctx;
-    workbench* wb;
-    // void customMenuRequested(QPoint pos);
-    void showctx(QPoint pos);
-public:
-    coverview(mwindow* win, workbench* wb);
-    ~coverview();
-    // virtual void paintEvent(QPaintEvent *p);
-protected:
-    void resizeEvent(QResizeEvent *event);
-	//void paintEvent(QPaintEvent *event);
-public slots:
-    void set(QPixmap cover);
-    void clear();
-signals:
-    void setlastpos(QPoint pos);
+	QPoint* lastpos;
+	QMenu* ctx;
+	QMenu* layoutctx;
+	workbench* wb;
+	// void customMenuRequested(QPoint pos);
+	void showctx (QPoint pos);
+
+  public:
+	coverview (mwindow* win, workbench* wb);
+	~coverview();
+	// virtual void paintEvent(QPaintEvent *p);
+  protected:
+	void resizeEvent (QResizeEvent* event);
+	// void paintEvent(QPaintEvent *event);
+  public slots:
+	void set (QPixmap cover);
+	void clear();
+  signals:
+	void setlastpos (QPoint pos);
 };
 
-#endif // COVERVIEW_HPP
+#endif	// COVERVIEW_HPP

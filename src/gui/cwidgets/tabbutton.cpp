@@ -23,16 +23,16 @@
 #include "tabbutton.hpp"
 #include <QtDebug>
 
-void tabbutton::set_key(QString nkey){
-    this->mapkey = nkey;
+void tabbutton::set_key (QString nkey) {
+	this->mapkey = nkey;
 }
 
-tabbutton::tabbutton(const QIcon &icon, QString key) : QPushButton(icon,""){
-    this->mapkey = key;
-	connect(this, &QPushButton::clicked, this, &tabbutton::slot_clicked);
+tabbutton::tabbutton (const QIcon &icon, QString key) : QPushButton (icon, "") {
+	this->mapkey = key;
+	connect (this, &QPushButton::clicked, this, &tabbutton::slot_clicked);
 }
 
-void tabbutton::slot_clicked(bool checked){
-    checked = !checked; /* ¨erase me */
-	this->idclicked(this->mapkey);
+void tabbutton::slot_clicked (bool checked) {
+	checked = !checked; /* ¨erase me */
+	this->idclicked (this->mapkey);
 }

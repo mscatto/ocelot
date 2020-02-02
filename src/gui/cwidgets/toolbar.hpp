@@ -31,15 +31,15 @@
 #include <QToolBar>
 
 class toolbar : public QToolBar {
-    Q_OBJECT
-private:
+	Q_OBJECT
+  private:
 	const uint PROGDSP_MINWIDTH_HORIZ = 96;
 	const uint PROGDSP_MINWIDTH = 48;
-	enum PROGDSP {REMAINING, ELAPSED, REMTOTAL, ELAPTOTAL};
+	enum PROGDSP { REMAINING, ELAPSED, REMTOTAL, ELAPTOTAL };
 	void init();
 
 	vars* jag;
-	QWidget *win;
+	QWidget* win;
 
 	QSplitter* progvol;
 	progslider* prog;
@@ -49,23 +49,24 @@ private:
 	QLabel* progdsp;
 
 	QString DSPSEP;
-    QList<QWidget*> docked;
+	QList<QWidget*> docked;
 	PROGDSP dspmode = PROGDSP::ELAPTOTAL;
-    QList<QAction*> *acts;
-public:
-    toolbar(QWidget* win, QMenu* conf, progslider* prog, volslider* vol, vars* jag);
+	QList<QAction*>* acts;
+
+  public:
+	toolbar (QWidget* win, QMenu* conf, progslider* prog, volslider* vol, vars* jag);
 	~toolbar(){};
-    QByteArray splitterstate();
-    void restore_splitterstate(QByteArray ba);
-public slots:
-	void rotate(Qt::Orientation o);
-private slots:
-	void update_progdsp(int position);
-	void update_dspmode(QAction *act);
+	QByteArray splitterstate();
+	void restore_splitterstate (QByteArray ba);
+  public slots:
+	void rotate (Qt::Orientation o);
+  private slots:
+	void update_progdsp (int position);
+	void update_dspmode (QAction* act);
 	void show_labelmenu();
-    void on_progvol_resize();
-    void store_volsize();
-    void menu_show();
+	void on_progvol_resize();
+	void store_volsize();
+	void menu_show();
 };
 
-#endif // TOOLBAR_HPP
+#endif	// TOOLBAR_HPP

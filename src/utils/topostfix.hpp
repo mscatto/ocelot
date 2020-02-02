@@ -20,7 +20,7 @@
  * software or the use or other dealings in the Software.
  */
 
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 
-std::string translate(std::string infix);
-int oprec(char ch);
+std::string translate (std::string infix);
+int oprec (char ch);

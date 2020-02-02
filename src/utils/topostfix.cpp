@@ -27,55 +27,54 @@
 
 using namespace std;
 
-string translate(string infix) {
-  string postfix = "";
-  stack<char> ns;
-  char ch;
+string translate (string infix) {
+	string postfix = "";
+	stack<char> ns;
+	char ch;
 
-  for (int i = 0; infix[i]; i++) {
-    ch = infix[i];
+	for (int i = 0; infix[i]; i++) {
+		ch = infix[i];
 
-    if (ch == '(') // if found opening bracket
-      ns.push(ch);
-    else if (ch == ')') { // if found closing bracket
-      while (!ns.empty() && ns.top() != '(') {
-        postfix = postfix + ns.top();
-        ns.pop();
-      }
+		if (ch == '(')	// if found opening bracket
+			ns.push (ch);
+		else if (ch == ')') {  // if found closing bracket
+			while (!ns.empty() && ns.top() != '(') {
+				postfix = postfix + ns.top();
+				ns.pop();
+			}
 
-      if (!ns.empty() && ns.top() == '(')
-        ns.pop();
-    } else { // found operator or operand
-      int priority = oprec(ch);
+			if (!ns.empty() && ns.top() == '(')
+				ns.pop();
+		} else {  // found operator or operand
+			int priority = oprec (ch);
 
-      if (priority == 0) // found operand
-        postfix = postfix + ch;
-      else { // found operator
-        if (ns.empty())
-          ns.push(ch);
-        else {
-          while (!ns.empty() && ns.top() != '(' &&
-                 priority <= oprec(ns.top())) {
-            postfix = postfix + ns.top();
-            ns.pop();
-          }
-          ns.push(ch);
-        }
-      }
-    }
-  }
+			if (priority == 0)	// found operand
+				postfix = postfix + ch;
+			else {	// found operator
+				if (ns.empty())
+					ns.push (ch);
+				else {
+					while (!ns.empty() && ns.top() != '(' && priority <= oprec (ns.top())) {
+						postfix = postfix + ns.top();
+						ns.pop();
+					}
+					ns.push (ch);
+				}
+			}
+		}
+	}
 
-  while (!ns.empty()) {
-    postfix += ns.top();
-    ns.pop();
-  }
+	while (!ns.empty()) {
+		postfix += ns.top();
+		ns.pop();
+	}
 
-  return postfix;
+	return postfix;
 }
 
-int oprec(char ch) {
-  if (ch == '+' || ch == '-')
-    return 1;
-  else
-    return 0;
+int oprec (char ch) {
+	if (ch == '+' || ch == '-')
+		return 1;
+	else
+		return 0;
 }

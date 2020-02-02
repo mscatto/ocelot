@@ -5,11 +5,10 @@
 #include <QOpenGLWidget>
 #include "../workbench.hpp"
 
-class visualizer : public QOpenGLWidget
-{
-public:
-    visualizer();
-    ~visualizer();
+class visualizer : public QOpenGLWidget {
+  public:
+	visualizer();
+	~visualizer();
 };
 
-#endif // VISUALIZER_HPP
+#endif	// VISUALIZER_HPP

@@ -37,49 +37,50 @@
 #include "src/vars.hpp"
 
 class libtree : public QFrame {
-    Q_OBJECT
-private:
-    enum CLICKBEHAVIOUR {
-        REPLACE,
-        REPLACE_AND_PLAY,
-        APPEND_CUR,
-        APPEND_AND_PLAY,
-        APPEND_OTHER,
-        SEND_TRANSC,
-        EDIT_TAGS,
-    };
+	Q_OBJECT
+  private:
+	enum CLICKBEHAVIOUR {
+		REPLACE,
+		REPLACE_AND_PLAY,
+		APPEND_CUR,
+		APPEND_AND_PLAY,
+		APPEND_OTHER,
+		SEND_TRANSC,
+		EDIT_TAGS,
+	};
 
 	tageditor* tagedit;
-    mwindow* win;
-    workbench* wb;
-    QMenu* ctx;
-    QTreeWidget* tree;
-    vars *jag;
+	mwindow* win;
+	workbench* wb;
+	QMenu* ctx;
+	QTreeWidget* tree;
+	vars* jag;
 
-    CLICKBEHAVIOUR mclick;
-    CLICKBEHAVIOUR dclick;
+	CLICKBEHAVIOUR mclick;
+	CLICKBEHAVIOUR dclick;
 
 	void init();
-    void showctx(const QPoint& pos);
-    void recurtree(QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db);
-    void listchildren(QTreeWidgetItem *item, QStringList *children);
-    QStringList extract(QString vars);
-private slots:
+	void showctx (const QPoint& pos);
+	void recurtree (QTreeWidgetItem* parent, QStringList levels, QString conditions, QSqlDatabase* db);
+	void listchildren (QTreeWidgetItem* item, QStringList* children);
+	QStringList extract (QString vars);
+  private slots:
 	void tageditor_spawn();
-    void transc_append(bool discard = false);
-    void transc_replace();
-    void refresh_config();
-    void doubleclick(QTreeWidgetItem* item);
-    void middleclick(QTreeWidgetItem* item);
-public slots:
-    void populate(QSqlDatabase* db);
-signals:
-    void dispatch(QStringList* l);
-    void transc_dispatch(QStringList* l, bool discard);
-    void playlist_set(const QStringList files);
-public:
-    libtree(mwindow* win, workbench* wb, vars* jag);
-    ~libtree();
+	void transc_append (bool discard = false);
+	void transc_replace();
+	void refresh_config();
+	void doubleclick (QTreeWidgetItem* item);
+	void middleclick (QTreeWidgetItem* item);
+  public slots:
+	void populate (QSqlDatabase* db);
+  signals:
+	void dispatch (QStringList* l);
+	void transc_dispatch (QStringList* l, bool discard);
+	void playlist_set (const QStringList files);
+
+  public:
+	libtree (mwindow* win, workbench* wb, vars* jag);
+	~libtree();
 };
 
-#endif // LIBTREE_HPP
+#endif	// LIBTREE_HPP

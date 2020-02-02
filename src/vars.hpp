@@ -34,52 +34,54 @@
 #include <QtDBus/QtDBus>
 
 class vars : QObject {
-    Q_OBJECT
-public:
+	Q_OBJECT
+  public:
 	// this should be moved to a dedicated file
-    const char* VERSION = "0.3c";
-    const QString DATA_PATH = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    const QString DB_PATH = DATA_PATH + "/ocelot.db";
-    QSqlDatabase* DB_REF = new QSqlDatabase();
-    player* pctx;
+	const char* VERSION = "0.3c";
+	const QString DATA_PATH = QStandardPaths::writableLocation (QStandardPaths::ConfigLocation);
+	const QString DB_PATH = DATA_PATH + "/ocelot.db";
+	QSqlDatabase* DB_REF = new QSqlDatabase();
+	player* pctx;
 
-    QDBusInterface* bus;
-	QStringList* libs; // this is bad
-
+	QDBusInterface* bus;
+	QStringList* libs;	// this is bad
 
 	// -- FUNCTIONS --
-    void remlibs(QString path);
-    void setdbdata(const char* var, QVariant val);
-    QVariant fetchdbdata(const char* var);
+	void remlibs (QString path);
+	void setdbdata (const char* var, QVariant val);
+	QVariant fetchdbdata (const char* var);
 	QStringList dumppaths();
 	QStringList dumplibinfo();
 
 	// DEBUG HELPERS
-	void TODO(const char *msg){qInfo("[TODO] %s", msg);};
-	void PANIC(const char *msg){qWarning("[PANIC] %s", msg);};
+	void TODO (const char* msg) {
+		qInfo ("[TODO] %s", msg);
+	};
+	void PANIC (const char* msg) {
+		qWarning ("[PANIC] %s", msg);
+	};
 
 	// TAG-RELATED FUNCTIONS
-	QString translate_key(QString key);
-	QString translate_val(QString val);
+	QString translate_key (QString key);
+	QString translate_val (QString val);
 	QStringList dumpval();
 	QStringList dumpkeys();
 
-    vars();
-    ~vars() {
-    }
+	vars();
+	~vars() {}
 
-private:
-    QMap<QString, QString> pmap;
-    QMap<QString, bool> ptmap;
-    void initpmap();
-    void initdb();
-    void initlibs();
-    void initdata();
-    void initaudio();
-public slots:
-    // void libfinished(uint *num);
-    // void p();
-signals:
-    void sendargs(int argc, char** argv);
+  private:
+	QMap<QString, QString> pmap;
+	QMap<QString, bool> ptmap;
+	void initpmap();
+	void initdb();
+	void initlibs();
+	void initdata();
+	void initaudio();
+  public slots:
+	// void libfinished(uint *num);
+	// void p();
+  signals:
+	void sendargs (int argc, char** argv);
 };
-#endif // VARS_HPP
+#endif	// VARS_HPP

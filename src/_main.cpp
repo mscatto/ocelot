@@ -30,33 +30,33 @@
 #include <QDebug>
 #include <QMessageLogger>
 
-int main(int argc, char* argv[]) {
-    QApplication a(argc, argv);
-    QCoreApplication::setOrganizationName("Babousoft");
-    QCoreApplication::setApplicationName("ocelot");
-    QSingleInstance instance;
-    instance.setGlobal(true);
+int main (int argc, char* argv[]) {
+	QApplication a (argc, argv);
+	QCoreApplication::setOrganizationName ("Babousoft");
+	QCoreApplication::setApplicationName ("ocelot");
+	QSingleInstance instance;
+	instance.setGlobal (true);
 
-    if(!instance.process()) {
-        std::cout << ("[WARNING] Ocelot is already running! Stepping down.\n"
-                      "Any arguments will be delivered to the master instance!\n");
-        return EXIT_SUCCESS;
-    }
+	if (!instance.process()) {
+		std::cout << ("[WARNING] Ocelot is already running! Stepping down.\n"
+					  "Any arguments will be delivered to the master instance!\n");
+		return EXIT_SUCCESS;
+	}
 
-    vars* jag = new vars();
-    mwindow* mw = new mwindow(jag);
-    bool firstrun = (jag->fetchdbdata("general_runwizard") == 1);
-    QObject::connect(&instance, &QSingleInstance::instanceMessage, mw, &mwindow::args_act);
+	vars* jag = new vars();
+	mwindow* mw = new mwindow (jag);
+	bool firstrun = (jag->fetchdbdata ("general_runwizard") == 1);
+	QObject::connect (&instance, &QSingleInstance::instanceMessage, mw, &mwindow::args_act);
 
-    if(argc > 1 && !firstrun) // so it won't start playing whenever there is no database
-        mw->args_act(a.arguments());
+	if (argc > 1 && !firstrun)	// so it won't start playing whenever there is no database
+		mw->args_act (a.arguments());
 
-    if(firstrun){
-		wizard* w = new wizard(mw, jag);
-        QObject::connect(w, &wizard::show_mwindow, mw, &mwindow::show);
-        w->show();
-    }else
-        mw->show();
+	if (firstrun) {
+		wizard* w = new wizard (mw, jag);
+		QObject::connect (w, &wizard::show_mwindow, mw, &mwindow::show);
+		w->show();
+	} else
+		mw->show();
 
-    return a.exec();
+	return a.exec();
 }

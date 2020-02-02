@@ -27,16 +27,17 @@
 #include <QLabel>
 
 class dummywidget : public QLabel {
-    Q_OBJECT
-private:
-    workbench* wb;
-    void showctx(QPoint pos);
-    QString deftext = "<b>:: PLACEHOLDER ::</b><br>Activate the <i>Layout Editor"
-                      "</i> and right-click <br>to replace this with something useful!";
+	Q_OBJECT
+  private:
+	workbench* wb;
+	void showctx (QPoint pos);
+	QString deftext = "<b>:: PLACEHOLDER ::</b><br>Activate the <i>Layout Editor"
+					  "</i> and right-click <br>to replace this with something useful!";
 	void init();
-public:
-    dummywidget(workbench* wb, QString text = "");
+
+  public:
+	dummywidget (workbench* wb, QString text = "");
 	~dummywidget(){};
 };
 
-#endif // DUMMYWIDGET_H
+#endif	// DUMMYWIDGET_H

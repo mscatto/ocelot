@@ -32,54 +32,53 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/wavfile.h>
 
-tagview::tagview(vars* jag, mwindow* parent, workbench* wb) : QTreeWidget() {
+tagview::tagview (vars* jag, mwindow* parent, workbench* wb) : QTreeWidget() {
 	this->jag = jag;
 	this->wb = wb;
 	this->ctx = new QMenu;
-	this->setColumnCount(2);
-	this->setColumnWidth(0, 200);
-	this->setHeaderHidden(false);
-	this->setObjectName("tagview");
-	this->sizePolicy().setHorizontalPolicy(QSizePolicy::Minimum);
-	this->sizePolicy().setVerticalPolicy(QSizePolicy::Minimum);
+	this->setColumnCount (2);
+	this->setColumnWidth (0, 200);
+	this->setHeaderHidden (false);
+	this->setObjectName ("tagview");
+	this->sizePolicy().setHorizontalPolicy (QSizePolicy::Minimum);
+	this->sizePolicy().setVerticalPolicy (QSizePolicy::Minimum);
 
-	this->setHeaderLabels(QStringList() << "Tag"
-										<< "Data");
-	this->setRootIsDecorated(false);
-	this->setAlternatingRowColors(true);
-	this->setContextMenuPolicy(Qt::CustomContextMenu);
+	this->setHeaderLabels (QStringList() << "Tag"
+										 << "Data");
+	this->setRootIsDecorated (false);
+	this->setAlternatingRowColors (true);
+	this->setContextMenuPolicy (Qt::CustomContextMenu);
 
-	connect(parent, &mwindow::selectionchanged, this, &tagview::swap);
-	connect(this, &QTreeWidget::customContextMenuRequested, this, &tagview::showctx);
+	connect (parent, &mwindow::selectionchanged, this, &tagview::swap);
+	connect (this, &QTreeWidget::customContextMenuRequested, this, &tagview::showctx);
 }
 
-tagview::~tagview() {
-}
+tagview::~tagview() {}
 
-void tagview::showctx(const QPoint& pos) {
-	if(this->wb->islocked())
-		this->ctx->exec(this->mapToGlobal(pos));
+void tagview::showctx (const QPoint& pos) {
+	if (this->wb->islocked())
+		this->ctx->exec (this->mapToGlobal (pos));
 	else {
-		this->wb->setlastctx(this);
-		this->wb->ctx_req(this->mapTo(this->wb, pos));
+		this->wb->setlastctx (this);
+		this->wb->ctx_req (this->mapTo (this->wb, pos));
 	}
 }
 
-void tagview::swap(QString item) {
+void tagview::swap (QString item) {
 	this->clear();
 
-	TagLib::FileRef* x = new TagLib::FileRef(qPrintable(item));
+	TagLib::FileRef* x = new TagLib::FileRef (qPrintable (item));
 
 	QStringList* keylist = new QStringList();
-	keylist->append(QString(x->file()->properties().toString().toCString(true)).split("\n"));
+	keylist->append (QString (x->file()->properties().toString().toCString (true)).split ("\n"));
 
 	QString s;
-	foreach(s, *keylist) {
-		if(s.contains("=", Qt::CaseInsensitive)) {
-			QStringList* qsl = new QStringList(s.split("="));
-			if(this->jag->translate_key(qsl->first()) != "") /* case there's a translation on record */
-				qsl->replace(0, this->jag->translate_key(qsl->first()));
-			this->addTopLevelItem(new QTreeWidgetItem(this, *qsl)); /* or else just show the taglib name for it */
+	foreach (s, *keylist) {
+		if (s.contains ("=", Qt::CaseInsensitive)) {
+			QStringList* qsl = new QStringList (s.split ("="));
+			if (this->jag->translate_key (qsl->first()) != "") /* case there's a translation on record */
+				qsl->replace (0, this->jag->translate_key (qsl->first()));
+			this->addTopLevelItem (new QTreeWidgetItem (this, *qsl)); /* or else just show the taglib name for it */
 			qsl->~QStringList();
 		}
 	}

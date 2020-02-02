@@ -29,54 +29,54 @@
 #include <QTreeWidget>
 
 class playlist : public QTreeWidget {
-    Q_OBJECT
-private:
-    const char* playchar = "►";
-    const char* queuechar = "·";
+	Q_OBJECT
+  private:
+	const char* playchar = "►";
+	const char* queuechar = "·";
 
-    vars* jag;
-    QHeaderView* customheader;
-    QStringList* headerlabels;
-    mwindow* win;
-    QString* order;
-    QTabWidget *view;
-    QMenu* headerctx;
-    QMenu* bodyctx;
-    QMenu* emptyctx;
+	vars* jag;
+	QHeaderView* customheader;
+	QStringList* headerlabels;
+	mwindow* win;
+	QString* order;
+	QTabWidget* view;
+	QMenu* headerctx;
+	QMenu* bodyctx;
+	QMenu* emptyctx;
 
-    int playing = 0;
-    int selected = 0;
+	int playing = 0;
+	int selected = 0;
 
-    QList<QTreeWidgetItem*> pl;
+	QList<QTreeWidgetItem*> pl;
 
-    bool contains(QString *path);
-    void dump(QString* path);
-    void media_dispatch(QTreeWidgetItem* item);
-    void showctx(const QPoint& pos, bool is_header);
+	bool contains (QString* path);
+	void dump (QString* path);
+	void media_dispatch (QTreeWidgetItem* item);
+	void showctx (const QPoint& pos, bool is_header);
 	void init();
-    QTreeWidgetItem* gen_treeitem(const char* const file);
+	QTreeWidgetItem* gen_treeitem (const char* const file);
 
-public:
-    playlist(QString* order, QMenu* headerctx, vars* jag, mwindow* win, QWidget* parent);
-    ~playlist(){}
-private slots:
-    void show_headerctx(const QPoint& pos);
-    void show_bodyctx(const QPoint& pos);
-public slots:
-    void rebuild_columns();
-    /* index > 0 means don't change */
-    void append(QStringList files);
-    void replace(const QStringList files);
-    void next();
-    void prev();
-    void doubleclick(QTreeWidgetItem* item);
-    void exportpl();
-    void clearchildren();
+  public:
+	playlist (QString* order, QMenu* headerctx, vars* jag, mwindow* win, QWidget* parent);
+	~playlist() {}
+  private slots:
+	void show_headerctx (const QPoint& pos);
+	void show_bodyctx (const QPoint& pos);
+  public slots:
+	void rebuild_columns();
+	/* index > 0 means don't change */
+	void append (QStringList files);
+	void replace (const QStringList files);
+	void next();
+	void prev();
+	void doubleclick (QTreeWidgetItem* item);
+	void exportpl();
+	void clearchildren();
 	void EOM();
-signals:
-    void changesel(TagLib::FileRef* f);
-    void play(QTreeWidgetItem*);
-    void EOP();
+  signals:
+	void changesel (TagLib::FileRef* f);
+	void play (QTreeWidgetItem*);
+	void EOP();
 };
 
-#endif // PLAYLIST_HPP
+#endif	// PLAYLIST_HPP

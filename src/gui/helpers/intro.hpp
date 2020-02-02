@@ -3,15 +3,14 @@
 
 #include <QWidget>
 
-class intro : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit intro(QWidget *parent = nullptr);
-    ~intro();
-signals:
+class intro : public QWidget {
+	Q_OBJECT
+  public:
+	explicit intro (QWidget *parent = nullptr);
+	~intro();
+  signals:
 
-public slots:
+  public slots:
 };
 
-#endif // INTRO_HPP
+#endif	// INTRO_HPP

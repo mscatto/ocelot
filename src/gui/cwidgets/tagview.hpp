@@ -32,20 +32,27 @@
 #include "../mwindow.hpp"
 #include "../workbench.hpp"
 
-class tagview : public QTreeWidget{
-    Q_OBJECT
-private:
-    const QStringList order = (QStringList()<<"TITLE"<<"ALBUM"<<"ARTIST"<<"YEAR"<<"GENRE"<<"TRACKNUMBER"<<"DISCNUMBER");
-    vars *jag;
-    workbench *wb;
-    QMenu *ctx;
-    void showctx(const QPoint &pos);
-public:
-    enum format {FLAC=0, MPEG=1, OGG=2, MP4=3, WAV=4};
-    tagview(vars *jag, mwindow *parent, workbench *wb);
-    ~tagview();
-public slots:
-    void swap(QString item);
+class tagview : public QTreeWidget {
+	Q_OBJECT
+  private:
+	const QStringList order = (QStringList() << "TITLE"
+											 << "ALBUM"
+											 << "ARTIST"
+											 << "YEAR"
+											 << "GENRE"
+											 << "TRACKNUMBER"
+											 << "DISCNUMBER");
+	vars *jag;
+	workbench *wb;
+	QMenu *ctx;
+	void showctx (const QPoint &pos);
+
+  public:
+	enum format { FLAC = 0, MPEG = 1, OGG = 2, MP4 = 3, WAV = 4 };
+	tagview (vars *jag, mwindow *parent, workbench *wb);
+	~tagview();
+  public slots:
+	void swap (QString item);
 };
 
-#endif // TAGVIEW_HPP
+#endif	// TAGVIEW_HPP

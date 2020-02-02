@@ -7,31 +7,30 @@
 #include <QWidget>
 
 class splitter : public QSplitter {
-    Q_OBJECT
-private:
-    mwindow* winptr;
+	Q_OBJECT
+  private:
+	mwindow* winptr;
 	workbench* wb;
-	void showctx(QPoint pos);
-public:
-	splitter(Qt::Orientation o, mwindow* win, workbench* wb);
-    ~splitter() override {
-    }
+	void showctx (QPoint pos);
 
-protected:
-    QSplitterHandle* createHandle() override;
+  public:
+	splitter (Qt::Orientation o, mwindow* win, workbench* wb);
+	~splitter() override {}
+
+  protected:
+	QSplitterHandle* createHandle() override;
 };
 
 class handle : public QSplitterHandle {
-    Q_OBJECT
-public:
-	handle(Qt::Orientation o, QSplitter* parent, mwindow* win);
-    ~handle() override {
-    }
-signals:
-    void savestate();
+	Q_OBJECT
+  public:
+	handle (Qt::Orientation o, QSplitter* parent, mwindow* win);
+	~handle() override {}
+  signals:
+	void savestate();
 
-protected:
-    void mouseReleaseEvent(QMouseEvent* e) override;
+  protected:
+	void mouseReleaseEvent (QMouseEvent* e) override;
 };
 
-#endif // SPLITTER_HPP
+#endif	// SPLITTER_HPP
